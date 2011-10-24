@@ -314,6 +314,7 @@ public class CreateDataMainApplication {
 		if(dmd == null){
 			dmd = new DataSourceManagerJDialog();
 			dmd.setCds(cds);
+			dmd.initialize();
 		}
 		return dmd;
 	}

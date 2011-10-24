@@ -57,7 +57,6 @@ public class DataSourceManagerJDialog extends JDialog {
 	 * 构造函数
 	 */
 	public DataSourceManagerJDialog() {
-		initialize();
 	}
 	
 	/**
@@ -186,8 +185,9 @@ public class DataSourceManagerJDialog extends JDialog {
 	 * This method initializes this
 	 * 
 	 */
-	private void initialize() {
+	public void initialize() {
 		this.setTitle("数据源管理");
+		tableData = cds.getAllDataConnectConfigVO();
 		this.setLayout(new BorderLayout());
 		this.add(getJScrollPane(), BorderLayout.CENTER);
 		this.add(getNorthJPanel(),BorderLayout.SOUTH);

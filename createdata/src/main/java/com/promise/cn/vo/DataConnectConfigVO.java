@@ -73,13 +73,13 @@ public class DataConnectConfigVO {
 	
 	public String toString(){
 		StringBuffer sb = new StringBuffer();
-		sb.append("<datasource>");
-		sb.append("<name>"+name+"</name>");
-		sb.append("<userName>"+userName+"</userName>");
-		sb.append("<password>"+password+"</password>");
-		sb.append("<driverClassName>"+driverClassName+"</driverClassName>");
-		sb.append("<url>"+url+"</url>");
-		sb.append("</datasource>");
+		sb.append("	 <datasource>"+"\n");
+		sb.append("			<name>"+name+"</name>"+"\n");
+		sb.append("			<userName>"+userName+"</userName>"+"\n");
+		sb.append("			<password>"+password+"</password>"+"\n");
+		sb.append("			<driverClassName>"+driverClassName+"</driverClassName>"+"\n");
+		sb.append("			<url>"+url+"</url>"+"\n");
+		sb.append("	 </datasource>"+"\n");
 		return sb.toString();
 	}
 	

@@ -1,13 +1,17 @@
 /*@文件名: CreateDataServiceImpl.java  @创建人: 邢健   @创建日期: 2011-10-20 下午01:23:12*/
 package com.promise.cn.service.impl;
 
+import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 
 import com.promise.cn.service.CreateDataService;
@@ -69,7 +73,7 @@ public class CreateDataServiceImpl implements CreateDataService {
 	@Override
 	public boolean saveDataConnectVOList(List<DataConnectConfigVO> dccVOList) {
 		StringBuffer result = new StringBuffer();
-		result.append("<datasources>");
+		result.append("<datasources>"+"\n");
 		for(int i=0;i<dccVOList.size();i++){
 			result.append(dccVOList.get(i).toString());
 		}
@@ -89,9 +93,40 @@ public class CreateDataServiceImpl implements CreateDataService {
 		}
 	}
 
+	/**
+	 * 解析data_connnect.xml,转换成DataConnectConfigVO集合
+	 */
+	@SuppressWarnings({"all"})
 	@Override
 	public List<DataConnectConfigVO> getAllDataConnectConfigVO() {
-		return null;
+		List<DataConnectConfigVO> dccList = new ArrayList<DataConnectConfigVO>();
+		 SAXReader reader = new SAXReader();
+		 String filePath = CreateDataServiceImpl.class.getResource("/data_connect.xml").getPath();
+         try {
+			Document  document = reader.read(new File(filePath));
+			Element rootElm = document.getRootElement();
+			List nodes = rootElm.elements("datasource");
+			for (Iterator it = nodes.iterator(); it.hasNext();) {
+				   Element elm = (Element) it.next();
+				   String name = elm.elementText("name");
+				   String userName = elm.elementText("userName");
+				   String password = elm.elementText("password");
+				   String driverClassName = elm.elementText("driverClassName");
+				   String url = elm.elementText("url");
+				   DataConnectConfigVO dccTemp = new DataConnectConfigVO();
+				   dccTemp.setName(name);
+				   dccTemp.setUrl(url);
+				   dccTemp.setUserName(userName);
+				   dccTemp.setPassword(password);
+				   dccTemp.setDriverClassName(driverClassName);
+				   dccList.add(dccTemp);
+				}
+
+		} catch (DocumentException e) {
+			e.printStackTrace();
+		}
+
+		return dccList;
 	}
 
 }
