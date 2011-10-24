@@ -50,7 +50,7 @@ public class DataSourceManagerJDialog extends JDialog {
 	private JButton addConnect_JButton = null;
 	private JPanel south_JPanel = null;
 	private DataEventManager dem = new DataEventManager();
-	private List<DataConnectConfigVO> tableData = new ArrayList<DataConnectConfigVO>();
+	public List<DataConnectConfigVO> tableData = new ArrayList<DataConnectConfigVO>();
 	private DataEventListener dataEventListener;
 	private CreateDataService cds;
 	
@@ -205,7 +205,6 @@ public class DataSourceManagerJDialog extends JDialog {
 	 */
 	public void initialize() {
 		this.setTitle("数据源管理");
-		tableData = cds.getAllDataConnectConfigVO();
 		this.setLayout(new BorderLayout());
 		this.add(getJScrollPane(), BorderLayout.CENTER);
 		this.add(getNorthJPanel(),BorderLayout.SOUTH);

@@ -8,6 +8,8 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -23,6 +25,7 @@ import javax.swing.SwingUtilities;
 import com.promise.cn.service.CreateDataService;
 import com.promise.cn.service.impl.CreateDataServiceImpl;
 import com.promise.cn.util.CreateDataUtil;
+import com.promise.cn.vo.DataConnectConfigVO;
 
 /**   
  * @类名: CreateDataMainApplication.java 
@@ -52,7 +55,7 @@ public class CreateDataMainApplication {
 	
 	private DataConnectPanel dcp;
 	private DataSourceManagerJDialog dmd;
-	
+	private List<DataConnectConfigVO> tableData = new ArrayList<DataConnectConfigVO>();
 	private CreateDataService cds = new CreateDataServiceImpl();
 	/**
 	 * @param args
@@ -72,6 +75,7 @@ public class CreateDataMainApplication {
 	 * @return javax.swing.JFrame
 	 */
 	private JFrame getJFrame() {
+		initData();
 		if (jFrame == null) {
 			jFrame = new JFrame();
 			jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -87,11 +91,15 @@ public class CreateDataMainApplication {
 		return jFrame;
 	}
 
+	private void initData(){
+		tableData = cds.getAllDataConnectConfigVO();
+	}
+	
 	/**
 	 * 初始化Jframe
 	 */
 	private void initJFrame(){
-		jFrame.add(getDataConnectPanel(), BorderLayout.WEST);
+		jFrame.add(getDataConnectPanel(), BorderLayout.NORTH);
 	}
 	
 	/**
@@ -305,7 +313,7 @@ public class CreateDataMainApplication {
 	
 	private DataConnectPanel getDataConnectPanel(){
 		if(dcp == null){
-			dcp = new DataConnectPanel();
+			dcp = new DataConnectPanel(tableData);
 		}
 		return dcp;
 	}
@@ -314,6 +322,7 @@ public class CreateDataMainApplication {
 		if(dmd == null){
 			dmd = new DataSourceManagerJDialog();
 			dmd.setCds(cds);
+			dmd.tableData = tableData;
 			dmd.initialize();
 		}
 		return dmd;

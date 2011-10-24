@@ -1,11 +1,19 @@
 /*@文件名: DataConnectPanel.java  @创建人: 邢健   @创建日期: 2011-10-20 下午04:05:32*/
 package com.promise.cn.main;
 
-import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.util.List;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.border.TitledBorder;
+
+import com.promise.cn.vo.DataConnectConfigVO;
 
 /**   
  * @类名: DataConnectPanel.java 
@@ -18,11 +26,21 @@ import javax.swing.JTable;
 public class DataConnectPanel extends JPanel {
 
 	private JComboBox jComboBox;
+	private JComboBox jComboBoxTables;
+	private JTextField jTextFieldTableName;
 	private JTable jTable;
+	private JLabel label1 = new JLabel("数据源:");
+	private JLabel label2 = new JLabel("表名:");
+	public List<DataConnectConfigVO> tableData = null; 
+	public DefaultComboBoxModel dcbm = null; 
 	
-	public DataConnectPanel(){
-		this.setName("连接属性");
-		this.setLayout(new BorderLayout());
+	public DataConnectPanel(List<DataConnectConfigVO> tableData){
+		this.tableData = tableData;
+		this.setName("连接配置属性");
+		FlowLayout flowLayout = new FlowLayout(FlowLayout.LEFT);
+		flowLayout.setHgap(22);
+		flowLayout.setVgap(10);
+		this.setLayout(flowLayout);
 		initPanel();
 	}
 	
@@ -30,14 +48,49 @@ public class DataConnectPanel extends JPanel {
 	 * 初始化面板
 	 */
 	public void initPanel(){
-		this.add(getJComboBox(), BorderLayout.NORTH);
-		this.add(getJTable(), BorderLayout.CENTER);
+		jTextFieldTableName = new JTextField("table name");
+		jTextFieldTableName.setHorizontalAlignment(JTextField.CENTER);
+		jTextFieldTableName.setColumns(15);
+		this.add(label1);
+		this.add(getJComboBox());
+		this.add(label2);
+		this.add(jTextFieldTableName);
+		this.setBackground(Color.white);
+		TitledBorder nameTitle =new TitledBorder("数据源和表"); 
+		this.setBorder(nameTitle);
 		this.setVisible(true);
+	}
+	
+	public JComboBox getjComboBoxTables(){
+		if(jComboBoxTables==null){
+			jComboBoxTables = new JComboBox();
+		}
+		return jComboBoxTables;
+	}
+	
+	/**
+	 * 返回数据源名称
+	 * @return
+	 */
+	public String[] getDataSourceName(){
+		String[] names = new String[tableData.size()];
+		if(tableData==null||tableData.size()==0){
+			
+		}
+		else{
+			for(int i=0;i<tableData.size();i++){
+				String name  = tableData.get(i).getName();
+				names[i] = name;
+			}
+		}
+		return names;
 	}
 	
 	public JComboBox getJComboBox(){
 		if(jComboBox==null){
 			jComboBox = new JComboBox();
+			dcbm = new DefaultComboBoxModel(getDataSourceName());
+			jComboBox.setModel(dcbm);
 		}
 		return jComboBox;
 	}
