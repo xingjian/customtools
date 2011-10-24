@@ -57,6 +57,7 @@ public class CreateDataMainApplication {
 	private DataSourceManagerJDialog dmd;
 	private List<DataConnectConfigVO> tableData = new ArrayList<DataConnectConfigVO>();
 	private CreateDataService cds = new CreateDataServiceImpl();
+	private TableConfigPanel tcp = null;
 	/**
 	 * @param args
 	 */
@@ -100,6 +101,14 @@ public class CreateDataMainApplication {
 	 */
 	private void initJFrame(){
 		jFrame.add(getDataConnectPanel(), BorderLayout.NORTH);
+		jFrame.add(getTableConfigPanel(), BorderLayout.CENTER);
+	}
+	
+	public TableConfigPanel getTableConfigPanel(){
+		if(tcp==null){
+			tcp = new TableConfigPanel();
+		}
+		return tcp;
 	}
 	
 	/**

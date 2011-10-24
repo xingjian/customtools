@@ -3,6 +3,7 @@ package com.promise.cn.main;
 
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.util.List;
 
 import javax.swing.DefaultComboBoxModel;
@@ -13,6 +14,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
+import com.promise.cn.util.CreateDataUtil;
 import com.promise.cn.vo.DataConnectConfigVO;
 
 /**   
@@ -51,13 +53,14 @@ public class DataConnectPanel extends JPanel {
 		jTextFieldTableName = new JTextField("table name");
 		jTextFieldTableName.setHorizontalAlignment(JTextField.CENTER);
 		jTextFieldTableName.setColumns(15);
+		label1.setFont(CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12));
+		label2.setFont(CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12));
 		this.add(label1);
 		this.add(getJComboBox());
 		this.add(label2);
 		this.add(jTextFieldTableName);
 		this.setBackground(Color.white);
-		TitledBorder nameTitle =new TitledBorder("数据源和表"); 
-		this.setBorder(nameTitle);
+		this.setBorder(new TitledBorder(null,"数据源和表",TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12),Color.BLUE));
 		this.setVisible(true);
 	}
 	
