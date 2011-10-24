@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasources>
+	 <datasource>
+			<name>dhcc_oracle</name>
+			<userName>sde</userName>
+			<password>sde</password>
+			<driverClassName>oracle.jdbc.OracleDriver</driverClassName>
+			<url>jdbc:oracle:thin:@172.18.18.203:1521:emdb</url>
+	 </datasource>
+	 <datasource>
+			<name>localhost_oracle</name>
+			<userName>sde</userName>
+			<password>sde</password>
+			<driverClassName>oracle.jdbc.OracleDriver</driverClassName>
+			<url>jdbc:oracle:thin:@localhost:1521:xingjian</url>
+	 </datasource>
+</datasources>

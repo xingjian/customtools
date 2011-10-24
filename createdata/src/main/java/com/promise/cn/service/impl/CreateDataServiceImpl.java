@@ -3,6 +3,8 @@ package com.promise.cn.service.impl;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -51,7 +53,22 @@ public class CreateDataServiceImpl implements CreateDataService {
 	 */
 	@Override
 	public boolean checkDataConnectVO(DataConnectConfigVO dccVO) {
-		return false;
+		Connection connect = null;
+		try {
+			Class.forName(dccVO.getDriverClassName());
+			connect = DriverManager.getConnection(dccVO.getUrl(),dccVO.getUserName(),dccVO.getPassword());
+			if(connect!=null){
+				if(!connect.isClosed()){
+					connect.close();
+				}
+				return true;
+			}else{
+				return false;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	/**

@@ -3,9 +3,11 @@ package com.promise.cn.service;
 
 import junit.framework.TestCase;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.promise.cn.service.impl.CreateDataServiceImpl;
+import com.promise.cn.vo.DataConnectConfigVO;
 
 /**   
  * @类名: TestCreateDataService.java 
@@ -25,8 +27,26 @@ public class TestCreateDataService extends TestCase{
 		cds = new CreateDataServiceImpl();
 	}
 	
+	/**
+	 * 测试读取配置文件，封装对象
+	 */
 	@Test
 	public void testGetAllDataConnectConfigVO(){
 		cds.getAllDataConnectConfigVO();
+	}
+	
+	/**
+	 * 测试数据库连接正确性
+	 */
+	@Test
+	public void testCheckDataConnectVO(){
+		DataConnectConfigVO dccTemp = new DataConnectConfigVO();
+		dccTemp.setName("testOracle");
+		dccTemp.setDriverClassName("oracle.jdbc.OracleDriver");
+		dccTemp.setPassword("sde");
+		dccTemp.setUrl("jdbc:oracle:thin:@172.18.18.203:1521:emdb");
+		dccTemp.setUserName("sde");
+		boolean booTemp = cds.checkDataConnectVO(dccTemp);
+		Assert.assertTrue(booTemp);
 	}
 }

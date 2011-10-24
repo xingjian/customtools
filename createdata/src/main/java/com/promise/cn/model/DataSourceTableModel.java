@@ -69,6 +69,16 @@ public class DataSourceTableModel implements TableModel {
 		}
 		return retStr;
 	}
+	
+	/**
+	 * 通过rowIndex返回DataConnectConfigVO
+	 * @param rowIndex
+	 * @return
+	 */
+	public DataConnectConfigVO getDataConnectConfigVOByRow(int rowIndex) {
+		DataConnectConfigVO dccTemp = dccList.get(rowIndex);
+		return dccTemp;
+	}
 
 	@Override
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {

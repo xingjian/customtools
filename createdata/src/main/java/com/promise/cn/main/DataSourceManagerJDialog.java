@@ -14,6 +14,7 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -83,8 +84,25 @@ public class DataSourceManagerJDialog extends JDialog {
 		if(testConnect_JButton == null){
 			testConnect_JButton = new JButton("测试连接");
 			testConnect_JButton.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 13));
+			testConnect_JButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					testConnect_JButtonClickHandle();
+				}
+			});
 		}
 		return testConnect_JButton;
+	}
+	
+	public void testConnect_JButtonClickHandle(){
+		int selectInt = jTable.getSelectedRow();
+		DataConnectConfigVO ccvTemp = tableModel.getDataConnectConfigVOByRow(selectInt);
+		boolean booTemp = cds.checkDataConnectVO(ccvTemp);
+		String message = "测试连接成功！";
+		if(!booTemp){
+			message = "测试连接失败！";
+		}
+		JOptionPane.showMessageDialog(this, message, "提示信息",JOptionPane.DEFAULT_OPTION);
 	}
 	
 	/**
@@ -191,7 +209,7 @@ public class DataSourceManagerJDialog extends JDialog {
 		this.setLayout(new BorderLayout());
 		this.add(getJScrollPane(), BorderLayout.CENTER);
 		this.add(getNorthJPanel(),BorderLayout.SOUTH);
-		this.setSize(700, 400);
+		this.setSize(780, 400);
 		this.setIconImage(CreateDataUtil.getImage("../images/tubiao.png"));
 	}
 
