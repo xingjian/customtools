@@ -12,6 +12,8 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -39,9 +41,10 @@ public class TableConfigPanel extends JPanel {
 	private JScrollPane jScrollPane = new JScrollPane();
 	private List<TableConfigVO> tableConfigVOList = new ArrayList<TableConfigVO>();
 	private JPanel jpanelSouth,jpanelCenter,jpanelCenter_South;
-	private JButton okBtn,addBtn,editBtn,deleBtn;
+	private JButton okBtn,addBtn,deleBtn,selectPathBtn;
 	private JCheckBox checkBox;
 	private JTextField sqlTextPathTextField;
+	private JFileChooser jfc=new JFileChooser();//文件选择器 
 	
 	public TableConfigPanel(){
 		initPanel();
@@ -85,6 +88,27 @@ public class TableConfigPanel extends JPanel {
 		return jpanelCenter;
 	}
 	
+	/**
+	 *弹出路径窗口 
+	 */
+	public void showJSCDialog(){
+		int intRetVal = jfc.showSaveDialog(this);
+		 if(intRetVal == JFileChooser.APPROVE_OPTION){ 
+		    sqlTextPathTextField.setText(jfc.getSelectedFile().getPath()); 
+		 } 
+	}
+	
+	/**
+	 * 开始生成sql语句并执行
+	 */
+	public void okBtnClickHandle(){
+		if(checkBox.isSelected()){
+			if(sqlTextPathTextField.getText().trim().equals("")){
+				JOptionPane.showMessageDialog(this, "请选择sql语句保存路径文件！");
+			}
+		}
+		
+	}
 	
 	/**
 	 * 按钮面板
@@ -95,14 +119,36 @@ public class TableConfigPanel extends JPanel {
 			jpanelSouth = new JPanel();
 			jpanelSouth.setBorder(new TitledBorder(null,"提交配置",TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12),Color.BLUE));
 			jpanelSouth.setLayout(flowLayout);
+			selectPathBtn = new JButton("选择文件");
+			selectPathBtn.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					showJSCDialog();
+				}
+			});
 			okBtn = new JButton("生成SQL并提交");
 			okBtn.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			okBtn.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					okBtnClickHandle();
+				}
+			});
 			checkBox = new JCheckBox();
+			checkBox.setSelected(true);
+			checkBox.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					sqlTextPathTextField.setEditable(checkBox.isSelected());
+					selectPathBtn.setEnabled(checkBox.isSelected());
+				}
+			});
 			sqlTextPathTextField = new JTextField(30);
 			flowLayout.setHgap(10);
-			jpanelSouth.add(okBtn);
 			jpanelSouth.add(checkBox);
 			jpanelSouth.add(sqlTextPathTextField);
+			jpanelSouth.add(selectPathBtn);
+			jpanelSouth.add(okBtn);
 		}
 		return jpanelSouth;
 	}
