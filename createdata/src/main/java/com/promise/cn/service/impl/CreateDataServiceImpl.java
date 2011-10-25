@@ -156,7 +156,7 @@ public class CreateDataServiceImpl implements CreateDataService {
 	 * 通过
 	 */
 	@Override
-	public boolean createSqlByList(List<TableConfigVO> list, String path,String tableName) {
+	public boolean createSqlByList(List<TableConfigVO> list, String path,String tableName,int count) {
 		File file  = null;
 		FileOutputStream fos = null;
 		FileChannel outputChannel = null;
@@ -173,7 +173,7 @@ public class CreateDataServiceImpl implements CreateDataService {
 		for(Iterator<TableConfigVO> iterator = list.iterator();iterator.hasNext();){
 			TableConfigVO tcvTemp = iterator.next();
 			tcvTemp.setTableName(tableName);
-			ByteBuffer bb = ByteBuffer.wrap(tcvTemp.createSqlByType("insert").getBytes());   
+			ByteBuffer bb = ByteBuffer.wrap("test".getBytes());   
 			try {
 				outputChannel.write(bb);
 			} catch (IOException e) {

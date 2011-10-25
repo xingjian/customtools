@@ -62,11 +62,4 @@ public class TableConfigVO {
 		this.endValue = endValue;
 	}
 	
-	public String createSqlByType(String type){
-		if(type.equals("insert")){
-			return "insert into "+tableName +"values"+"\n" ;
-		}
-		return null;
-	}
-	
 }

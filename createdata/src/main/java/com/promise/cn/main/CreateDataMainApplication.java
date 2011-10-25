@@ -120,7 +120,8 @@ public class CreateDataMainApplication {
 	 */
 	public void createSqlByList(List<TableConfigVO> list,String path){
 		String tableName = dcp.jTextFieldTableName.getText();
-		cds.createSqlByList(list, path,tableName);
+		int count  = Integer.parseInt(dcp.jTextFieldDataCount.getText());
+		cds.createSqlByList(list, path,tableName,count);
 	}
 	
 	/**

@@ -30,9 +30,11 @@ public class DataConnectPanel extends JPanel {
 	private JComboBox jComboBox;
 	private JComboBox jComboBoxTables;
 	public JTextField jTextFieldTableName;
+	public JTextField jTextFieldDataCount;
 	private JTable jTable;
 	private JLabel label1 = new JLabel("数据源:");
 	private JLabel label2 = new JLabel("表名:");
+	private JLabel label3 = new JLabel("数据量(条):");
 	public List<DataConnectConfigVO> tableData = null; 
 	public DefaultComboBoxModel dcbm = null; 
 	
@@ -51,14 +53,19 @@ public class DataConnectPanel extends JPanel {
 	 */
 	public void initPanel(){
 		jTextFieldTableName = new JTextField("table name");
+		jTextFieldDataCount = new JTextField();
+		jTextFieldDataCount.setColumns(15);
 		jTextFieldTableName.setHorizontalAlignment(JTextField.CENTER);
 		jTextFieldTableName.setColumns(15);
 		label1.setFont(CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12));
 		label2.setFont(CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12));
+		label3.setFont(CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12));
 		this.add(label1);
 		this.add(getJComboBox());
 		this.add(label2);
 		this.add(jTextFieldTableName);
+		this.add(label3);
+		this.add(jTextFieldDataCount);
 		this.setBackground(Color.white);
 		this.setBorder(new TitledBorder(null,"数据源和表",TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12),Color.BLUE));
 		this.setVisible(true);
