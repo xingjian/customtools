@@ -29,7 +29,7 @@ public class DataConnectPanel extends JPanel {
 
 	private JComboBox jComboBox;
 	private JComboBox jComboBoxTables;
-	private JTextField jTextFieldTableName;
+	public JTextField jTextFieldTableName;
 	private JTable jTable;
 	private JLabel label1 = new JLabel("数据源:");
 	private JLabel label2 = new JLabel("表名:");

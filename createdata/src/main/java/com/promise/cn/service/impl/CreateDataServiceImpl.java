@@ -2,7 +2,12 @@
 package com.promise.cn.service.impl;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
@@ -18,6 +23,7 @@ import org.dom4j.io.XMLWriter;
 
 import com.promise.cn.service.CreateDataService;
 import com.promise.cn.vo.DataConnectConfigVO;
+import com.promise.cn.vo.TableConfigVO;
 
 /**   
  * @类名: CreateDataServiceImpl.java 
@@ -144,6 +150,38 @@ public class CreateDataServiceImpl implements CreateDataService {
 		}
 
 		return dccList;
+	}
+	
+	/**
+	 * 通过
+	 */
+	@Override
+	public boolean createSqlByList(List<TableConfigVO> list, String path,String tableName) {
+		File file  = null;
+		FileOutputStream fos = null;
+		FileChannel outputChannel = null;
+		if(null!=path&&!path.equals("")){
+			file = new File(path);
+			try {
+				fos = new FileOutputStream(file);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}   
+			outputChannel = fos.getChannel();   
+		}
+		
+		for(Iterator<TableConfigVO> iterator = list.iterator();iterator.hasNext();){
+			TableConfigVO tcvTemp = iterator.next();
+			tcvTemp.setTableName(tableName);
+			ByteBuffer bb = ByteBuffer.wrap(tcvTemp.createSqlByType("insert").getBytes());   
+			try {
+				outputChannel.write(bb);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return false;
 	}
 
 }

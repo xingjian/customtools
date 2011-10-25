@@ -26,6 +26,7 @@ import com.promise.cn.service.CreateDataService;
 import com.promise.cn.service.impl.CreateDataServiceImpl;
 import com.promise.cn.util.CreateDataUtil;
 import com.promise.cn.vo.DataConnectConfigVO;
+import com.promise.cn.vo.TableConfigVO;
 
 /**   
  * @类名: CreateDataMainApplication.java 
@@ -106,9 +107,20 @@ public class CreateDataMainApplication {
 	
 	public TableConfigPanel getTableConfigPanel(){
 		if(tcp==null){
-			tcp = new TableConfigPanel();
+			tcp = new TableConfigPanel(this);
+			tcp.cds = cds;
 		}
 		return tcp;
+	}
+	
+	/**
+	 * 创建sql
+	 * @param list
+	 * @param path
+	 */
+	public void createSqlByList(List<TableConfigVO> list,String path){
+		String tableName = dcp.jTextFieldTableName.getText();
+		cds.createSqlByList(list, path,tableName);
 	}
 	
 	/**

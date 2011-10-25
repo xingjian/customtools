@@ -4,6 +4,7 @@ package com.promise.cn.service;
 import java.util.List;
 
 import com.promise.cn.vo.DataConnectConfigVO;
+import com.promise.cn.vo.TableConfigVO;
 
 /**   
  * @类名: CreateDataService.java 
@@ -47,4 +48,8 @@ public interface CreateDataService {
 	 * 批量获取数据源连接
 	 */
 	public List<DataConnectConfigVO> getAllDataConnectConfigVO();
+	/**
+	 * 通过TableConfigVO集合创建sql,并写入指定文件
+	 */
+	public boolean createSqlByList(List<TableConfigVO> list,String path,String tableName);
 }

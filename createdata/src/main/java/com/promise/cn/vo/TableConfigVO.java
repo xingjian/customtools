@@ -17,7 +17,14 @@ public class TableConfigVO {
 	private String initValue;
 	private String step;
 	private String endValue;
+	private String tableName;
 	
+	public String getTableName() {
+		return tableName;
+	}
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
+	}
 	public String getId() {
 		return id;
 	}
@@ -53,6 +60,13 @@ public class TableConfigVO {
 	}
 	public void setEndValue(String endValue) {
 		this.endValue = endValue;
+	}
+	
+	public String createSqlByType(String type){
+		if(type.equals("insert")){
+			return "insert into "+tableName +"values"+"\n" ;
+		}
+		return null;
 	}
 	
 }

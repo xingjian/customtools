@@ -22,6 +22,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.border.TitledBorder;
 
 import com.promise.cn.model.TableConfigVOModel;
+import com.promise.cn.service.CreateDataService;
 import com.promise.cn.util.CreateDataUtil;
 import com.promise.cn.vo.TableConfigVO;
 
@@ -45,8 +46,11 @@ public class TableConfigPanel extends JPanel {
 	private JCheckBox checkBox;
 	private JTextField sqlTextPathTextField;
 	private JFileChooser jfc=new JFileChooser();//文件选择器 
+	public CreateDataService cds;
+	public CreateDataMainApplication cdma;
 	
-	public TableConfigPanel(){
+	public TableConfigPanel(CreateDataMainApplication cdma){
+		this.cdma = cdma;
 		initPanel();
 	}
 	
@@ -105,9 +109,12 @@ public class TableConfigPanel extends JPanel {
 		if(checkBox.isSelected()){
 			if(sqlTextPathTextField.getText().trim().equals("")){
 				JOptionPane.showMessageDialog(this, "请选择sql语句保存路径文件！");
+			}else{
+				cdma.createSqlByList(dtm.tcVOList, sqlTextPathTextField.getText());
 			}
+		}else{
+			cdma.createSqlByList(dtm.tcVOList, sqlTextPathTextField.getText());
 		}
-		
 	}
 	
 	/**
