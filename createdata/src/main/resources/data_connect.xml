@@ -14,4 +14,11 @@
 			<driverClassName>oracle.jdbc.OracleDriver</driverClassName>
 			<url>jdbc:oracle:thin:@localhost:1521:xingjian</url>
 	 </datasource>
+	 <datasource>
+			<name>localhost_mysql</name>
+			<userName>root</userName>
+			<password>000000</password>
+			<driverClassName>com.mysql.jdbc.Driver</driverClassName>
+			<url>jdbc:mysql://localhost/whq</url>
+	 </datasource>
 </datasources>

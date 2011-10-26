@@ -5,7 +5,8 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.Toolkit;
-import java.net.URL;
+import java.text.DecimalFormat;
+import java.util.Random;
 
 /**   
  * @类名: CreateDataUtil.java 
@@ -40,4 +41,86 @@ public class CreateDataUtil {
 		Toolkit toolkit = Toolkit.getDefaultToolkit(); 
 		return toolkit.createImage(CreateDataUtil.class.getResource(imageURL));
 	}
+	
+	/**
+	 * 产生随机数区间范围minInt---maxInt
+	 * @param minInt
+	 * @param maxInt
+	 * @return
+	 */
+	public static int getRandomInt(int minInt, int maxInt) {
+		Random random = new Random();
+		int retInt = 0;
+		if(maxInt>minInt){
+			retInt = random.nextInt(maxInt-minInt)+minInt;
+		}
+		return retInt;
+	}
+	
+	/**
+	 * 产生随机数区间范围mindouble---maxdouble
+	 * @param minInt
+	 * @param maxInt
+	 * @return
+	 */
+	public static double getRandomDouble(double mindouble, double maxdouble,int count) {
+		Random random = new Random();
+		double retdouble = 0.0;
+		if(maxdouble>mindouble){
+			retdouble = random.nextDouble()*(maxdouble-mindouble)+mindouble;
+			DecimalFormat dcmFmt = new DecimalFormat(getDecimalPointFormat(count));
+			retdouble = Double.parseDouble(dcmFmt.format(retdouble));
+		}
+		return retdouble;
+	}
+
+	/**
+	 * 返回小数点格式,count最小值为1
+	 * @return
+	 */
+	public static String getDecimalPointFormat(int count){
+		String retStr = "0.";
+		for(int i=0;i<count;i++){
+			retStr = retStr+"0";
+		}
+		return retStr;
+	}
+	
+	/**
+	 * 随机产生字符串
+	 */
+	public static String getRandomString(int length){
+        String str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";  
+        Random random = new Random();  
+        StringBuffer sb = new StringBuffer();  
+        for(int i = 0 ; i < length; ++i){  
+            int number = random.nextInt(62);  
+            sb.append(str.charAt(number));  
+        }  
+        return sb.toString();  
+	}
+
+	/**
+	 * 随机产生字符串
+	 */
+	public static String getRandomString(String baseStr,int length,String position){
+        String str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";  
+        Random random = new Random();  
+        StringBuffer sb = new StringBuffer();
+        if(position=="left"){
+        	sb.append(baseStr);
+        	for(int i = baseStr.length() ; i < length; ++i){  
+                int number = random.nextInt(62);  
+                sb.append(str.charAt(number));  
+            } 
+        }else if(position=="right"){
+        	for(int i = 0 ; i < length - baseStr.length(); ++i){  
+                int number = random.nextInt(62);  
+                sb.append(str.charAt(number));  
+            }
+        	sb.append(baseStr);
+        }
+        return sb.toString();  
+	}
+	
 }

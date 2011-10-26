@@ -2,12 +2,10 @@
 package com.promise.cn.main;
 
 import java.awt.BorderLayout;
-import java.awt.Event;
 import java.awt.Font;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +16,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
@@ -59,6 +56,7 @@ public class CreateDataMainApplication {
 	private List<DataConnectConfigVO> tableData = new ArrayList<DataConnectConfigVO>();
 	private CreateDataService cds = new CreateDataServiceImpl();
 	private TableConfigPanel tcp = null;
+	private PolicyManagerJDialog pmd = null;
 	/**
 	 * @param args
 	 */
@@ -82,7 +80,7 @@ public class CreateDataMainApplication {
 			jFrame = new JFrame();
 			jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			jFrame.setJMenuBar(getJJMenuBar());
-			jFrame.setSize(1000, 600);
+			jFrame.setSize(800, 600);
 			jFrame.setContentPane(getJContentPane());
 			jFrame.setTitle("模拟数据程序");
 			jFrame.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 16));
@@ -172,10 +170,9 @@ public class CreateDataMainApplication {
 	private JMenu getMenu2() {
 		if (menu2 == null) {
 			menu2 = new JMenu();
-			menu2.setText("窗口");
-			menu2.add(getCutMenuItem());
-			menu2.add(getCopyMenuItem());
-			menu2.add(getPasteMenuItem());
+			menu2.setText("工具");
+			menu2.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			menu2.add(getPolicyItem());
 		}
 		return menu2;
 	}
@@ -275,42 +272,21 @@ public class CreateDataMainApplication {
 	 * This method initializes jMenuItem	
 	 * @return javax.swing.JMenuItem	
 	 */
-	private JMenuItem getCutMenuItem() {
+	private JMenuItem getPolicyItem() {
 		if (cutMenuItem == null) {
 			cutMenuItem = new JMenuItem();
-			cutMenuItem.setText("Cut");
-			cutMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,
-					Event.CTRL_MASK, true));
+			cutMenuItem.setText("策略管理");
+			cutMenuItem.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					PolicyManagerJDialog pmdTemp = getPolicyManagerJDialog();
+					pmdTemp.setLocationRelativeTo(getJFrame());
+					pmdTemp.setVisible(true);
+					pmdTemp.setResizable(false);
+				}
+			});
 		}
 		return cutMenuItem;
-	}
-
-	/**
-	 * This method initializes jMenuItem	
-	 * @return javax.swing.JMenuItem	
-	 */
-	private JMenuItem getCopyMenuItem() {
-		if (copyMenuItem == null) {
-			copyMenuItem = new JMenuItem();
-			copyMenuItem.setText("Copy");
-			copyMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C,
-					Event.CTRL_MASK, true));
-		}
-		return copyMenuItem;
-	}
-
-	/**
-	 * This method initializes jMenuItem	
-	 * @return javax.swing.JMenuItem	
-	 */
-	private JMenuItem getPasteMenuItem() {
-		if (pasteMenuItem == null) {
-			pasteMenuItem = new JMenuItem();
-			pasteMenuItem.setText("Paste");
-			pasteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,
-					Event.CTRL_MASK, true));
-		}
-		return pasteMenuItem;
 	}
 
 	/**
@@ -350,4 +326,10 @@ public class CreateDataMainApplication {
 		return dmd;
 	}
 
+	private PolicyManagerJDialog getPolicyManagerJDialog(){
+		if(pmd==null){
+			pmd = new PolicyManagerJDialog();
+		}
+		return pmd;
+	}
 }

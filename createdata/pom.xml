@@ -23,6 +23,11 @@
              <version>5</version>
              <scope>compile</scope>
         </dependency>
+        <dependency>
+			<groupId>com.mysql</groupId>
+			<artifactId>jdbc</artifactId>
+			<version>3.1.14</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>opengis_geoext</finalName>
