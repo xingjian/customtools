@@ -6,6 +6,7 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -39,6 +40,14 @@ public class PolicyDialog extends JDialog{
 	public JLabel label2 = new JLabel("策略类型:");
 	public CardLayout cardLayout;
 	public JButton okBtn,exitBtn;
+	public JLabel label1_jp1,label2_jp1;
+	public JTextField maxTextField_jp1,minTextField_jp1;
+	public JLabel label1_jp2,label2_jp2,label3_jp2;
+	public JTextField maxTextField_jp2,minTextField_jp2,countTextField;
+	public JLabel label1_jp3,label2_jp3,label3_jp3;
+	public JTextField strJTextField,lengthJTextField;
+	public String[] siteJComboBoxItems = {"append_left","append_right"};
+	public JComboBox siteJComboBox = new JComboBox(siteJComboBoxItems);
 	
 	public PolicyDialog(String[] policyType,String titleName,PolicyVO policyVO){
 		this.policyType = policyType;
@@ -46,7 +55,8 @@ public class PolicyDialog extends JDialog{
 		this.setTitle(titleName);
 		init();
 		this.setIconImage(CreateDataUtil.getImage("../images/tubiao.png"));
-		this.setSize(500,300);
+		this.setSize(300,300);
+		this.setResizable(false);
 		this.setModal(true);
 	}
 	
@@ -58,6 +68,14 @@ public class PolicyDialog extends JDialog{
 		this.add(getNorthPanel(), BorderLayout.NORTH);
 		this.add(getCenterPanel(), BorderLayout.CENTER);
 		this.add(getSouthPanel(),BorderLayout.SOUTH);
+		if(policyVO.getType()==null){
+			jcb.setSelectedIndex(0);
+		}else if(policyVO.getType().equals("randomInt[a,b]")){
+			jcb.setSelectedIndex(1);
+		}else if(policyVO.getType().equals("randomString")){
+			jcb.setSelectedIndex(2);
+		}
+		
 	}
 	
 	public JPanel getSouthPanel(){
@@ -87,21 +105,79 @@ public class PolicyDialog extends JDialog{
 	
 	public JPanel getJPanel_One(){
 		if(jp1==null){
-			jp1 = new JPanel();
+			jp1 = new JPanel(new GridLayout(2,1));
+			jp1.setBorder(new TitledBorder(null,"随机策略Int",TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12),Color.BLUE));
+			label1_jp1 = new JLabel("最大值:");
+			label1_jp1.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			label2_jp1 = new JLabel("最小值:");
+			label2_jp1.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			maxTextField_jp1 = new JTextField(10);
+			minTextField_jp1 = new JTextField(10);
+			JPanel jp1_temp1 = new JPanel();
+			JPanel jp1_temp2 = new JPanel();
+			jp1_temp1.add(label1_jp1);
+			jp1_temp1.add(minTextField_jp1);
+			jp1_temp2.add(label2_jp1);
+			jp1_temp2.add(maxTextField_jp1);
+			jp1.add(jp1_temp1);
+			jp1.add(jp1_temp2);
 		}
 		return jp1;
 	}
 	
 	public JPanel getJPanel_Two(){
 		if(jp2==null){
-			jp2 = new JPanel();
+			jp2 = new JPanel(new GridLayout(3,1));
+			jp2.setBorder(new TitledBorder(null,"随机策略Double",TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12),Color.BLUE));
+			label1_jp2 = new JLabel("最大值:");
+			label1_jp2.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			label2_jp2 = new JLabel("最小值:");
+			label2_jp2.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			label3_jp2 = new JLabel("小数位:");
+			label3_jp2.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			maxTextField_jp2 = new JTextField(10);
+			minTextField_jp2 = new JTextField(10);
+			countTextField = new JTextField(10);
+			JPanel jp2_temp1 = new JPanel();
+			JPanel jp2_temp2 = new JPanel();
+			JPanel jp2_temp3 = new JPanel();
+			jp2_temp1.add(label1_jp2);
+			jp2_temp1.add(minTextField_jp2);
+			jp2_temp2.add(label2_jp2);
+			jp2_temp2.add(maxTextField_jp2);
+			jp2_temp3.add(label3_jp2);
+			jp2_temp3.add(countTextField);
+			jp2.add(jp2_temp1);
+			jp2.add(jp2_temp2);
+			jp2.add(jp2_temp3);
 		}
 		return jp2;
 	}
 	
 	public JPanel getJPanel_Three(){
 		if(jp3==null){
-			jp3 = new JPanel();
+			jp3 = new JPanel(new GridLayout(3,1));
+			jp3.setBorder(new TitledBorder(null,"随机策略String",TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12),Color.BLUE));
+			JPanel jp3_temp1 = new JPanel();
+			JPanel jp3_temp2 = new JPanel();
+			JPanel jp3_temp3 = new JPanel();
+			label1_jp3 = new JLabel("字  符  串:");
+			label2_jp3 = new JLabel("追加位置:");
+			label3_jp3 = new JLabel("字符长度:");
+			label1_jp3.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			label2_jp3.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			strJTextField = new JTextField(10);
+			lengthJTextField = new JTextField(10);
+			label3_jp3.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			jp3_temp3.add(label3_jp3);
+			jp3_temp3.add(lengthJTextField);
+			jp3_temp1.add(label1_jp3);
+			jp3_temp1.add(strJTextField);
+			jp3_temp2.add(label2_jp3);
+			jp3_temp2.add(siteJComboBox);
+			jp3.add(jp3_temp1);
+			jp3.add(jp3_temp3);
+			jp3.add(jp3_temp2);
 		}
 		return jp3;
 	}
@@ -109,13 +185,32 @@ public class PolicyDialog extends JDialog{
 	public JPanel getNorthPanel(){
 		if(northPanel==null){
 			jcb = new JComboBox(policyType);
-			northPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-			northPanel.add(label1);
-			northPanel.add(textField);
-			northPanel.add(label2);
-			northPanel.add(jcb);
+			jcb.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if (e.getSource() == jcb){
+						String itemStr = jcb.getSelectedItem().toString();
+						if(itemStr.equals("randomDouble[a,b]")){
+							cardLayout.show(centerPanel, "jp2");
+						}else if(itemStr.equals("randomInt[a,b]")){
+							cardLayout.show(centerPanel, "jp1");
+						}else if(itemStr.equals("randomString")){
+							cardLayout.show(centerPanel, "jp3");
+						}
+					}
+				}
+			});
+			northPanel = new JPanel(new GridLayout(2,1));
+			JPanel jpNorth_temp1 = new JPanel();
+			JPanel jpNorth_temp2 = new JPanel();
+			jpNorth_temp1.add(label1);
+			jpNorth_temp1.add(textField);
+			jpNorth_temp2.add(label2);
+			jpNorth_temp2.add(jcb);
 			label1.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
 			label2.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			northPanel.add(jpNorth_temp1);
+			northPanel.add(jpNorth_temp2);
 			northPanel.setBorder(new TitledBorder(null,"名称和类型",TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12),Color.BLUE));
 		}
 		return northPanel;
