@@ -3,12 +3,18 @@ package com.promise.cn.main;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
 
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.border.TitledBorder;
 
+import com.promise.cn.util.CreateDataUtil;
 import com.promise.cn.vo.PolicyVO;
 
 /**   
@@ -21,16 +27,21 @@ import com.promise.cn.vo.PolicyVO;
  */
 public class PolicyDialog extends JDialog{
 
-	public JPanel jp1,jp2,jp3,southPanel,centerPanel;
+	public JPanel jp1,jp2,jp3,northPanel,centerPanel;
 	public PolicyVO policyVO;
 	private JComboBox jcb;
-	public JLabel label1 = new JLabel("类型:");
+	private String[] policyType; 
+	public JLabel label1 = new JLabel("策略名称:");
+	public JTextField textField = new JTextField(10);
+	public JLabel label2 = new JLabel("策略类型:");
 	public CardLayout cardLayout;
 	
-	public PolicyDialog(){
+	public PolicyDialog(String[] policyType,String titleName){
+		this.policyType = policyType;
+		this.setTitle(titleName);
 		init();
-		this.setSize(400,600);
-		this.setVisible(true);
+		this.setIconImage(CreateDataUtil.getImage("../images/tubiao.png"));
+		this.setSize(500,300);
 	}
 	
 	/**
@@ -38,7 +49,7 @@ public class PolicyDialog extends JDialog{
 	 */
 	public void init(){
 		this.setLayout(new BorderLayout());
-		this.add(getSouthPanel(), BorderLayout.SOUTH);
+		this.add(getNorthPanel(), BorderLayout.NORTH);
 		this.add(getCenterPanel(), BorderLayout.CENTER);
 	}
 	
@@ -63,11 +74,19 @@ public class PolicyDialog extends JDialog{
 		return jp3;
 	}
 	
-	public JPanel getSouthPanel(){
-		if(southPanel==null){
-			southPanel = new JPanel();
+	public JPanel getNorthPanel(){
+		if(northPanel==null){
+			jcb = new JComboBox(policyType);
+			northPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+			northPanel.add(label1);
+			northPanel.add(textField);
+			northPanel.add(label2);
+			northPanel.add(jcb);
+			label1.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			label2.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			northPanel.setBorder(new TitledBorder(null,"名称和类型",TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12),Color.BLUE));
 		}
-		return southPanel;
+		return northPanel;
 	}
 	
 	public JPanel getCenterPanel(){

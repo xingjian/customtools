@@ -44,8 +44,6 @@ public class CreateDataMainApplication {
 	private JMenuItem exitMenuItem = null;
 	private JMenuItem aboutMenuItem = null;
 	private JMenuItem cutMenuItem = null;
-	private JMenuItem copyMenuItem = null;
-	private JMenuItem pasteMenuItem = null;
 	private JMenuItem connectManagerItem = null;
 	private JDialog aboutDialog = null;
 	private JPanel aboutContentPane = null;

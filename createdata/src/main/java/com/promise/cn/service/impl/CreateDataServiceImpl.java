@@ -23,6 +23,7 @@ import org.dom4j.io.XMLWriter;
 
 import com.promise.cn.service.CreateDataService;
 import com.promise.cn.vo.DataConnectConfigVO;
+import com.promise.cn.vo.PolicyVO;
 import com.promise.cn.vo.TableConfigVO;
 
 /**   
@@ -182,6 +183,32 @@ public class CreateDataServiceImpl implements CreateDataService {
 		}
 		
 		return false;
+	}
+
+	/**
+	 * 批量保存策略
+	 */
+	@Override
+	public boolean savePolicyVOList(List<PolicyVO> policyVOList) {
+		StringBuffer result = new StringBuffer();
+		result.append("<policys>"+"\n");
+		for(int i=0;i<policyVOList.size();i++){
+			result.append(policyVOList.get(i).toString());
+		}
+		result.append("</policys>");
+		String filePath = CreateDataServiceImpl.class.getResource("/policy.xml").getPath();
+		XMLWriter writer;
+		try {
+			writer = new XMLWriter(new FileWriter(filePath));
+			Document document = null;
+			document = DocumentHelper.parseText(result.toString());
+			writer.write(document);
+			writer.close();
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 }

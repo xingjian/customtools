@@ -7,15 +7,22 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.TitledBorder;
 
+import com.promise.cn.customcomponent.CustomTable;
+import com.promise.cn.model.JTableComboBoxEditor;
+import com.promise.cn.model.PolicyManagerTableModel;
 import com.promise.cn.util.CreateDataUtil;
+import com.promise.cn.vo.PolicyVO;
 
 /**   
  * @类名: PolicyManagerJDialog.java 
@@ -29,8 +36,12 @@ public class PolicyManagerJDialog extends JDialog {
 
 	private JScrollPane jScrollPane = null;
 	private JPanel jpanelSouth = null;
-	private JTable jtable = null;
+	private CustomTable jtable = null;
 	private JButton addBtn,deleteBtn,editBtn,saveBtn;
+	private String[] jtableHeader = {"名称","类型"};
+	private String[] policyType = {"randomDouble[a,b]","randomInt[a,b]","randomString"};
+	private PolicyManagerTableModel pmtm = null;
+	private List<PolicyVO> policyList = new ArrayList<PolicyVO>();
 	
 	public PolicyManagerJDialog(){
 		init();
@@ -54,22 +65,24 @@ public class PolicyManagerJDialog extends JDialog {
 	 */
 	public JScrollPane getJScrollPane(){
 		if(jScrollPane==null){
+			pmtm = new PolicyManagerTableModel(policyList,jtableHeader);
+			jtable = new CustomTable(pmtm);
+			jtable.setRowHeight(25);  
+	        //设置表格内部字体
+			jtable.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+	        //设置表头字体
+			jtable.getTableHeader().setFont(CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12));
+	        //设置选择模式,使其能选择一行或多行
+			jtable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+	        //设置列不可拖动
+			jtable.getColumnModel().getColumn(1).setCellEditor(new JTableComboBoxEditor(policyType));
+			jtable.getTableHeader().setReorderingAllowed(false);
 			jScrollPane = new JScrollPane();
-			jScrollPane.setViewportView(getJTable());
+			jScrollPane.setViewportView(jtable);
 		}
 		return jScrollPane;
 	}
 	
-	/**
-	 * init jtable
-	 * @return
-	 */
-	public JTable getJTable(){
-		if(jtable==null){
-			jtable = new JTable();
-		}
-		return jtable;
-	}
 	
 	public JPanel getJPanelSouth(){
 		if(jpanelSouth==null){
@@ -79,6 +92,10 @@ public class PolicyManagerJDialog extends JDialog {
 			addBtn.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
+					PolicyDialog policyDialog = new PolicyDialog(policyType,"增加策略");
+					policyDialog.setLocationRelativeTo(getJScrollPane());
+					policyDialog.setVisible(true);
+					policyDialog.setResizable(false);
 				}
 			});
 			editBtn = new JButton("编辑策略");
@@ -107,7 +124,7 @@ public class PolicyManagerJDialog extends JDialog {
 			jpanelSouth.add(editBtn);
 			jpanelSouth.add(deleteBtn);
 			jpanelSouth.add(saveBtn);
-			jpanelSouth.setBorder(new TitledBorder(null,"策略列表",TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12),Color.BLUE));
+			jpanelSouth.setBorder(new TitledBorder(null,"策略操作",TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12),Color.BLUE));
 		}
 		return jpanelSouth;
 	}

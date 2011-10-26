@@ -4,6 +4,7 @@ package com.promise.cn.service;
 import java.util.List;
 
 import com.promise.cn.vo.DataConnectConfigVO;
+import com.promise.cn.vo.PolicyVO;
 import com.promise.cn.vo.TableConfigVO;
 
 /**   
@@ -52,4 +53,8 @@ public interface CreateDataService {
 	 * 通过TableConfigVO集合创建sql,并写入指定文件
 	 */
 	public boolean createSqlByList(List<TableConfigVO> list,String path,String tableName,int count);
+	/**
+	 * 批量保存策略
+	 */
+	public boolean savePolicyVOList(List<PolicyVO> policyVOList);
 }

@@ -38,7 +38,7 @@ public class TableConfigPanel extends JPanel {
 
 	private JTable jtable = null;
 	private TableConfigVOModel dtm = null;
-	private String[] tableHeader = {"字段名","类型","初始化值","步长值","结束值"};
+	private String[] tableHeader = {"字段名","类型","策略名称"};
 	private JScrollPane jScrollPane = new JScrollPane();
 	private List<TableConfigVO> tableConfigVOList = new ArrayList<TableConfigVO>();
 	private JPanel jpanelSouth,jpanelCenter,jpanelCenter_South;

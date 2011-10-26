@@ -72,6 +72,16 @@ public class PolicyVO {
 		this.endValue = endValue;
 	}
 	
+	@Override
+	public String toString(){
+		StringBuffer sb = new StringBuffer();
+		sb.append("	 <policy>"+"\n");
+		sb.append("			<name>"+name+"</name>"+"\n");
+		sb.append("			<userName>"+type+"</userName>"+"\n");
+		sb.append("	 </policy>"+"\n");
+		return sb.toString();
+		
+	}
 	
 	
 }
