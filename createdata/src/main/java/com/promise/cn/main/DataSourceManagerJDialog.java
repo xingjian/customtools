@@ -209,6 +209,7 @@ public class DataSourceManagerJDialog extends JDialog {
 		this.add(getJScrollPane(), BorderLayout.CENTER);
 		this.add(getNorthJPanel(),BorderLayout.SOUTH);
 		this.setSize(780, 400);
+		this.setModal(true);
 		this.setIconImage(CreateDataUtil.getImage("../images/tubiao.png"));
 	}
 

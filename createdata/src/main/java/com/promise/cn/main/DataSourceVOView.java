@@ -50,6 +50,7 @@ public class DataSourceVOView extends JDialog {
 	public DataSourceVOView() {
 		init();
 		initBtnEvent();
+		this.setModal(true);
 	}
 
 	public void initBtnEvent(){

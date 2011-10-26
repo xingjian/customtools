@@ -42,6 +42,7 @@ public class PolicyDialog extends JDialog{
 		init();
 		this.setIconImage(CreateDataUtil.getImage("../images/tubiao.png"));
 		this.setSize(500,300);
+		this.setModal(true);
 	}
 	
 	/**
