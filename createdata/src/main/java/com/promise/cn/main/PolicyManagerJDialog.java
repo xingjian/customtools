@@ -93,7 +93,8 @@ public class PolicyManagerJDialog extends JDialog {
 			addBtn.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					PolicyDialog policyDialog = new PolicyDialog(policyType,"增加策略");
+					PolicyVO addPolicy = new PolicyVO();
+					PolicyDialog policyDialog = new PolicyDialog(policyType,"增加策略",addPolicy);
 					policyDialog.setLocationRelativeTo(getJScrollPane());
 					policyDialog.setVisible(true);
 					policyDialog.setResizable(false);

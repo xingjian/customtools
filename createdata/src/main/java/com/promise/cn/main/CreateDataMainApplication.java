@@ -274,6 +274,7 @@ public class CreateDataMainApplication {
 		if (cutMenuItem == null) {
 			cutMenuItem = new JMenuItem();
 			cutMenuItem.setText("策略管理");
+			cutMenuItem.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
 			cutMenuItem.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {

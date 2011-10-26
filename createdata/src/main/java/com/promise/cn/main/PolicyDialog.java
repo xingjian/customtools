@@ -6,7 +6,10 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -27,7 +30,7 @@ import com.promise.cn.vo.PolicyVO;
  */
 public class PolicyDialog extends JDialog{
 
-	public JPanel jp1,jp2,jp3,northPanel,centerPanel;
+	public JPanel jp1,jp2,jp3,northPanel,centerPanel,southPanel;
 	public PolicyVO policyVO;
 	private JComboBox jcb;
 	private String[] policyType; 
@@ -35,9 +38,11 @@ public class PolicyDialog extends JDialog{
 	public JTextField textField = new JTextField(10);
 	public JLabel label2 = new JLabel("策略类型:");
 	public CardLayout cardLayout;
+	public JButton okBtn,exitBtn;
 	
-	public PolicyDialog(String[] policyType,String titleName){
+	public PolicyDialog(String[] policyType,String titleName,PolicyVO policyVO){
 		this.policyType = policyType;
+		this.policyVO = policyVO;
 		this.setTitle(titleName);
 		init();
 		this.setIconImage(CreateDataUtil.getImage("../images/tubiao.png"));
@@ -52,6 +57,32 @@ public class PolicyDialog extends JDialog{
 		this.setLayout(new BorderLayout());
 		this.add(getNorthPanel(), BorderLayout.NORTH);
 		this.add(getCenterPanel(), BorderLayout.CENTER);
+		this.add(getSouthPanel(),BorderLayout.SOUTH);
+	}
+	
+	public JPanel getSouthPanel(){
+		if(southPanel==null){
+			southPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+			okBtn = new JButton("确定");
+			okBtn.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					
+				}
+			});
+			exitBtn = new JButton("取消");
+			okBtn.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			exitBtn.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			exitBtn.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					dispose();
+				}
+			});
+			southPanel.add(okBtn);
+			southPanel.add(exitBtn);
+		}
+		return southPanel;
 	}
 	
 	public JPanel getJPanel_One(){
