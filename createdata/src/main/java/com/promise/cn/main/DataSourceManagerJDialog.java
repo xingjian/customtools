@@ -48,6 +48,7 @@ public class DataSourceManagerJDialog extends JDialog {
 	private JButton editConnect_JButton = null;
 	private JButton deleteConnect_JButton = null;
 	private JButton addConnect_JButton = null;
+	private JButton exit_JButton = null;
 	private JPanel south_JPanel = null;
 	private DataEventManager dem = new DataEventManager();
 	public List<DataConnectConfigVO> tableData = new ArrayList<DataConnectConfigVO>();
@@ -66,6 +67,15 @@ public class DataSourceManagerJDialog extends JDialog {
 	 */
 	public JPanel getNorthJPanel(){
 		if(south_JPanel == null){
+			exit_JButton = new JButton("关    闭");
+			exit_JButton.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 13));
+			exit_JButton.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					dispose();
+				}
+			});
 			south_JPanel = new JPanel();
 			south_JPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
 			south_JPanel.add(getTestConnectJButton());
@@ -73,6 +83,7 @@ public class DataSourceManagerJDialog extends JDialog {
 			south_JPanel.add(getEditConnectJButton());
 			south_JPanel.add(getSaveConnectJButton());
 			south_JPanel.add(getDeleteConnectJButton());
+			south_JPanel.add(exit_JButton);
 		}
 		return south_JPanel;
 	}

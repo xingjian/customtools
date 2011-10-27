@@ -46,11 +46,15 @@ public class PolicyDialog extends JDialog{
 	public JTextField maxTextField_jp2,minTextField_jp2,countTextField;
 	public JLabel label1_jp3,label2_jp3,label3_jp3;
 	public JTextField strJTextField,lengthJTextField;
-	public String[] siteJComboBoxItems = {"append_left","append_right"};
+	public String[] siteJComboBoxItems = new String[2];
 	public JComboBox siteJComboBox = new JComboBox(siteJComboBoxItems);
+	public PolicyManagerJDialog pmjd;
+	public String status;
 	
-	public PolicyDialog(String[] policyType,String titleName,PolicyVO policyVO){
-		this.policyType = policyType;
+	public PolicyDialog(PolicyManagerJDialog pmjd,String titleName,PolicyVO policyVO,String status){
+		this.pmjd = pmjd;
+		this.status = status;
+		this.policyType = pmjd.policyType;
 		this.policyVO = policyVO;
 		this.setTitle(titleName);
 		init();
@@ -60,10 +64,16 @@ public class PolicyDialog extends JDialog{
 		this.setModal(true);
 	}
 	
+	public void initData(){
+		siteJComboBoxItems[0] = CreateDataUtil.SITETYPE_LEFT;
+		siteJComboBoxItems[1] = CreateDataUtil.SITETYPE_RIGHT;
+	}
+	
 	/**
 	 * 初始化
 	 */
 	public void init(){
+		initData();
 		this.setLayout(new BorderLayout());
 		this.add(getNorthPanel(), BorderLayout.NORTH);
 		this.add(getCenterPanel(), BorderLayout.CENTER);
@@ -85,7 +95,34 @@ public class PolicyDialog extends JDialog{
 			okBtn.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					
+					policyVO.setName(textField.getText());
+					String type = jcb.getSelectedItem().toString();
+					policyVO.setType(type);
+					if(type.equals(CreateDataUtil.RANDOMDOUBLE_AB)){
+						String initValue = minTextField_jp2.getText();
+						String endValue = maxTextField_jp2.getText();
+						String numberDecimal = countTextField.getText();
+						policyVO.setInitValue(initValue);
+						policyVO.setEndValue(endValue);
+						policyVO.setNumberDecimal(numberDecimal);
+					}else if(type.equals(CreateDataUtil.RANDOMINT_AB)){
+						String initValue = minTextField_jp1.getText();
+						String endValue = maxTextField_jp1.getText();
+						policyVO.setInitValue(initValue);
+						policyVO.setEndValue(endValue);
+					}else if(type.equals(CreateDataUtil.RANDOMSTRING)){
+						String value = strJTextField.getText();
+						String valueLength = lengthJTextField.getText();
+						String siteType = siteJComboBox.getSelectedItem().toString();
+						policyVO.setValue(value);
+						policyVO.setStrLength(valueLength);
+						policyVO.setSiteStr(siteType);
+					}
+					if(status.equals("add")){
+						pmjd.policyList.add(policyVO);
+					}
+					pmjd.jtable.updateUI();
+					dispose();
 				}
 			});
 			exitBtn = new JButton("取消");
@@ -190,11 +227,11 @@ public class PolicyDialog extends JDialog{
 				public void actionPerformed(ActionEvent e) {
 					if (e.getSource() == jcb){
 						String itemStr = jcb.getSelectedItem().toString();
-						if(itemStr.equals("randomDouble[a,b]")){
+						if(itemStr.equals(CreateDataUtil.RANDOMDOUBLE_AB)){
 							cardLayout.show(centerPanel, "jp2");
-						}else if(itemStr.equals("randomInt[a,b]")){
+						}else if(itemStr.equals(CreateDataUtil.RANDOMINT_AB)){
 							cardLayout.show(centerPanel, "jp1");
-						}else if(itemStr.equals("randomString")){
+						}else if(itemStr.equals(CreateDataUtil.RANDOMSTRING)){
 							cardLayout.show(centerPanel, "jp3");
 						}
 					}
@@ -227,4 +264,5 @@ public class PolicyDialog extends JDialog{
 		}
 		return centerPanel;
 	}
+	
 }

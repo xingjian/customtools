@@ -14,12 +14,10 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.TitledBorder;
 
 import com.promise.cn.customcomponent.CustomTable;
-import com.promise.cn.model.JTableComboBoxEditor;
 import com.promise.cn.model.PolicyManagerTableModel;
 import com.promise.cn.util.CreateDataUtil;
 import com.promise.cn.vo.PolicyVO;
@@ -36,12 +34,13 @@ public class PolicyManagerJDialog extends JDialog {
 
 	private JScrollPane jScrollPane = null;
 	private JPanel jpanelSouth = null;
-	private CustomTable jtable = null;
+	public CustomTable jtable = null;
 	private JButton addBtn,deleteBtn,editBtn,saveBtn;
 	private String[] jtableHeader = {"名称","类型"};
-	private String[] policyType = {"randomDouble[a,b]","randomInt[a,b]","randomString"};
+	public String[] policyType = new String[3];
 	private PolicyManagerTableModel pmtm = null;
-	private List<PolicyVO> policyList = new ArrayList<PolicyVO>();
+	public List<PolicyVO> policyList = new ArrayList<PolicyVO>();
+	
 	
 	public PolicyManagerJDialog(){
 		init();
@@ -50,10 +49,18 @@ public class PolicyManagerJDialog extends JDialog {
 		this.setModal(true);
 	}
 	
+	public void initPolicyType(){
+		policyType[0] = CreateDataUtil.RANDOMDOUBLE_AB;
+		policyType[1] = CreateDataUtil.RANDOMINT_AB;
+		policyType[2] = CreateDataUtil.RANDOMSTRING;
+	}
+	
+	
 	/**
 	 * 初始化方法
 	 */
 	public void init(){
+		initPolicyType();
 		this.setTitle("策略管理");
 		this.setLayout(new BorderLayout());
 		this.add(getJPanelSouth(),BorderLayout.SOUTH);
@@ -76,7 +83,6 @@ public class PolicyManagerJDialog extends JDialog {
 	        //设置选择模式,使其能选择一行或多行
 			jtable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 	        //设置列不可拖动
-			jtable.getColumnModel().getColumn(1).setCellEditor(new JTableComboBoxEditor(policyType));
 			jtable.getTableHeader().setReorderingAllowed(false);
 			jScrollPane = new JScrollPane();
 			jScrollPane.setViewportView(jtable);
@@ -84,6 +90,13 @@ public class PolicyManagerJDialog extends JDialog {
 		return jScrollPane;
 	}
 	
+	public void addPolicyBtnHandle(){
+		PolicyVO addPolicy = new PolicyVO();
+		PolicyDialog policyDialog = new PolicyDialog(this,"增加策略",addPolicy,"add");
+		policyDialog.setLocationRelativeTo(getJScrollPane());
+		policyDialog.setVisible(true);
+		policyDialog.setResizable(false);
+	}
 	
 	public JPanel getJPanelSouth(){
 		if(jpanelSouth==null){
@@ -93,11 +106,7 @@ public class PolicyManagerJDialog extends JDialog {
 			addBtn.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					PolicyVO addPolicy = new PolicyVO();
-					PolicyDialog policyDialog = new PolicyDialog(policyType,"增加策略",addPolicy);
-					policyDialog.setLocationRelativeTo(getJScrollPane());
-					policyDialog.setVisible(true);
-					policyDialog.setResizable(false);
+					addPolicyBtnHandle();
 				}
 			});
 			editBtn = new JButton("编辑策略");
@@ -116,6 +125,7 @@ public class PolicyManagerJDialog extends JDialog {
 			saveBtn.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
+					
 				}
 			});
 			addBtn.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 13));

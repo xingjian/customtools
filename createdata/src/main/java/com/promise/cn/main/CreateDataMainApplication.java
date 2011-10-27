@@ -168,7 +168,7 @@ public class CreateDataMainApplication {
 	private JMenu getMenu2() {
 		if (menu2 == null) {
 			menu2 = new JMenu();
-			menu2.setText("工具");
+			menu2.setText("策略工具");
 			menu2.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
 			menu2.add(getPolicyItem());
 		}
@@ -183,6 +183,7 @@ public class CreateDataMainApplication {
 		if (menu3 == null) {
 			menu3 = new JMenu();
 			menu3.setText("系统帮助");
+			menu3.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
 			menu3.add(getAboutMenuItem());
 		}
 		return menu3;
@@ -213,6 +214,7 @@ public class CreateDataMainApplication {
 		if (aboutMenuItem == null) {
 			aboutMenuItem = new JMenuItem();
 			aboutMenuItem.setText("关于系统");
+			aboutMenuItem.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
 			aboutMenuItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					JDialog aboutDialog = getAboutDialog();
@@ -296,6 +298,7 @@ public class CreateDataMainApplication {
 		if (connectManagerItem == null) {
 			connectManagerItem = new JMenuItem();
 			connectManagerItem.setText("连接管理");
+			connectManagerItem.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
 			connectManagerItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					DataSourceManagerJDialog dmdTemp = getDataSourceManagerJDialog();

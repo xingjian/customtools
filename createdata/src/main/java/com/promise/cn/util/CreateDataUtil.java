@@ -17,6 +17,12 @@ import java.util.Random;
  * @版本 V1.0   
  */
 public class CreateDataUtil {
+	
+	public static String RANDOMDOUBLE_AB = "randomDouble[a,b]";
+	public static String RANDOMINT_AB = "randomInt[a,b]";
+	public static String RANDOMSTRING = "randomString";
+	public static String SITETYPE_LEFT = "append_left";
+	public static String SITETYPE_RIGHT = "append_right";
 	/**
 	 * 组件居中
 	 */

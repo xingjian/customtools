@@ -127,6 +127,7 @@ public class TableConfigPanel extends JPanel {
 			jpanelSouth.setBorder(new TitledBorder(null,"提交配置",TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12),Color.BLUE));
 			jpanelSouth.setLayout(flowLayout);
 			selectPathBtn = new JButton("选择文件");
+			selectPathBtn.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
 			selectPathBtn.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
