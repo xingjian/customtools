@@ -87,6 +87,7 @@ public class DataSourceManagerJDialog extends JDialog {
 		}
 		return south_JPanel;
 	}
+	
 	/**
 	 * 测试连接按钮
 	 * @return
@@ -105,6 +106,9 @@ public class DataSourceManagerJDialog extends JDialog {
 		return testConnect_JButton;
 	}
 	
+	/**
+	 * 测试数据库连接
+	 */
 	public void testConnect_JButtonClickHandle(){
 		int selectInt = jTable.getSelectedRow();
 		DataConnectConfigVO ccvTemp = tableModel.getDataConnectConfigVOByRow(selectInt);
@@ -139,7 +143,9 @@ public class DataSourceManagerJDialog extends JDialog {
 	public void saveDataConnectConifgVO(){
 		boolean isSave = cds.saveDataConnectVOList(tableModel.dccList);
 		if(isSave){
-			
+			JOptionPane.showMessageDialog(jScrollPane, "数据库连接保存成功！");
+		}else{
+			JOptionPane.showMessageDialog(jScrollPane, "数据库连接保存失败！");
 		}
 	}
 	

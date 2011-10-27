@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
@@ -19,6 +20,7 @@ import javax.swing.border.TitledBorder;
 
 import com.promise.cn.customcomponent.CustomTable;
 import com.promise.cn.model.PolicyManagerTableModel;
+import com.promise.cn.service.CreateDataService;
 import com.promise.cn.util.CreateDataUtil;
 import com.promise.cn.vo.PolicyVO;
 
@@ -40,9 +42,11 @@ public class PolicyManagerJDialog extends JDialog {
 	public String[] policyType = new String[3];
 	private PolicyManagerTableModel pmtm = null;
 	public List<PolicyVO> policyList = new ArrayList<PolicyVO>();
+	public CreateDataService cds = null;
 	
 	
-	public PolicyManagerJDialog(){
+	public PolicyManagerJDialog(CreateDataService cds){
+		this.cds = cds;
 		init();
 		this.setIconImage(CreateDataUtil.getImage("../images/tubiao.png"));
 		this.setSize(600, 400);
@@ -61,6 +65,7 @@ public class PolicyManagerJDialog extends JDialog {
 	 */
 	public void init(){
 		initPolicyType();
+		policyList = cds.getAllPolicyVO();
 		this.setTitle("策略管理");
 		this.setLayout(new BorderLayout());
 		this.add(getJPanelSouth(),BorderLayout.SOUTH);
@@ -90,12 +95,31 @@ public class PolicyManagerJDialog extends JDialog {
 		return jScrollPane;
 	}
 	
+	/**
+	 * add policy
+	 */
 	public void addPolicyBtnHandle(){
 		PolicyVO addPolicy = new PolicyVO();
 		PolicyDialog policyDialog = new PolicyDialog(this,"增加策略",addPolicy,"add");
 		policyDialog.setLocationRelativeTo(getJScrollPane());
 		policyDialog.setVisible(true);
 		policyDialog.setResizable(false);
+	}
+	
+	/**
+	 * edit policy
+	 */
+	public void editPolicyBtnHandle(){
+		if(jtable.getSelectedRow()!=-1){
+			PolicyVO editPolicy = pmtm.getPolicyVOByRow(jtable.getSelectedRow());
+			PolicyDialog policyDialog = new PolicyDialog(this,"编辑策略",editPolicy,"edit");
+			policyDialog.setLocationRelativeTo(getJScrollPane());
+			policyDialog.setVisible(true);
+			policyDialog.setResizable(false);
+		}else{
+			JOptionPane.showMessageDialog(jtable, "请选择一条策略数据！");
+		}
+		
 	}
 	
 	public JPanel getJPanelSouth(){
@@ -113,6 +137,7 @@ public class PolicyManagerJDialog extends JDialog {
 			editBtn.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
+					editPolicyBtnHandle();
 				}
 			});
 			deleteBtn = new JButton("删除策略");
@@ -125,7 +150,12 @@ public class PolicyManagerJDialog extends JDialog {
 			saveBtn.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					
+					boolean ret = cds.savePolicyVOList(policyList);
+					if(ret){
+						JOptionPane.showMessageDialog(jScrollPane, "策略保存成功！");
+					}else{
+						JOptionPane.showMessageDialog(jScrollPane, "策略保存失败！");
+					}
 				}
 			});
 			addBtn.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 13));

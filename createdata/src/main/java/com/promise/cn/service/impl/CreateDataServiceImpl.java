@@ -22,6 +22,7 @@ import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 
 import com.promise.cn.service.CreateDataService;
+import com.promise.cn.util.CreateDataUtil;
 import com.promise.cn.vo.DataConnectConfigVO;
 import com.promise.cn.vo.PolicyVO;
 import com.promise.cn.vo.TableConfigVO;
@@ -209,6 +210,55 @@ public class CreateDataServiceImpl implements CreateDataService {
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+	/**
+	 * 获取所有的策略文件
+	 */
+	@Override
+	public List<PolicyVO> getAllPolicyVO() {
+		List<PolicyVO> policyList = new ArrayList<PolicyVO>();
+		 SAXReader reader = new SAXReader();
+		 String filePath = CreateDataServiceImpl.class.getResource("/policy.xml").getPath();
+        try {
+			Document  document = reader.read(new File(filePath));
+			Element rootElm = document.getRootElement();
+			List nodes = rootElm.elements("policy");
+			for (Iterator it = nodes.iterator(); it.hasNext();) {
+				   Element elm = (Element) it.next();
+				   String name = elm.elementText("name");
+				   String type = elm.elementText("type");
+				   PolicyVO policyTemp = new PolicyVO();
+				   policyTemp.setName(name);
+				   policyTemp.setType(type);
+				   if(type.equals(CreateDataUtil.RANDOMDOUBLE_AB)){
+						String initValue = elm.elementText("initValue");
+						String endValue = elm.elementText("endValue");
+						String numberDecimal = elm.elementText("numberDecimal");
+						policyTemp.setInitValue(initValue);
+						policyTemp.setEndValue(endValue);
+						policyTemp.setNumberDecimal(numberDecimal);
+				   }else if(type.equals(CreateDataUtil.RANDOMINT_AB)){
+						String initValue = elm.elementText("initValue");
+						String endValue = elm.elementText("endValue");
+						policyTemp.setInitValue(initValue);
+						policyTemp.setEndValue(endValue);
+					}else if(type.equals(CreateDataUtil.RANDOMSTRING)){
+						String value = elm.elementText("value");
+						String siteStr = elm.elementText("siteStr");
+						String strLength = elm.elementText("strLength");
+						policyTemp.setValue(value);
+						policyTemp.setSiteStr(siteStr);
+						policyTemp.setStrLength(strLength);
+					}
+				   policyList.add(policyTemp);
+				}
+
+		} catch (DocumentException e) {
+			e.printStackTrace();
+		}
+
+		return policyList;
 	}
 
 }

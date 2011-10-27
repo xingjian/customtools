@@ -330,7 +330,7 @@ public class CreateDataMainApplication {
 
 	private PolicyManagerJDialog getPolicyManagerJDialog(){
 		if(pmd==null){
-			pmd = new PolicyManagerJDialog();
+			pmd = new PolicyManagerJDialog(cds);
 		}
 		return pmd;
 	}

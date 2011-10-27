@@ -109,7 +109,7 @@ public class PolicyVO {
 		StringBuffer sb = new StringBuffer();
 		sb.append("	 <policy>"+"\n");
 		sb.append("			<name>"+name+"</name>"+"\n");
-		sb.append("			<userName>"+type+"</userName>"+"\n");
+		sb.append("			<type>"+type+"</type>"+"\n");
 		if(type.equals(CreateDataUtil.RANDOMDOUBLE_AB)){
 			sb.append("			<initValue>"+initValue+"</initValue>"+"\n");
 			sb.append("			<endValue>"+endValue+"</endValue>"+"\n");

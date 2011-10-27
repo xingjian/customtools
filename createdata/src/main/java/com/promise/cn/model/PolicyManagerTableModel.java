@@ -58,7 +58,7 @@ public class PolicyManagerTableModel implements TableModel {
 		if(rowIndex==-1){
 			return false;
 		}else{
-			return true;
+			return false;
 		}
 	}
 
@@ -67,6 +67,16 @@ public class PolicyManagerTableModel implements TableModel {
 	 */
 	public void deleteSelectRow(int rowIndex){
 		policyVOList.remove(rowIndex);
+	}
+	
+	/**
+	 * 通过rowIndex返回DataConnectConfigVO
+	 * @param rowIndex
+	 * @return
+	 */
+	public PolicyVO getPolicyVOByRow(int rowIndex) {
+		PolicyVO policyVO = policyVOList.get(rowIndex);
+		return policyVO;
 	}
 	
 	@Override

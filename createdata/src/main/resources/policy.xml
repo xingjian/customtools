@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<policys>
+	 <policy>
+			<name>1111</name>
+			<type>randomDouble[a,b]</type>
+			<initValue>100</initValue>
+			<endValue>1</endValue>
+			<numberDecimal>4</numberDecimal>
+	 </policy>
+	 <policy>
+			<name>2222</name>
+			<type>randomInt[a,b]</type>
+			<initValue>200</initValue>
+			<endValue>100</endValue>
+	 </policy>
+	 <policy>
+			<name>3333</name>
+			<type>randomString</type>
+			<value>dhcc</value>
+			<siteStr>append_left</siteStr>
+			<strLength>32</strLength>
+	 </policy>
+</policys>

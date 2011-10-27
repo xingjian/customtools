@@ -47,7 +47,7 @@ public class PolicyDialog extends JDialog{
 	public JLabel label1_jp3,label2_jp3,label3_jp3;
 	public JTextField strJTextField,lengthJTextField;
 	public String[] siteJComboBoxItems = new String[2];
-	public JComboBox siteJComboBox = new JComboBox(siteJComboBoxItems);
+	public JComboBox siteJComboBox = null;
 	public PolicyManagerJDialog pmjd;
 	public String status;
 	
@@ -67,6 +67,7 @@ public class PolicyDialog extends JDialog{
 	public void initData(){
 		siteJComboBoxItems[0] = CreateDataUtil.SITETYPE_LEFT;
 		siteJComboBoxItems[1] = CreateDataUtil.SITETYPE_RIGHT;
+		siteJComboBox = new JComboBox(siteJComboBoxItems);
 	}
 	
 	/**
@@ -80,10 +81,23 @@ public class PolicyDialog extends JDialog{
 		this.add(getSouthPanel(),BorderLayout.SOUTH);
 		if(policyVO.getType()==null){
 			jcb.setSelectedIndex(0);
-		}else if(policyVO.getType().equals("randomInt[a,b]")){
+		}else if(policyVO.getType().equals(CreateDataUtil.RANDOMINT_AB)){
 			jcb.setSelectedIndex(1);
-		}else if(policyVO.getType().equals("randomString")){
+			textField.setText(policyVO.getName());
+			minTextField_jp1.setText(policyVO.getInitValue());
+			maxTextField_jp1.setText(policyVO.getEndValue());
+		}else if(policyVO.getType().equals(CreateDataUtil.RANDOMSTRING)){
 			jcb.setSelectedIndex(2);
+			textField.setText(policyVO.getName());
+			strJTextField.setText(policyVO.getValue());
+			lengthJTextField.setText(policyVO.getStrLength());
+			siteJComboBox.setSelectedItem(policyVO.getSiteStr());
+		}else if(policyVO.getType().equals(CreateDataUtil.RANDOMDOUBLE_AB)){
+			jcb.setSelectedIndex(0);
+			textField.setText(policyVO.getName());
+			minTextField_jp2.setText(policyVO.getInitValue());
+			maxTextField_jp2.setText(policyVO.getEndValue());
+			countTextField.setText(policyVO.getNumberDecimal());
 		}
 		
 	}

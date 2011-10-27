@@ -57,4 +57,8 @@ public interface CreateDataService {
 	 * 批量保存策略
 	 */
 	public boolean savePolicyVOList(List<PolicyVO> policyVOList);
+	/**
+	 * 批量获取策略
+	 */
+	public List<PolicyVO> getAllPolicyVO();
 }
