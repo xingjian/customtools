@@ -144,6 +144,13 @@ public class PolicyManagerJDialog extends JDialog {
 			deleteBtn.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
+					if(jtable.getSelectedRow()!=-1){
+						pmtm.deleteSelectRow(jtable.getSelectedRow());
+						if(pmtm.policyVOList.size()>0){
+							jtable.addRowSelectionInterval(0, 0);
+						}
+						jtable.updateUI();
+					}
 				}
 			});
 			saveBtn = new JButton("保存策略");

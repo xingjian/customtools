@@ -157,6 +157,18 @@ public class DataSourceManagerJDialog extends JDialog {
 		if(deleteConnect_JButton == null){
 			deleteConnect_JButton = new JButton("删除连接");
 			deleteConnect_JButton.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 13));
+			deleteConnect_JButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if(jTable.getSelectedRow()!=-1){
+						tableModel.deleteSelectRow(jTable.getSelectedRow());
+						if(tableModel.dccList.size()>0){
+							jTable.addRowSelectionInterval(0, 0);
+						}
+						jTable.updateUI();
+					}
+				}
+			});
 		}
 		return deleteConnect_JButton;
 	}

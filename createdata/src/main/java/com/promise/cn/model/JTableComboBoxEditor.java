@@ -17,5 +17,5 @@ public class JTableComboBoxEditor extends DefaultCellEditor {
 	public JTableComboBoxEditor(String[] items) {
 		super(new JComboBox(items));
 	}
-
+	
 }

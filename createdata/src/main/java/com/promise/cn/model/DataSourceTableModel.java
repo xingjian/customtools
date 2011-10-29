@@ -47,6 +47,10 @@ public class DataSourceTableModel implements TableModel {
 		return String.class;
 	}
 
+	public void deleteSelectRow(int rowIndex){
+		dccList.remove(rowIndex);
+	}
+	
 	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
 		return false;

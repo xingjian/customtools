@@ -74,11 +74,7 @@ public class TableConfigVOModel implements TableModel {
 		}else if(columnIndex==1){
 			retStr = dccTemp.getType();
 		}else if(columnIndex==2){
-			retStr = dccTemp.getInitValue();
-		}else if(columnIndex==3){
-			retStr = dccTemp.getStep();
-		}else if(columnIndex==4){
-			retStr = dccTemp.getEndValue();
+			retStr = dccTemp.getPolicyName();
 		}
 		return retStr;
 	}
@@ -91,11 +87,7 @@ public class TableConfigVOModel implements TableModel {
 		}else if(columnIndex==1){
 			dccTemp.setType(aValue.toString());
 		}else if(columnIndex==2){
-			dccTemp.setInitValue(aValue.toString());
-		}else if(columnIndex==3){
-			dccTemp.setStep(aValue.toString());
-		}else if(columnIndex==4){
-			dccTemp.setEndValue(aValue.toString());
+			dccTemp.setPolicyName(aValue.toString());
 		}
 	}
 

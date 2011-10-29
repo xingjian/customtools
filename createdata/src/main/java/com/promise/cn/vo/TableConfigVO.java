@@ -18,7 +18,14 @@ public class TableConfigVO {
 	private String step;
 	private String endValue;
 	private String tableName;
+	private String policyName;
 	
+	public String getPolicyName() {
+		return policyName;
+	}
+	public void setPolicyName(String policyName) {
+		this.policyName = policyName;
+	}
 	public String getTableName() {
 		return tableName;
 	}

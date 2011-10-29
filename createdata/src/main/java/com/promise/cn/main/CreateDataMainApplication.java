@@ -23,6 +23,7 @@ import com.promise.cn.service.CreateDataService;
 import com.promise.cn.service.impl.CreateDataServiceImpl;
 import com.promise.cn.util.CreateDataUtil;
 import com.promise.cn.vo.DataConnectConfigVO;
+import com.promise.cn.vo.PolicyVO;
 import com.promise.cn.vo.TableConfigVO;
 
 /**   
@@ -55,6 +56,7 @@ public class CreateDataMainApplication {
 	private CreateDataService cds = new CreateDataServiceImpl();
 	private TableConfigPanel tcp = null;
 	private PolicyManagerJDialog pmd = null;
+	public List<PolicyVO> policyList = new ArrayList<PolicyVO>();
 	/**
 	 * @param args
 	 */
@@ -90,6 +92,7 @@ public class CreateDataMainApplication {
 	}
 
 	private void initData(){
+		policyList = cds.getAllPolicyVO();
 		tableData = cds.getAllDataConnectConfigVO();
 	}
 	
@@ -103,8 +106,7 @@ public class CreateDataMainApplication {
 	
 	public TableConfigPanel getTableConfigPanel(){
 		if(tcp==null){
-			tcp = new TableConfigPanel(this);
-			tcp.cds = cds;
+			tcp = new TableConfigPanel(this,cds);
 		}
 		return tcp;
 	}

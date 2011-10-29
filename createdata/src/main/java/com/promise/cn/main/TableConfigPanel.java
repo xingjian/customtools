@@ -8,6 +8,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -21,9 +22,11 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.TitledBorder;
 
+import com.promise.cn.model.JTableComboBoxEditor;
 import com.promise.cn.model.TableConfigVOModel;
 import com.promise.cn.service.CreateDataService;
 import com.promise.cn.util.CreateDataUtil;
+import com.promise.cn.vo.PolicyVO;
 import com.promise.cn.vo.TableConfigVO;
 
 /**   
@@ -48,9 +51,12 @@ public class TableConfigPanel extends JPanel {
 	private JFileChooser jfc=new JFileChooser();//文件选择器 
 	public CreateDataService cds;
 	public CreateDataMainApplication cdma;
+	public List<PolicyVO> policyList = new ArrayList<PolicyVO>();
 	
-	public TableConfigPanel(CreateDataMainApplication cdma){
+	public TableConfigPanel(CreateDataMainApplication cdma,CreateDataService cds){
 		this.cdma = cdma;
+		this.cds = cds;
+		this.policyList = cdma.policyList;
 		initPanel();
 	}
 	
@@ -85,12 +91,27 @@ public class TableConfigPanel extends JPanel {
 			jtable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 	        //设置列不可拖动
 			jtable.getTableHeader().setReorderingAllowed(false);
+			jtable.getColumnModel().getColumn(2).setCellEditor(new JTableComboBoxEditor(getNewPolicyList()));
 			jScrollPane.setViewportView(jtable);
 			jpanelCenter.add(jScrollPane,BorderLayout.CENTER);
 			jpanelCenter.add(getJpanelCenter_South(),BorderLayout.SOUTH);
 		}
 		return jpanelCenter;
 	}
+	
+	/**
+	 * 获取最新策略
+	 */
+	public String[] getNewPolicyList(){
+		List<PolicyVO> listTemp = cds.getAllPolicyVO();
+		System.out.println(listTemp.size());
+		String[] retString = new String[listTemp.size()];
+		for(int i=0;i<listTemp.size();i++){
+			retString[i]=listTemp.get(i).getName();
+		}
+		return retString;
+	}
+	
 	
 	/**
 	 *弹出路径窗口 
@@ -173,6 +194,7 @@ public class TableConfigPanel extends JPanel {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					TableConfigVO tcvTemp = new TableConfigVO();
+					tcvTemp.setPolicyName(policyList.get(0).getName());
 					tableConfigVOList.add(tcvTemp);
 					jtable.updateUI();
 				}
