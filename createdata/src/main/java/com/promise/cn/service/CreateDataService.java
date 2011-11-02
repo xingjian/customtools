@@ -65,4 +65,8 @@ public interface CreateDataService {
 	 * 通过Name返回PolicyVO
 	 */
 	public PolicyVO getPolicyByName(String name,List<PolicyVO> list);
+	/**
+	 * 通过数据源获取表
+	 */
+	public List<String> getTablesByDataSource(DataConnectConfigVO dccv);
 }

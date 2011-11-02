@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -21,7 +22,7 @@ import com.promise.cn.vo.DataConnectConfigVO;
 /**   
  * @类名: DataSourceVOView.java 
  * @包名: com.promise.cn.main 
- * @描述: TODO(用一句话描述该文件做什么) 
+ * @描述: 数据源界面 
  * @作者: 邢健 xingjian@dhcc.com.cn   
  * @日期: 2011-10-21 上午10:25:26 
  * @版本 V1.0   
@@ -30,7 +31,7 @@ public class DataSourceVOView extends JDialog {
 	private DataConnectConfigVO dcc;
 	private JButton okBtn = new JButton("确定");
 	private JButton exitBtn = new JButton("取消");
-	private JPanel centerPanel = new JPanel(new GridLayout(5,2));
+	private JPanel centerPanel = new JPanel(new GridLayout(6,2));
 	private JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 	private JLabel nameLabel = new JLabel("Name：");
 	private JLabel userNameLabel = new JLabel("UserName：");
@@ -43,16 +44,31 @@ public class DataSourceVOView extends JDialog {
 	private JTextField driverClassNameText = new JTextField();
 	private JTextField urlText = new JTextField();
 	public DataEventManager dataEventManager = null;
-
+	public JLabel typeJLabel = new JLabel("type");
+	public String[] typesJComboBoxItems = new String[5];
+	public JComboBox typeJComboBox = null;
 	/**
 	 * 构造函数
 	 */
 	public DataSourceVOView() {
+		initData();
 		init();
 		initBtnEvent();
 		this.setModal(true);
 	}
 
+	/**
+	 * 初始化数据
+	 */
+	public void initData(){
+		typesJComboBoxItems[0] = CreateDataUtil.DATABASETYPE_ORACLE;
+		typesJComboBoxItems[1] = CreateDataUtil.DATABASETYPE_MYSQL;
+		typesJComboBoxItems[2] = CreateDataUtil.DATABASETYPE_POSTGRESQL;
+		typesJComboBoxItems[3] = CreateDataUtil.DATABASETYPE_SQLSERVER;
+		typesJComboBoxItems[4] = CreateDataUtil.DATABASETYPE_DB2;
+		typeJComboBox = new JComboBox(typesJComboBoxItems);
+	}
+	
 	public void initBtnEvent(){
 		okBtn.addActionListener(new ActionListener() {
 			@Override

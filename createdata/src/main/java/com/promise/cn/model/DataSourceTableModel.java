@@ -11,7 +11,7 @@ import com.promise.cn.vo.DataConnectConfigVO;
 /**   
  * @类名: DataSourceTableModel.java 
  * @包名: com.promise.cn.model 
- * @描述: TODO(用一句话描述该文件做什么) 
+ * @描述: 数据源连接 
  * @作者: 邢健 xingjian@dhcc.com.cn   
  * @日期: 2011-10-21 下午02:04:52 
  * @版本 V1.0   

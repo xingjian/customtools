@@ -23,6 +23,24 @@ public class CreateDataUtil {
 	public static String RANDOMSTRING = "randomString";
 	public static String SITETYPE_LEFT = "append_left";
 	public static String SITETYPE_RIGHT = "append_right";
+	public static String DATABASETYPE_ORACLE = "Oracle";
+	public static String DATABASETYPE_MYSQL = "MySQL";
+	public static String DATABASETYPE_SQLSERVER = "SQLServer";
+	public static String DATABASETYPE_POSTGRESQL = "PostgreSQL";
+	public static String DATABASETYPE_DB2 = "DB2";
+	
+	public static String JDBC_URL_ORACLE = "";
+	public static String JDBC_URL_MYSQL = "";
+	public static String JDBC_URL_SQLSERVER = "";
+	public static String JDBC_URL_DB2 = "";
+	public static String JDBC_URL_POSTGRESQL = "";
+	
+	public static String JDBC_DRIVERNAME_ORACLE = "oracle.jdbc.driver.OracleDriver";
+	public static String JDBC_DRIVERNAME_MYSQL = "com.mysql.jdbc.Driver";
+	public static String JDBC_DRIVERNAME_SQLSERVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+	public static String JDBC_DRIVERNAME_DB2 = "";
+	public static String JDBC_DRIVERNAME_POSTGRESQL = "org.postgresql.Driver";
+	
 	/**
 	 * 组件居中
 	 */

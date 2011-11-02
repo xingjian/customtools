@@ -19,6 +19,8 @@ public class DataConnectConfigVO {
 	
 	private String driverClassName;
 	
+	private String type;
+	
 	private String url;
 	//数据状态
 	private String status;
@@ -71,12 +73,21 @@ public class DataConnectConfigVO {
 		this.url = url;
 	}
 	
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+	
 	public String toString(){
 		StringBuffer sb = new StringBuffer();
 		sb.append("	 <datasource>"+"\n");
 		sb.append("			<name>"+name+"</name>"+"\n");
 		sb.append("			<userName>"+userName+"</userName>"+"\n");
 		sb.append("			<password>"+password+"</password>"+"\n");
+		sb.append("			<type>"+type+"</type>"+"\n");
 		sb.append("			<driverClassName>"+driverClassName+"</driverClassName>"+"\n");
 		sb.append("			<url>"+url+"</url>"+"\n");
 		sb.append("	 </datasource>"+"\n");
