@@ -52,7 +52,7 @@ public interface CreateDataService {
 	/**
 	 * 通过TableConfigVO集合创建sql,并写入指定文件
 	 */
-	public boolean createSqlByList(List<TableConfigVO> list,String path,String tableName,int count);
+	public boolean createInsertSqlByList(List<TableConfigVO> list,String path,String tableName,int count);
 	/**
 	 * 批量保存策略
 	 */
@@ -61,4 +61,8 @@ public interface CreateDataService {
 	 * 批量获取策略
 	 */
 	public List<PolicyVO> getAllPolicyVO();
+	/**
+	 * 通过Name返回PolicyVO
+	 */
+	public PolicyVO getPolicyByName(String name,List<PolicyVO> list);
 }

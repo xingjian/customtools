@@ -8,7 +8,6 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -39,7 +38,7 @@ import com.promise.cn.vo.TableConfigVO;
  */
 public class TableConfigPanel extends JPanel {
 
-	private JTable jtable = null;
+	public JTable jtable = null;
 	private TableConfigVOModel dtm = null;
 	private String[] tableHeader = {"字段名","类型","策略名称"};
 	private JScrollPane jScrollPane = new JScrollPane();
@@ -99,12 +98,17 @@ public class TableConfigPanel extends JPanel {
 		return jpanelCenter;
 	}
 	
+	
+	public void updateJTableColumn(){
+		jtable.getColumnModel().getColumn(2).setCellEditor(new JTableComboBoxEditor(getNewPolicyList()));
+		jtable.updateUI();
+	}
+	
 	/**
 	 * 获取最新策略
 	 */
 	public String[] getNewPolicyList(){
 		List<PolicyVO> listTemp = cds.getAllPolicyVO();
-		System.out.println(listTemp.size());
 		String[] retString = new String[listTemp.size()];
 		for(int i=0;i<listTemp.size();i++){
 			retString[i]=listTemp.get(i).getName();
@@ -131,10 +135,10 @@ public class TableConfigPanel extends JPanel {
 			if(sqlTextPathTextField.getText().trim().equals("")){
 				JOptionPane.showMessageDialog(this, "请选择sql语句保存路径文件！");
 			}else{
-				cdma.createSqlByList(dtm.tcVOList, sqlTextPathTextField.getText());
+				cdma.createInsertSqlByList(dtm.tcVOList, sqlTextPathTextField.getText(),policyList);
 			}
 		}else{
-			cdma.createSqlByList(dtm.tcVOList, sqlTextPathTextField.getText());
+			cdma.createInsertSqlByList(dtm.tcVOList, sqlTextPathTextField.getText(),policyList);
 		}
 	}
 	
@@ -155,7 +159,7 @@ public class TableConfigPanel extends JPanel {
 					showJSCDialog();
 				}
 			});
-			okBtn = new JButton("生成SQL并提交");
+			okBtn = new JButton("生成SQL文件");
 			okBtn.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
 			okBtn.addActionListener(new ActionListener() {
 				@Override

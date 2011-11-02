@@ -113,13 +113,13 @@ public class CreateDataUtil {
         String str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";  
         Random random = new Random();  
         StringBuffer sb = new StringBuffer();
-        if(position=="left"){
+        if(position.equals(SITETYPE_LEFT)){
         	sb.append(baseStr);
         	for(int i = baseStr.length() ; i < length; ++i){  
                 int number = random.nextInt(62);  
                 sb.append(str.charAt(number));  
             } 
-        }else if(position=="right"){
+        }else if(position.equals(SITETYPE_RIGHT)){
         	for(int i = 0 ; i < length - baseStr.length(); ++i){  
                 int number = random.nextInt(62);  
                 sb.append(str.charAt(number));  

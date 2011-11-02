@@ -43,10 +43,11 @@ public class PolicyManagerJDialog extends JDialog {
 	private PolicyManagerTableModel pmtm = null;
 	public List<PolicyVO> policyList = new ArrayList<PolicyVO>();
 	public CreateDataService cds = null;
+	public CreateDataMainApplication cdma;
 	
-	
-	public PolicyManagerJDialog(CreateDataService cds){
+	public PolicyManagerJDialog(CreateDataService cds,CreateDataMainApplication cdma){
 		this.cds = cds;
+		this.cdma = cdma;
 		init();
 		this.setIconImage(CreateDataUtil.getImage("../images/tubiao.png"));
 		this.setSize(600, 400);
@@ -159,6 +160,7 @@ public class PolicyManagerJDialog extends JDialog {
 				public void actionPerformed(ActionEvent e) {
 					boolean ret = cds.savePolicyVOList(policyList);
 					if(ret){
+						cdma.getTableConfigPanel().updateJTableColumn();
 						JOptionPane.showMessageDialog(jScrollPane, "策略保存成功！");
 					}else{
 						JOptionPane.showMessageDialog(jScrollPane, "策略保存失败！");

@@ -158,7 +158,9 @@ public class CreateDataServiceImpl implements CreateDataService {
 	 * 通过
 	 */
 	@Override
-	public boolean createSqlByList(List<TableConfigVO> list, String path,String tableName,int count) {
+	public boolean createInsertSqlByList(List<TableConfigVO> list, String path,String tableName,int count) {
+		boolean retBoolean = true;
+		List<PolicyVO> listPolicy = getAllPolicyVO();
 		File file  = null;
 		FileOutputStream fos = null;
 		FileChannel outputChannel = null;
@@ -171,19 +173,31 @@ public class CreateDataServiceImpl implements CreateDataService {
 			}   
 			outputChannel = fos.getChannel();   
 		}
-		
-		for(Iterator<TableConfigVO> iterator = list.iterator();iterator.hasNext();){
-			TableConfigVO tcvTemp = iterator.next();
-			tcvTemp.setTableName(tableName);
-			ByteBuffer bb = ByteBuffer.wrap("test".getBytes());   
+		/**insert into tableName values('a','b','c')**/
+		for(int i=0;i<count;i++){
+			String insertSql = "insert into "+tableName+" values(";
+			for(Iterator<TableConfigVO> iterator = list.iterator();iterator.hasNext();){
+				TableConfigVO tcvTemp = iterator.next();
+				PolicyVO pTemp= getPolicyByName(tcvTemp.getPolicyName(),listPolicy);
+				if(pTemp.getType().equals(CreateDataUtil.RANDOMDOUBLE_AB)){
+					insertSql = insertSql+"'"+CreateDataUtil.getRandomDouble(Double.parseDouble(pTemp.getInitValue()), Double.parseDouble(pTemp.getEndValue()), Integer.parseInt(pTemp.getNumberDecimal()))+"',";
+				}else if(pTemp.getType().equals(CreateDataUtil.RANDOMINT_AB)){
+					insertSql = insertSql+"'"+CreateDataUtil.getRandomInt(Integer.parseInt(pTemp.getInitValue()), Integer.parseInt(pTemp.getEndValue()))+"',";
+				}else if(pTemp.getType().equals(CreateDataUtil.RANDOMSTRING)){
+					insertSql = insertSql+"'"+CreateDataUtil.getRandomString(pTemp.getValue(), Integer.parseInt(pTemp.getStrLength()), pTemp.getSiteStr())+"',";
+				}
+			}
+			insertSql = insertSql.substring(0, insertSql.length()-1);
+			insertSql = insertSql+");"+"\r\n";
+			ByteBuffer bb = ByteBuffer.wrap(insertSql.getBytes());   
 			try {
 				outputChannel.write(bb);
 			} catch (IOException e) {
+				retBoolean = false;
 				e.printStackTrace();
 			}
 		}
-		
-		return false;
+		return retBoolean;
 	}
 
 	/**
@@ -261,4 +275,18 @@ public class CreateDataServiceImpl implements CreateDataService {
 		return policyList;
 	}
 
+	/**
+	 * 通过name获取policyvo
+	 */
+	public PolicyVO getPolicyByName(String name,List<PolicyVO> list){
+		PolicyVO policy = null;
+		for(Iterator<PolicyVO> iter = list.iterator();iter.hasNext();){
+			PolicyVO p = iter.next();
+			if(p.getName().equals(name)){
+				policy = p;
+				break;
+			}
+		}
+		return policy;
+	}
 }

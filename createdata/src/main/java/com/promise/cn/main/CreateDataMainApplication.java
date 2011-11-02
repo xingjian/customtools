@@ -15,6 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -116,10 +117,15 @@ public class CreateDataMainApplication {
 	 * @param list
 	 * @param path
 	 */
-	public void createSqlByList(List<TableConfigVO> list,String path){
+	public void createInsertSqlByList(List<TableConfigVO> list,String path,List<PolicyVO> listPolicy){
 		String tableName = dcp.jTextFieldTableName.getText();
 		int count  = Integer.parseInt(dcp.jTextFieldDataCount.getText());
-		cds.createSqlByList(list, path,tableName,count);
+		boolean success = cds.createInsertSqlByList(list, path,tableName,count);
+		String message = "Sql文件生成成功！";
+		if(!success){
+			message = "Sql文件生成失败！";
+		}
+		JOptionPane.showMessageDialog(jContentPane, message, "提示信息",JOptionPane.DEFAULT_OPTION);
 	}
 	
 	/**
@@ -332,7 +338,7 @@ public class CreateDataMainApplication {
 
 	private PolicyManagerJDialog getPolicyManagerJDialog(){
 		if(pmd==null){
-			pmd = new PolicyManagerJDialog(cds);
+			pmd = new PolicyManagerJDialog(cds,this);
 		}
 		return pmd;
 	}

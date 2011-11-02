@@ -158,9 +158,9 @@ public class PolicyDialog extends JDialog{
 		if(jp1==null){
 			jp1 = new JPanel(new GridLayout(2,1));
 			jp1.setBorder(new TitledBorder(null,"随机策略Int",TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12),Color.BLUE));
-			label1_jp1 = new JLabel("最大值:");
+			label1_jp1 = new JLabel("最小值:");
 			label1_jp1.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
-			label2_jp1 = new JLabel("最小值:");
+			label2_jp1 = new JLabel("最大值:");
 			label2_jp1.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
 			maxTextField_jp1 = new JTextField(10);
 			minTextField_jp1 = new JTextField(10);
@@ -180,9 +180,9 @@ public class PolicyDialog extends JDialog{
 		if(jp2==null){
 			jp2 = new JPanel(new GridLayout(3,1));
 			jp2.setBorder(new TitledBorder(null,"随机策略Double",TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12),Color.BLUE));
-			label1_jp2 = new JLabel("最大值:");
+			label1_jp2 = new JLabel("最小值:");
 			label1_jp2.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
-			label2_jp2 = new JLabel("最小值:");
+			label2_jp2 = new JLabel("最大值:");
 			label2_jp2.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
 			label3_jp2 = new JLabel("小数位:");
 			label3_jp2.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
