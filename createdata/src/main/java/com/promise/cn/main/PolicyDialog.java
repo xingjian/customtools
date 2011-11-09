@@ -15,6 +15,7 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
@@ -31,9 +32,11 @@ import com.promise.cn.vo.PolicyVO;
  */
 public class PolicyDialog extends JDialog{
 
-	public JPanel jp1,jp2,jp3,northPanel,centerPanel,southPanel;
+	public JPanel jp1,jp2,jp3,jp4,jp5,jp6,jp7,northPanel,centerPanel,southPanel;
 	public PolicyVO policyVO;
 	private JComboBox jcb;
+	private JComboBox jcb_jp5;
+	private JComboBox jcb_jp6;
 	private String[] policyType; 
 	public JLabel label1 = new JLabel("策略名称:");
 	public JTextField textField = new JTextField(10);
@@ -45,8 +48,16 @@ public class PolicyDialog extends JDialog{
 	public JLabel label1_jp2,label2_jp2,label3_jp2;
 	public JTextField maxTextField_jp2,minTextField_jp2,countTextField;
 	public JLabel label1_jp3,label2_jp3,label3_jp3;
+	public JLabel label1_jp4;
+	public JLabel label1_jp5,label2_jp5,label3_jp5;
+	public JTextField jtf1_jp5,jtf2_jp5,jtf3_jp5;
+	public JLabel label1_jp6,label2_jp6,label3_jp6;
+	public JTextField jtf1_jp6,jtf2_jp6,jtf3_jp6;
+	public JTextArea jta_jp4;
 	public JTextField strJTextField,lengthJTextField;
 	public String[] siteJComboBoxItems = new String[2];
+	public String[] jcbItems_jp5 = new String[2];
+	public String[] jcbItems_jp6 = new String[2];
 	public JComboBox siteJComboBox = null;
 	public PolicyManagerJDialog pmjd;
 	public String status;
@@ -68,6 +79,12 @@ public class PolicyDialog extends JDialog{
 		siteJComboBoxItems[0] = CreateDataUtil.SITETYPE_LEFT;
 		siteJComboBoxItems[1] = CreateDataUtil.SITETYPE_RIGHT;
 		siteJComboBox = new JComboBox(siteJComboBoxItems);
+		jcbItems_jp5[0] = CreateDataUtil.DESCENDTYPE_ASC;
+		jcbItems_jp5[1] = CreateDataUtil.DESCENDTYPE_DESC;
+		jcb_jp5 = new JComboBox(jcbItems_jp5);
+		jcbItems_jp6[0] = CreateDataUtil.DESCENDTYPE_ASC;
+		jcbItems_jp5[1] = CreateDataUtil.DESCENDTYPE_DESC;
+		jcb_jp6 = new JComboBox(jcbItems_jp6);
 	}
 	
 	/**
@@ -154,6 +171,7 @@ public class PolicyDialog extends JDialog{
 		return southPanel;
 	}
 	
+	//随机策略Int
 	public JPanel getJPanel_One(){
 		if(jp1==null){
 			jp1 = new JPanel(new GridLayout(2,1));
@@ -176,6 +194,7 @@ public class PolicyDialog extends JDialog{
 		return jp1;
 	}
 	
+	//随机策略Double
 	public JPanel getJPanel_Two(){
 		if(jp2==null){
 			jp2 = new JPanel(new GridLayout(3,1));
@@ -205,6 +224,7 @@ public class PolicyDialog extends JDialog{
 		return jp2;
 	}
 	
+	//随机策略String
 	public JPanel getJPanel_Three(){
 		if(jp3==null){
 			jp3 = new JPanel(new GridLayout(3,1));
@@ -233,6 +253,82 @@ public class PolicyDialog extends JDialog{
 		return jp3;
 	}
 	
+	//固定字符串
+	public JPanel getJPanel_Four(){
+		if(jp4==null){
+			jp4 = new JPanel(new BorderLayout());
+			jp4.setBorder(new TitledBorder(null,"固定数值或字符串",TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12),Color.BLUE));
+			label1_jp4 = new JLabel("固定数值(多个值使用逗号分开):");
+			label1_jp4.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			jta_jp4 = new JTextArea();
+			jp4.add(label1_jp4,BorderLayout.NORTH);
+			jp4.add(jta_jp4,BorderLayout.CENTER);
+		}
+		return jp4;
+	}
+	
+	//递增或递减Int
+	public JPanel getJPanel_Five(){
+		if(jp5==null){
+			jp5 = new JPanel(new GridLayout(3,1));
+			jp5.setBorder(new TitledBorder(null,"递增或递减(Int)",TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12),Color.BLUE));
+			JPanel jp5_temp1 = new JPanel();
+			JPanel jp5_temp2 = new JPanel();
+			JPanel jp5_temp3 = new JPanel();
+			jtf1_jp5 = new JTextField(10);
+			jtf2_jp5 = new JTextField(10);
+			jtf3_jp5 = new JTextField(10);
+			label1_jp5 = new JLabel("初始值:");
+			label2_jp5 = new JLabel("排序方式:");
+			label3_jp5 = new JLabel("步长值:");
+			label1_jp5.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			label2_jp5.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			label3_jp5.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			jcb_jp5.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			jp5_temp3.add(label3_jp5);
+			jp5_temp3.add(jtf3_jp5);
+			jp5_temp1.add(label1_jp5);
+			jp5_temp1.add(jtf1_jp5);
+			jp5_temp2.add(label2_jp5);
+			jp5_temp2.add(jcb_jp5);
+			jp5.add(jp5_temp1);
+			jp5.add(jp5_temp3);
+			jp5.add(jp5_temp2);
+		}
+		return jp5;
+	}
+	
+	//递增或递减double
+	public JPanel getJPanel_Six(){
+		if(jp6==null){
+			jp6 = new JPanel(new GridLayout(3,1));
+			jp6.setBorder(new TitledBorder(null,"递增或递减(Double)",TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12),Color.BLUE));
+			JPanel jp6_temp1 = new JPanel();
+			JPanel jp6_temp2 = new JPanel();
+			JPanel jp6_temp3 = new JPanel();
+			jtf1_jp6 = new JTextField(10);
+			jtf2_jp6 = new JTextField(10);
+			jtf3_jp6 = new JTextField(10);
+			label1_jp6 = new JLabel("初始值:");
+			label2_jp6 = new JLabel("排序方式:");
+			label3_jp6 = new JLabel("步长值:");
+			label1_jp6.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			label2_jp6.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			label3_jp6.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			jcb_jp6.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			jp6_temp3.add(label3_jp6);
+			jp6_temp3.add(jtf3_jp6);
+			jp6_temp1.add(label1_jp6);
+			jp6_temp1.add(jtf1_jp6);
+			jp6_temp2.add(label2_jp6);
+			jp6_temp2.add(jcb_jp6);
+			jp6.add(jp6_temp1);
+			jp6.add(jp6_temp3);
+			jp6.add(jp6_temp2);
+		}
+		return jp6;
+	}
+	
 	public JPanel getNorthPanel(){
 		if(northPanel==null){
 			jcb = new JComboBox(policyType);
@@ -247,6 +343,12 @@ public class PolicyDialog extends JDialog{
 							cardLayout.show(centerPanel, "jp1");
 						}else if(itemStr.equals(CreateDataUtil.RANDOMSTRING)){
 							cardLayout.show(centerPanel, "jp3");
+						}else if(itemStr.equals(CreateDataUtil.CONSTANTVALUE)){
+							cardLayout.show(centerPanel, "jp4");
+						}else if(itemStr.equals(CreateDataUtil.DESCEND_INT)){
+							cardLayout.show(centerPanel, "jp5");
+						}else if(itemStr.equals(CreateDataUtil.DESCEND_DOUBLE)){
+							cardLayout.show(centerPanel, "jp6");
 						}
 					}
 				}
@@ -275,6 +377,9 @@ public class PolicyDialog extends JDialog{
 			centerPanel.add("jp1", getJPanel_One());
 			centerPanel.add("jp2", getJPanel_Two());
 			centerPanel.add("jp3", getJPanel_Three());
+			centerPanel.add("jp4", getJPanel_Four());
+			centerPanel.add("jp5", getJPanel_Five());
+			centerPanel.add("jp6", getJPanel_Six());
 		}
 		return centerPanel;
 	}

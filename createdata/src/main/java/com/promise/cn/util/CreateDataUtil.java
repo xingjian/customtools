@@ -18,6 +18,11 @@ import java.util.Random;
  */
 public class CreateDataUtil {
 	
+	
+	public static String CONSTANTVALUE  = "constant value";
+	public static String DESCEND_INT = "descend_int";
+	public static String DESCEND_DOUBLE = "descend_double";
+	public static String DESCEND_DATE = "descend_date";
 	public static String RANDOMDOUBLE_AB = "randomDouble[a,b]";
 	public static String RANDOMINT_AB = "randomInt[a,b]";
 	public static String RANDOMSTRING = "randomString";
@@ -28,7 +33,8 @@ public class CreateDataUtil {
 	public static String DATABASETYPE_SQLSERVER = "SQLServer";
 	public static String DATABASETYPE_POSTGRESQL = "PostgreSQL";
 	public static String DATABASETYPE_DB2 = "DB2";
-	
+	public static String DESCENDTYPE_DESC = "--- 降序 ---";
+	public static String DESCENDTYPE_ASC = "--- 升序 ---";
 	public static String JDBC_URL_ORACLE = "";
 	public static String JDBC_URL_MYSQL = "";
 	public static String JDBC_URL_SQLSERVER = "";

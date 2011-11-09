@@ -30,7 +30,7 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<finalName>opengis_geoext</finalName>
+		<finalName>createdata</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

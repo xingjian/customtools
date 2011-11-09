@@ -39,7 +39,7 @@ public class PolicyManagerJDialog extends JDialog {
 	public CustomTable jtable = null;
 	private JButton addBtn,deleteBtn,editBtn,saveBtn;
 	private String[] jtableHeader = {"名称","类型"};
-	public String[] policyType = new String[3];
+	public String[] policyType = new String[7];
 	private PolicyManagerTableModel pmtm = null;
 	public List<PolicyVO> policyList = new ArrayList<PolicyVO>();
 	public CreateDataService cds = null;
@@ -58,6 +58,10 @@ public class PolicyManagerJDialog extends JDialog {
 		policyType[0] = CreateDataUtil.RANDOMDOUBLE_AB;
 		policyType[1] = CreateDataUtil.RANDOMINT_AB;
 		policyType[2] = CreateDataUtil.RANDOMSTRING;
+		policyType[3] = CreateDataUtil.CONSTANTVALUE;
+		policyType[4] = CreateDataUtil.DESCEND_INT;
+		policyType[5] = CreateDataUtil.DESCEND_DOUBLE;
+		policyType[6] = CreateDataUtil.DESCEND_DATE;
 	}
 	
 	
