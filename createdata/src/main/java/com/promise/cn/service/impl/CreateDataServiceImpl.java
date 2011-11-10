@@ -10,7 +10,13 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 
@@ -186,6 +192,64 @@ public class CreateDataServiceImpl implements CreateDataService {
 					insertSql = insertSql+"'"+CreateDataUtil.getRandomInt(Integer.parseInt(pTemp.getInitValue()), Integer.parseInt(pTemp.getEndValue()))+"',";
 				}else if(pTemp.getType().equals(CreateDataUtil.RANDOMSTRING)){
 					insertSql = insertSql+"'"+CreateDataUtil.getRandomString(pTemp.getValue(), Integer.parseInt(pTemp.getStrLength()), pTemp.getSiteStr())+"',";
+				}else if(pTemp.getType().equals(CreateDataUtil.CONSTANTVALUE)){
+					String value = pTemp.getValue();
+					String[] values = value.trim().split(",");
+					String tempValue = null;
+					if(values.length>1){
+						tempValue = values[CreateDataUtil.getRemainder(i, values.length)];
+					}else{
+						tempValue = value;
+					}
+					insertSql = insertSql+"'"+tempValue+"',";
+				}else if(pTemp.getType().equals(CreateDataUtil.DESCEND_INT)){
+					int temp = 0;
+					if(pTemp.isDesc()){
+						temp = Integer.parseInt(pTemp.getValue())+i*(Integer.parseInt(pTemp.getStepValue()));
+					}else{
+						temp = Integer.parseInt(pTemp.getValue())-i*(Integer.parseInt(pTemp.getStepValue()));
+					}
+					insertSql = insertSql+"'"+temp+"',";
+				}else if(pTemp.getType().equals(CreateDataUtil.DESCEND_DOUBLE)){
+					double temp = 0;
+					if(pTemp.isDesc()){
+						temp = Double.parseDouble(pTemp.getValue())+i*(Double.parseDouble(pTemp.getStepValue()));
+					}else{
+						temp = Double.parseDouble(pTemp.getValue())-i*(Double.parseDouble(pTemp.getStepValue()));
+					}
+					DecimalFormat dcmFmt = new DecimalFormat(CreateDataUtil.getDecimalPointFormat(Integer.parseInt(pTemp.getNumberDecimal())));
+					temp = Double.parseDouble(dcmFmt.format(temp));
+					insertSql = insertSql+"'"+temp+"',";
+				}else if(pTemp.getType().equals(CreateDataUtil.DESCEND_DATE)){
+					String temp = "";
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+					try {
+						Date startDate = sdf.parse(pTemp.getValue());
+						GregorianCalendar gc = new GregorianCalendar();
+						gc.setTime(startDate);
+						int stepValueDouble = Integer.parseInt(pTemp.getStepValue());
+						if(pTemp.isDesc()){
+							if(pTemp.getStepValueUnit().equals(CreateDataUtil.DATA_HOUR)){
+								gc.add(Calendar.HOUR, i*stepValueDouble);
+							}else if(pTemp.getStepValueUnit().equals(CreateDataUtil.DATA_MINUTE)){
+								gc.add(Calendar.MINUTE, i*stepValueDouble);
+							}else if(pTemp.getStepValueUnit().equals(CreateDataUtil.DATA_SECOND)){
+								gc.add(Calendar.SECOND, i*stepValueDouble);
+							}
+						}else{
+							if(pTemp.getStepValueUnit().equals(CreateDataUtil.UNIT_HOUR)){
+								gc.add(Calendar.HOUR, -i*stepValueDouble);
+							}else if(pTemp.getStepValueUnit().equals(CreateDataUtil.UNIT_MINUTE)){
+								gc.add(Calendar.MINUTE, -i*stepValueDouble);
+							}else if(pTemp.getStepValueUnit().equals(CreateDataUtil.UNIT_SECOND)){
+								gc.add(Calendar.SECOND, -i*stepValueDouble);
+							}
+						}
+						temp = sdf.format(gc.getTime());
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}
+					insertSql = insertSql+"'"+temp+"',";
 				}
 			}
 			insertSql = insertSql.substring(0, insertSql.length()-1);

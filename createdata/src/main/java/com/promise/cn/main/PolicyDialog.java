@@ -109,6 +109,9 @@ public class PolicyDialog extends JDialog{
 		jcb_jp6.setMaximumSize(new Dimension(135,20)); 
 		jcb_jp6.setMinimumSize(new Dimension(135,20)); 
 		jcb_jp6.setPreferredSize(new Dimension(135,20));
+		siteJComboBox.setMaximumSize(new Dimension(135,20)); 
+		siteJComboBox.setMinimumSize(new Dimension(135,20)); 
+		siteJComboBox.setPreferredSize(new Dimension(135,20));
 	}
 	
 	/**
@@ -173,6 +176,13 @@ public class PolicyDialog extends JDialog{
 				jcb_jp7.setSelectedItem(CreateDataUtil.DESCENDTYPE_ASC);
 			}else {
 				jcb_jp7.setSelectedItem(CreateDataUtil.DESCENDTYPE_DESC);
+			}
+			if(policyVO.getStepValueUnit().equals(CreateDataUtil.UNIT_HOUR)){
+				jcb_jp71.setSelectedItem(CreateDataUtil.DATA_HOUR);
+			}else if(policyVO.getStepValueUnit().equals(CreateDataUtil.UNIT_MINUTE)){
+				jcb_jp71.setSelectedItem(CreateDataUtil.DATA_MINUTE);
+			}if(policyVO.getStepValueUnit().equals(CreateDataUtil.UNIT_SECOND)){
+				jcb_jp71.setSelectedItem(CreateDataUtil.DATA_SECOND);
 			}
 			jcb_jp71.setSelectedItem(policyVO.getStepValueUnit());
 		}

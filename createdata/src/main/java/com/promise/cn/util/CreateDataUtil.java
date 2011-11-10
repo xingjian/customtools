@@ -26,8 +26,8 @@ public class CreateDataUtil {
 	public static String RANDOMDOUBLE_AB = "randomDouble[a,b]";
 	public static String RANDOMINT_AB = "randomInt[a,b]";
 	public static String RANDOMSTRING = "randomString";
-	public static String SITETYPE_LEFT = "----append_left----";
-	public static String SITETYPE_RIGHT = "----append_right----";
+	public static String SITETYPE_LEFT = "append_left";
+	public static String SITETYPE_RIGHT = "append_right";
 	public static String DATABASETYPE_ORACLE = "Oracle";
 	public static String DATABASETYPE_MYSQL = "MySQL";
 	public static String DATABASETYPE_SQLSERVER = "SQLServer";
@@ -158,6 +158,13 @@ public class CreateDataUtil {
         	sb.append(baseStr);
         }
         return sb.toString();  
+	}
+	
+	/**
+	 * 求余的方法
+	 */
+	public static int getRemainder(int a, int b){
+		return a%b;
 	}
 	
 }

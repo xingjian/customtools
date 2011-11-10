@@ -182,6 +182,12 @@ public class DataSourceManagerJDialog extends JDialog {
 		if(editConnect_JButton == null){
 			editConnect_JButton = new JButton("编辑连接");
 			editConnect_JButton.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 13));
+			editConnect_JButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					
+				}
+			});
 		}
 		return editConnect_JButton;
 	}

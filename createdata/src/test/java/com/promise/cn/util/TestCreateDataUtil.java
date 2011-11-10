@@ -64,4 +64,11 @@ public class TestCreateDataUtil extends TestCase {
 		}
 	}
 	
+	@Test
+	public void testGetRemainder(){
+		int b = 3;
+		for(int a=0;a<=100;a++){
+			System.out.println(CreateDataUtil.getRemainder(a,b));
+		}
+	}
 }
