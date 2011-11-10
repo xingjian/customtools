@@ -12,6 +12,7 @@ import javax.swing.JComboBox;
  * @日期: 2011-10-26 上午09:34:22 
  * @版本 V1.0   
  */
+@SuppressWarnings("all")
 public class JTableComboBoxEditor extends DefaultCellEditor {
 
 	public JTableComboBoxEditor(String[] items) {

@@ -13,6 +13,7 @@ import javax.swing.table.TableModel;
  * @日期: 2011-10-26 上午10:46:35 
  * @版本 V1.0   
  */
+@SuppressWarnings("all")
 public class CustomTable extends JTable {
 
 	public int row=-1,col=-1;

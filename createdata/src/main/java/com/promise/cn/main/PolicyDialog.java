@@ -31,6 +31,7 @@ import com.promise.cn.vo.PolicyVO;
  * @日期: 2011-10-25 下午03:05:36 
  * @版本 V1.0   
  */
+@SuppressWarnings("all")
 public class PolicyDialog extends JDialog{
 
 	public JPanel jp1,jp2,jp3,jp4,jp5,jp6,jp7,northPanel,centerPanel,southPanel;

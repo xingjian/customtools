@@ -13,6 +13,7 @@ import java.util.Iterator;
  * @日期: 2011-10-21 下午01:21:30 
  * @版本 V1.0   
  */
+@SuppressWarnings("all")
 public class DataEventManager {
 
 	private Collection listeners;

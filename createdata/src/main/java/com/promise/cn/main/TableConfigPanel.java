@@ -36,6 +36,7 @@ import com.promise.cn.vo.TableConfigVO;
  * @日期: 2011-10-24 下午02:44:13 
  * @版本 V1.0   
  */
+@SuppressWarnings("all")
 public class TableConfigPanel extends JPanel {
 
 	public JTable jtable = null;

@@ -11,6 +11,7 @@ import java.util.EventObject;
  * @日期: 2011-10-21 下午12:03:03 
  * @版本 V1.0   
  */
+@SuppressWarnings("all")
 public class DataEvent extends EventObject {
 
 	public Object data;

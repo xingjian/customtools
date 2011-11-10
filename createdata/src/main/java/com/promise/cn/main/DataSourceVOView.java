@@ -27,6 +27,7 @@ import com.promise.cn.vo.DataConnectConfigVO;
  * @日期: 2011-10-21 上午10:25:26 
  * @版本 V1.0   
  */
+@SuppressWarnings("all")
 public class DataSourceVOView extends JDialog {
 	private DataConnectConfigVO dcc;
 	private JButton okBtn = new JButton("确定");

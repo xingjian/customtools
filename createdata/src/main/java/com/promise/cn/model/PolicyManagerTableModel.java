@@ -6,9 +6,7 @@ import java.util.List;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
-import com.promise.cn.vo.DataConnectConfigVO;
 import com.promise.cn.vo.PolicyVO;
-import com.promise.cn.vo.TableConfigVO;
 
 /**   
  * @类名: PolicyManagerTableModel.java 
@@ -18,6 +16,7 @@ import com.promise.cn.vo.TableConfigVO;
  * @日期: 2011-10-26 上午09:41:06 
  * @版本 V1.0   
  */
+@SuppressWarnings("all")
 public class PolicyManagerTableModel implements TableModel {
 
 	public List<PolicyVO> policyVOList;

@@ -32,6 +32,7 @@ import com.promise.cn.vo.PolicyVO;
  * @日期: 2011-10-26 上午08:59:27 
  * @版本 V1.0   
  */
+@SuppressWarnings("all")
 public class PolicyManagerJDialog extends JDialog {
 
 	private JScrollPane jScrollPane = null;

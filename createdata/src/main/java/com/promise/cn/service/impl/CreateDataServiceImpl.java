@@ -35,6 +35,7 @@ import com.promise.cn.vo.TableConfigVO;
  * @日期: 2011-10-20 下午01:23:12 
  * @版本 V1.0   
  */
+@SuppressWarnings("all")
 public class CreateDataServiceImpl implements CreateDataService {
 
 	/**

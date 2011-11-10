@@ -37,6 +37,7 @@ import com.promise.cn.vo.DataConnectConfigVO;
  * @日期: 2011-10-20 下午04:52:21 
  * @版本 V1.0   
  */
+@SuppressWarnings("all")
 public class DataSourceManagerJDialog extends JDialog {
 
 	private JScrollPane jScrollPane = null;
