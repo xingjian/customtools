@@ -13,7 +13,6 @@ import com.promise.cn.util.CreateDataUtil;
  */
 public class PolicyVO {
 
-	//1 代表常量,2代表递增,3代表递减,4代表区间,5代表固定集合,6代表随机,7代表uuid
 	private String type;
 	
 	private String name;//名称
@@ -32,6 +31,27 @@ public class PolicyVO {
 	
 	private String numberDecimal ;//小数点位数
 	
+	private boolean desc;//是否递增 true 递增 false 递减
+	
+	private String stepValueUnit;//步长单位
+	
+	
+	public String getStepValueUnit() {
+		return stepValueUnit;
+	}
+
+	public void setStepValueUnit(String stepValueUnit) {
+		this.stepValueUnit = stepValueUnit;
+	}
+
+	public boolean isDesc() {
+		return desc;
+	}
+
+	public void setDesc(boolean desc) {
+		this.desc = desc;
+	}
+
 	public String getStrLength() {
 		return strLength;
 	}
@@ -121,6 +141,22 @@ public class PolicyVO {
 			sb.append("			<value>"+value+"</value>"+"\n");
 			sb.append("			<siteStr>"+siteStr+"</siteStr>"+"\n");
 			sb.append("			<strLength>"+strLength+"</strLength>"+"\n");
+		}else if(type.equals(CreateDataUtil.CONSTANTVALUE)){
+			sb.append("			<value>"+value+"</value>"+"\n");
+		}else if(type.equals(CreateDataUtil.DESCEND_INT)){
+			sb.append("			<value>"+value+"</value>"+"\n");
+			sb.append("			<stepValue>"+stepValue+"</stepValue>"+"\n");
+			sb.append("			<desc>"+desc+"</desc>"+"\n");
+		}else if(type.equals(CreateDataUtil.DESCEND_DOUBLE)){
+			sb.append("			<value>"+value+"</value>"+"\n");
+			sb.append("			<stepValue>"+stepValue+"</stepValue>"+"\n");
+			sb.append("			<desc>"+desc+"</desc>"+"\n");
+			sb.append("			<numberDecimal>"+numberDecimal+"</numberDecimal>"+"\n");
+		}else if(type.equals(CreateDataUtil.DESCEND_DATE)){
+			sb.append("			<value>"+value+"</value>"+"\n");
+			sb.append("			<stepValue>"+stepValue+"</stepValue>"+"\n");
+			sb.append("			<desc>"+desc+"</desc>"+"\n");
+			sb.append("			<stepValueUnit>"+stepValueUnit+"</stepValueUnit>"+"\n");
 		}
 		sb.append("	 </policy>"+"\n");
 		return sb.toString();

@@ -265,6 +265,34 @@ public class CreateDataServiceImpl implements CreateDataService {
 						policyTemp.setValue(value);
 						policyTemp.setSiteStr(siteStr);
 						policyTemp.setStrLength(strLength);
+					}else if(type.equals(CreateDataUtil.CONSTANTVALUE)){
+						String value = elm.elementText("value");
+						policyTemp.setValue(value);
+					}else if(type.equals(CreateDataUtil.DESCEND_INT)){
+						String value = elm.elementText("value");
+						String stepValue = elm.elementText("stepValue");
+						String desc = elm.elementText("desc");
+						policyTemp.setValue(value);
+						policyTemp.setStepValue(stepValue);
+						policyTemp.setDesc(Boolean.parseBoolean(desc));
+					}else if(type.equals(CreateDataUtil.DESCEND_DOUBLE)){
+						String value = elm.elementText("value");
+						String stepValue = elm.elementText("stepValue");
+						String desc = elm.elementText("desc");
+						String numberDecimal = elm.elementText("numberDecimal");
+						policyTemp.setValue(value);
+						policyTemp.setStepValue(stepValue);
+						policyTemp.setDesc(Boolean.parseBoolean(desc));
+						policyTemp.setNumberDecimal(numberDecimal);
+					}else if(type.equals(CreateDataUtil.DESCEND_DATE)){
+						String value = elm.elementText("value");
+						String stepValue = elm.elementText("stepValue");
+						String desc = elm.elementText("desc");
+						String stepValueUnit = elm.elementText("stepValueUnit");
+						policyTemp.setValue(value);
+						policyTemp.setStepValue(stepValue);
+						policyTemp.setDesc(Boolean.parseBoolean(desc));
+						policyTemp.setStepValueUnit(stepValueUnit);
 					}
 				   policyList.add(policyTemp);
 				}

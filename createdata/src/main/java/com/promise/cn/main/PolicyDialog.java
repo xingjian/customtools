@@ -55,7 +55,7 @@ public class PolicyDialog extends JDialog{
 	public JLabel label1_jp4;
 	public JLabel label1_jp5,label2_jp5,label3_jp5;
 	public JTextField jtf1_jp5,jtf2_jp5,jtf3_jp5;
-	public JLabel label1_jp6,label2_jp6,label3_jp6;
+	public JLabel label1_jp6,label2_jp6,label3_jp6,label4_jp6;
 	public JTextField jtf1_jp6,jtf2_jp6,jtf3_jp6;
 	public JLabel label1_jp7,label2_jp7,label3_jp7;
 	public JTextField jtf1_jp7,jtf2_jp7,jtf3_jp7;
@@ -64,7 +64,7 @@ public class PolicyDialog extends JDialog{
 	public String[] siteJComboBoxItems = new String[2];
 	public String[] jcbItems_jp5 = new String[2];
 	public String[] jcbItems_jp6 = new String[2];
-	public String[] jcbItems_jp7 = new String[3];
+	public String[] jcbItems_jp7 = new String[2];
 	public String[] jcbItems_jp71 = new String[3];
 	public JComboBox siteJComboBox = null;
 	public PolicyManagerJDialog pmjd;
@@ -105,11 +105,10 @@ public class PolicyDialog extends JDialog{
 		jcb_jp71.setPreferredSize(new Dimension(60,20)); 
 		jcb_jp7.setMaximumSize(new Dimension(135,20)); 
 		jcb_jp7.setMinimumSize(new Dimension(135,20)); 
-		jcb_jp7.setPreferredSize(new Dimension(135,20)); 
-
-
-
-
+		jcb_jp7.setPreferredSize(new Dimension(135,20));
+		jcb_jp6.setMaximumSize(new Dimension(135,20)); 
+		jcb_jp6.setMinimumSize(new Dimension(135,20)); 
+		jcb_jp6.setPreferredSize(new Dimension(135,20));
 	}
 	
 	/**
@@ -140,6 +139,42 @@ public class PolicyDialog extends JDialog{
 			minTextField_jp2.setText(policyVO.getInitValue());
 			maxTextField_jp2.setText(policyVO.getEndValue());
 			countTextField.setText(policyVO.getNumberDecimal());
+		}else if(policyVO.getType().equals(CreateDataUtil.CONSTANTVALUE)){
+			jcb.setSelectedItem(CreateDataUtil.CONSTANTVALUE);
+			textField.setText(policyVO.getName());
+			jta_jp4.setText(policyVO.getValue());
+		}else if(policyVO.getType().equals(CreateDataUtil.DESCEND_INT)){
+			jcb.setSelectedItem(CreateDataUtil.DESCEND_INT);
+			textField.setText(policyVO.getName());
+			jtf1_jp5.setText(policyVO.getValue());
+			jtf3_jp5.setText(policyVO.getStepValue());
+			if(policyVO.isDesc()){
+				jcb_jp5.setSelectedItem(CreateDataUtil.DESCENDTYPE_ASC);
+			}else {
+				jcb_jp5.setSelectedItem(CreateDataUtil.DESCENDTYPE_DESC);
+			}
+		}else if(policyVO.getType().equals(CreateDataUtil.DESCEND_DOUBLE)){
+			jcb.setSelectedItem(CreateDataUtil.DESCEND_DOUBLE);
+			textField.setText(policyVO.getName());
+			jtf1_jp6.setText(policyVO.getValue());
+			jtf2_jp6.setText(policyVO.getNumberDecimal());
+			jtf3_jp6.setText(policyVO.getStepValue());
+			if(policyVO.isDesc()){
+				jcb_jp6.setSelectedItem(CreateDataUtil.DESCENDTYPE_ASC);
+			}else {
+				jcb_jp6.setSelectedItem(CreateDataUtil.DESCENDTYPE_DESC);
+			}
+		}else if(policyVO.getType().equals(CreateDataUtil.DESCEND_DATE)){
+			jcb.setSelectedItem(CreateDataUtil.DESCEND_DATE);
+			textField.setText(policyVO.getName());
+			jtf1_jp7.setText(policyVO.getValue());
+			jtf3_jp7.setText(policyVO.getStepValue());
+			if(policyVO.isDesc()){
+				jcb_jp7.setSelectedItem(CreateDataUtil.DESCENDTYPE_ASC);
+			}else {
+				jcb_jp7.setSelectedItem(CreateDataUtil.DESCENDTYPE_DESC);
+			}
+			jcb_jp71.setSelectedItem(policyVO.getStepValueUnit());
 		}
 		
 	}
@@ -173,6 +208,52 @@ public class PolicyDialog extends JDialog{
 						policyVO.setValue(value);
 						policyVO.setStrLength(valueLength);
 						policyVO.setSiteStr(siteType);
+					}else if(type.equals(CreateDataUtil.DESCEND_INT)){
+						String value = jtf1_jp5.getText();
+						String stepValue = jtf3_jp5.getText();
+						String descName = jcb_jp5.getSelectedItem().toString();
+						boolean descBoolean = true;
+						if(descName.equals(CreateDataUtil.DESCENDTYPE_DESC)){
+							descBoolean = false;
+						}
+						policyVO.setValue(value);
+						policyVO.setDesc(descBoolean);
+						policyVO.setStepValue(stepValue);
+					}else if(type.equals(CreateDataUtil.DESCEND_DOUBLE)){
+						String value = jtf1_jp6.getText();
+						String stepValue = jtf3_jp6.getText();
+						String descName = jcb_jp6.getSelectedItem().toString();
+						boolean descBoolean = true;
+						if(descName.equals(CreateDataUtil.DESCENDTYPE_DESC)){
+							descBoolean = false;
+						}
+						policyVO.setValue(value);
+						policyVO.setDesc(descBoolean);
+						policyVO.setStepValue(stepValue);
+						policyVO.setNumberDecimal(jtf2_jp6.getText());
+					}else if(type.equals(CreateDataUtil.DESCEND_DATE)){
+						String value = jtf1_jp7.getText();
+						String stepValue = jtf3_jp7.getText();
+						String descName = jcb_jp7.getSelectedItem().toString();
+						String stepUnitName = jcb_jp71.getSelectedItem().toString();
+						boolean descBoolean = true;
+						String stepUnitValue = CreateDataUtil.UNIT_HOUR;
+						if(stepUnitName.equals(CreateDataUtil.DATA_HOUR)){
+							stepUnitValue = CreateDataUtil.UNIT_HOUR;
+						}else if(stepUnitName.equals(CreateDataUtil.DATA_MINUTE)){
+							stepUnitValue = CreateDataUtil.UNIT_MINUTE;
+						}else if(stepUnitName.equals(CreateDataUtil.DATA_SECOND)){
+							stepUnitValue = CreateDataUtil.UNIT_SECOND;
+						}
+						if(descName.equals(CreateDataUtil.DESCENDTYPE_DESC)){
+							descBoolean = false;
+						}
+						policyVO.setValue(value);
+						policyVO.setDesc(descBoolean);
+						policyVO.setStepValue(stepValue);
+						policyVO.setStepValueUnit(stepUnitValue);
+					}else if(type.equals(CreateDataUtil.CONSTANTVALUE)){
+						policyVO.setValue(jta_jp4.getText().trim());
 					}
 					if(status.equals("add")){
 						pmjd.policyList.add(policyVO);
@@ -326,20 +407,23 @@ public class PolicyDialog extends JDialog{
 	//递增或递减double
 	public JPanel getJPanel_Six(){
 		if(jp6==null){
-			jp6 = new JPanel(new GridLayout(3,1));
+			jp6 = new JPanel(new GridLayout(4,1));
 			jp6.setBorder(new TitledBorder(null,"递增或递减(Double)",TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,CreateDataUtil.getFont("微软雅黑", Font.PLAIN, 12),Color.BLUE));
 			JPanel jp6_temp1 = new JPanel();
 			JPanel jp6_temp2 = new JPanel();
 			JPanel jp6_temp3 = new JPanel();
+			JPanel jp6_temp4 = new JPanel();
 			jtf1_jp6 = new JTextField(12);
 			jtf2_jp6 = new JTextField(12);
 			jtf3_jp6 = new JTextField(12);
 			label1_jp6 = new JLabel("初 始 值 :");
+			label4_jp6 = new JLabel("小 数 位 :");
 			label2_jp6 = new JLabel("排序方式:");
 			label3_jp6 = new JLabel("步 长 值 :");
 			label1_jp6.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
 			label2_jp6.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
 			label3_jp6.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			label4_jp6.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
 			jcb_jp6.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
 			jp6_temp3.add(label3_jp6);
 			jp6_temp3.add(jtf3_jp6);
@@ -347,9 +431,12 @@ public class PolicyDialog extends JDialog{
 			jp6_temp1.add(jtf1_jp6);
 			jp6_temp2.add(label2_jp6);
 			jp6_temp2.add(jcb_jp6);
+			jp6_temp4.add(label4_jp6);
+			jp6_temp4.add(jtf2_jp6);
 			jp6.add(jp6_temp1);
 			jp6.add(jp6_temp3);
 			jp6.add(jp6_temp2);
+			jp6.add(jp6_temp4);
 		}
 		return jp6;
 	}

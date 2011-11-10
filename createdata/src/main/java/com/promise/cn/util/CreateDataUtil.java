@@ -19,7 +19,7 @@ import java.util.Random;
 public class CreateDataUtil {
 	
 	
-	public static String CONSTANTVALUE  = "constant value";
+	public static String CONSTANTVALUE  = "constant_value";
 	public static String DESCEND_INT = "descend_int";
 	public static String DESCEND_DOUBLE = "descend_double";
 	public static String DESCEND_DATE = "descend_date";
@@ -49,6 +49,10 @@ public class CreateDataUtil {
 	public static String JDBC_DRIVERNAME_SQLSERVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 	public static String JDBC_DRIVERNAME_DB2 = "";
 	public static String JDBC_DRIVERNAME_POSTGRESQL = "org.postgresql.Driver";
+	
+	public static String UNIT_HOUR = "hour";
+	public static String UNIT_MINUTE = "minute";
+	public static String UNIT_SECOND = "second";
 	
 	/**
 	 * 组件居中

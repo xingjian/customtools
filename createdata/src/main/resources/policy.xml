@@ -3,21 +3,49 @@
 	 <policy>
 			<name>1111</name>
 			<type>randomDouble[a,b]</type>
-			<initValue>100</initValue>
-			<endValue>1</endValue>
+			<initValue>11</initValue>
+			<endValue>15</endValue>
 			<numberDecimal>4</numberDecimal>
 	 </policy>
 	 <policy>
 			<name>2222</name>
 			<type>randomInt[a,b]</type>
-			<initValue>200</initValue>
-			<endValue>100</endValue>
+			<initValue>46</initValue>
+			<endValue>50</endValue>
 	 </policy>
 	 <policy>
 			<name>3333</name>
 			<type>randomString</type>
 			<value>dhcc</value>
 			<siteStr>append_left</siteStr>
-			<strLength>32</strLength>
+			<strLength>10</strLength>
+	 </policy>
+	 <policy>
+			<name>4444</name>
+			<type>constant_value</type>
+			<value>aaaa,bbbb,cccc</value>
+	 </policy>
+	 <policy>
+			<name>5555</name>
+			<type>descend_int</type>
+			<value>12</value>
+			<stepValue>2</stepValue>
+			<desc>false</desc>
+	 </policy>
+	 <policy>
+			<name>6666</name>
+			<type>descend_double</type>
+			<value>12.8</value>
+			<stepValue>0.6</stepValue>
+			<desc>true</desc>
+			<numberDecimal>4</numberDecimal>
+	 </policy>
+	 <policy>
+			<name>7777</name>
+			<type>descend_date</type>
+			<value>2011-11-11 00:00:00</value>
+			<stepValue>5</stepValue>
+			<desc>false</desc>
+			<stepValueUnit>minute</stepValueUnit>
 	 </policy>
 </policys>
