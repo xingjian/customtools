@@ -2,6 +2,7 @@
 package com.promise.cn.main;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -32,18 +33,18 @@ public class DataSourceVOView extends JDialog {
 	private DataConnectConfigVO dcc;
 	private JButton okBtn = new JButton("确定");
 	private JButton exitBtn = new JButton("取消");
-	private JPanel centerPanel = new JPanel(new GridLayout(6,2));
+	private JPanel centerPanel = new JPanel(new GridLayout(5,1));
 	private JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 	private JLabel nameLabel = new JLabel("Name：");
 	private JLabel userNameLabel = new JLabel("UserName：");
 	private JLabel pwdLabel = new JLabel("PWD：");
 	private JLabel driverClassNameLabel = new JLabel("DriverClassName：");
 	private JLabel urlLabel = new JLabel("URL：");
-	private JTextField nameText = new JTextField();
-	private JTextField userNameText = new JTextField();
-	private JTextField pwdText = new JTextField();
-	private JTextField driverClassNameText = new JTextField();
-	private JTextField urlText = new JTextField();
+	private JTextField nameText = new JTextField(35);
+	private JTextField userNameText = new JTextField(35);
+	private JTextField pwdText = new JTextField(35);
+	private JTextField driverClassNameText = new JTextField(35);
+	private JTextField urlText = new JTextField(35);
 	public DataEventManager dataEventManager = null;
 	public JLabel typeJLabel = new JLabel("type");
 	public String[] typesJComboBoxItems = new String[5];
@@ -51,7 +52,8 @@ public class DataSourceVOView extends JDialog {
 	/**
 	 * 构造函数
 	 */
-	public DataSourceVOView() {
+	public DataSourceVOView(DataConnectConfigVO dcc) {
+		this.dcc = dcc;
 		initData();
 		init();
 		initBtnEvent();
@@ -90,13 +92,12 @@ public class DataSourceVOView extends JDialog {
 	 */
 	public void dispatchDataEvent(){
 		if(dataEventManager!=null){
-			DataConnectConfigVO dccv = new DataConnectConfigVO();
-			dccv.setName(nameText.getText());
-			dccv.setUserName(userNameText.getText());
-			dccv.setPassword(pwdText.getText());
-			dccv.setUrl(urlText.getText());
-			dccv.setDriverClassName(driverClassNameText.getText());
-			dataEventManager.fireDataEvent(dccv);
+			dcc.setName(nameText.getText());
+			dcc.setUserName(userNameText.getText());
+			dcc.setPassword(pwdText.getText());
+			dcc.setUrl(urlText.getText());
+			dcc.setDriverClassName(driverClassNameText.getText());
+			dataEventManager.fireDataEvent(dcc);
 		}
 	}
 	
@@ -115,19 +116,56 @@ public class DataSourceVOView extends JDialog {
 		exitBtn.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 13));
 		southPanel.add(okBtn);
 		southPanel.add(exitBtn);
-		centerPanel.add(nameLabel);
-		centerPanel.add(nameText);
-		centerPanel.add(userNameLabel);
-		centerPanel.add(userNameText);
-		centerPanel.add(pwdLabel);
-		centerPanel.add(pwdText);
-		centerPanel.add(driverClassNameLabel);
-		centerPanel.add(driverClassNameText);
-		centerPanel.add(urlLabel);
-		centerPanel.add(urlText);
+		
+		JPanel jp1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JPanel jp2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JPanel jp3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JPanel jp4 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JPanel jp5 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		nameLabel.setMaximumSize(new Dimension(125,20)); 
+		nameLabel.setMinimumSize(new Dimension(125,20)); 
+		nameLabel.setPreferredSize(new Dimension(125,20));
+		
+		userNameLabel.setMaximumSize(new Dimension(125,20)); 
+		userNameLabel.setMinimumSize(new Dimension(125,20)); 
+		userNameLabel.setPreferredSize(new Dimension(125,20));
+		
+		pwdLabel.setMaximumSize(new Dimension(125,20)); 
+		pwdLabel.setMinimumSize(new Dimension(125,20)); 
+		pwdLabel.setPreferredSize(new Dimension(125,20));
+		
+		driverClassNameLabel.setMaximumSize(new Dimension(125,20)); 
+		driverClassNameLabel.setMinimumSize(new Dimension(125,20)); 
+		driverClassNameLabel.setPreferredSize(new Dimension(125,20));
+		
+		urlLabel.setMaximumSize(new Dimension(125,20)); 
+		urlLabel.setMinimumSize(new Dimension(125,20)); 
+		urlLabel.setPreferredSize(new Dimension(125,20));
+		
+		
+		jp1.add(nameLabel);
+		jp1.add(nameText);
+		jp2.add(userNameLabel);
+		jp2.add(userNameText);
+		jp3.add(pwdLabel);
+		jp3.add(pwdText);
+		jp4.add(driverClassNameLabel);
+		jp4.add(driverClassNameText);
+		jp5.add(urlLabel);
+		jp5.add(urlText);
+		centerPanel.add(jp1);
+		centerPanel.add(jp2);
+		centerPanel.add(jp3);
+		centerPanel.add(jp4);
+		centerPanel.add(jp5);
 		this.add(centerPanel,BorderLayout.CENTER);
 		this.add(southPanel,BorderLayout.SOUTH);
 		if(dcc!=null){
+			nameText.setText(dcc.getName());
+			userNameText.setText(dcc.getUserName());
+			pwdText.setText(dcc.getPassword());
+			urlText.setText(dcc.getUrl());
+			driverClassNameText.setText(dcc.getDriverClassName());
 		}else{
 			dcc = new DataConnectConfigVO();
 			dcc.setStatus("add");

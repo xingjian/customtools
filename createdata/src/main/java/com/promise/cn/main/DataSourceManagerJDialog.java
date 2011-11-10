@@ -185,7 +185,24 @@ public class DataSourceManagerJDialog extends JDialog {
 			editConnect_JButton.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					
+					DataConnectConfigVO dccv = null;
+					if(jTable.getSelectedRow()>-1){
+						dccv = tableModel.getDataConnectConfigVOByRow(jTable.getSelectedRow());
+						dccv.setStatus("update");
+					}
+					DataSourceVOView dsvv = new DataSourceVOView(dccv);
+					dsvv.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+					dsvv.addWindowListener(new WindowAdapter() {
+						 public void windowClosed(WindowEvent e) {
+							 dem.removeDataEventListener(getDataEventListener()); 
+						 }
+					});
+					dsvv.setDataEventManager(dem);
+					dem.addDataEventListener(getDataEventListener());
+					dsvv.setSize(550, 200);
+					dsvv.setLocationRelativeTo(getContentPane());
+					dsvv.setVisible(true);
+					dsvv.setResizable(false);
 				}
 			});
 		}
@@ -197,7 +214,10 @@ public class DataSourceManagerJDialog extends JDialog {
 			dataEventListener = new DataEventListener() {
 				@Override
 				public void dataEvent(DataEvent dataEvent) {
-					tableModel.dccList.add((DataConnectConfigVO)dataEvent.data);
+					DataConnectConfigVO dccv = (DataConnectConfigVO)dataEvent.data;
+					if(dccv.getStatus().equals("add")){
+						tableModel.dccList.add((DataConnectConfigVO)dataEvent.data);
+					}
 					jTable.updateUI();
 				}
 			};
@@ -216,7 +236,7 @@ public class DataSourceManagerJDialog extends JDialog {
 			addConnect_JButton.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					DataSourceVOView dsvv = new DataSourceVOView();
+					DataSourceVOView dsvv = new DataSourceVOView(null);
 					dsvv.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 					dsvv.addWindowListener(new WindowAdapter() {
 						 public void windowClosed(WindowEvent e) {
@@ -225,7 +245,7 @@ public class DataSourceManagerJDialog extends JDialog {
 					});
 					dsvv.setDataEventManager(dem);
 					dem.addDataEventListener(getDataEventListener());
-					dsvv.setSize(400, 200);
+					dsvv.setSize(550, 200);
 					dsvv.setLocationRelativeTo(getContentPane());
 					dsvv.setVisible(true);
 					dsvv.setResizable(false);
