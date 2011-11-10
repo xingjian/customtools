@@ -35,9 +35,9 @@ public class CreateDataUtil {
 	public static String DATABASETYPE_DB2 = "DB2";
 	public static String DESCENDTYPE_DESC = "------- 降序 -------";
 	public static String DESCENDTYPE_ASC = "------- 升序 -------";
-	public static String DATA_HOUR = "--- 时 ---";
-	public static String DATA_MINUTE = "--- 分 ---";
-	public static String DATA_SECOND = "--- 秒 ---";
+	public static String DATA_HOUR = "- 时 -";
+	public static String DATA_MINUTE = "- 分 -";
+	public static String DATA_SECOND = "- 秒 -";
 	public static String JDBC_URL_ORACLE = "";
 	public static String JDBC_URL_MYSQL = "";
 	public static String JDBC_URL_SQLSERVER = "";
