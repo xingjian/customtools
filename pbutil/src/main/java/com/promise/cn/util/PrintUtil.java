@@ -1,7 +1,5 @@
 /**@文件名: PrintUtil.java @作者： promisePB xingjian@yeah.net @日期 2011-5-12 上午09:16:18 */
-
 package com.promise.cn.util;
-
 /**   
  * @类名: PrintUtil.java 
  * @包名: com.promise.cn.util 
@@ -10,11 +8,9 @@ package com.promise.cn.util;
  * @日期： 2011-5-12 上午09:16:18 
  * @版本： V1.0   
  */
-
 public class PrintUtil {
 	
 	/**
-	 * 
 	 * 功能：输出对象的内容
 	 * 描述：对象可以是任何内容
 	 * @param object
