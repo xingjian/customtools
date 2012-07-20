@@ -46,6 +46,7 @@ public class CreateDataMainApplication {
 	private JMenuItem exitMenuItem = null;
 	private JMenuItem aboutMenuItem = null;
 	private JMenuItem cutMenuItem = null;
+	private JMenuItem createSQLMenuItem = null;
 	private JMenuItem connectManagerItem = null;
 	private JDialog aboutDialog = null;
 	private JPanel aboutContentPane = null;
@@ -176,9 +177,10 @@ public class CreateDataMainApplication {
 	private JMenu getMenu2() {
 		if (menu2 == null) {
 			menu2 = new JMenu();
-			menu2.setText("策略工具");
+			menu2.setText("应用工具");
 			menu2.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
 			menu2.add(getPolicyItem());
+			menu2.add(getCreateSQLMenuItem());
 		}
 		return menu2;
 	}
@@ -296,6 +298,26 @@ public class CreateDataMainApplication {
 			});
 		}
 		return cutMenuItem;
+	}
+	
+	/**
+	 * 初始化创建sql语句item
+	 * @return
+	 */
+	private JMenuItem getCreateSQLMenuItem(){
+		if(null==createSQLMenuItem){
+			createSQLMenuItem = new JMenuItem();
+			createSQLMenuItem.setText("SQL生成工具");
+			createSQLMenuItem.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+			createSQLMenuItem.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					
+				}
+			});
+			
+		}
+		return createSQLMenuItem;
 	}
 
 	/**
