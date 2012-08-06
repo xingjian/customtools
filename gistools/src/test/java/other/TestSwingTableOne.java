@@ -1,6 +1,6 @@
 /**@Title: TestSwingTableOne.java @author promisePB xingjian@yeah.net @date 2010-12-7 上午11:15:27 */
 
-package com.xingjian.cn.test;
+package other;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -25,7 +25,7 @@ import javax.swing.table.TableColumnModel;
  * @date 2010-12-7 上午11:15:27 
  * @version V1.0   
  */
-
+@SuppressWarnings("all")
 public class TestSwingTableOne {
     private JFrame frame = null;
 
@@ -124,6 +124,7 @@ public class TestSwingTableOne {
 * @author 五斗米
 * 
 */
+@SuppressWarnings("all")
 class Table_Model extends AbstractTableModel {
 
     private static final long serialVersionUID = -7495940408592595397L;

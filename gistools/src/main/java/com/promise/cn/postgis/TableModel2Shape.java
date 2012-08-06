@@ -1,5 +1,5 @@
 /**@Title: TableModel2Shape.java @author promisePB xingjian@yeah.net @date 2010-12-7 上午11:07:41 */
-package com.xingjian.cn.tools.gis;
+package com.promise.cn.postgis;
 
 import java.util.Vector;
 
@@ -13,7 +13,7 @@ import javax.swing.table.AbstractTableModel;
  * @date 2010-12-7 上午11:07:41 
  * @version V1.0   
  */
-
+@SuppressWarnings("all")
 public class TableModel2Shape extends AbstractTableModel{
 
 	private static final long serialVersionUID = -7495940408592595397L;

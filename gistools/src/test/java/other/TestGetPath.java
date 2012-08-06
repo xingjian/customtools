@@ -1,6 +1,6 @@
 /**@Title: TestGetPath.java @author promisePB xingjian@yeah.net @date 2010-12-8 上午09:03:31 */
 
-package com.xingjian.cn.test;
+package other;
 
 /**   
  * @Title: TestGetPath.java 

@@ -1,6 +1,6 @@
 /**@Title: Shape2PostGIS.java @author promisePB xingjian@yeah.net @date 2010-12-6 下午06:15:15 */
 
-package com.xingjian.cn.tools.gis;
+package com.promise.cn.postgis;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -33,7 +33,7 @@ import javax.swing.table.TableColumnModel;
  * @date 2010-12-6 下午06:15:15 
  * @version V1.0   
  */
-
+@SuppressWarnings("all")
 public class Shape2PostGIS extends JFrame {
 
 	private static final long serialVersionUID = 1L;
