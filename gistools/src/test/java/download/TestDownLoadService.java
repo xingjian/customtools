@@ -19,23 +19,16 @@ import com.promise.cn.download.vo.HttpRespons;
 @SuppressWarnings("all")
 public class TestDownLoadService {
 
+	private String dhcc = "http://172.18.18.31:8399/arcgis/rest/services/bjroad6/MapServer/tile/2/1/1";
 	/**
 	 * 测试sendGet
 	 */
 	@Test
 	public void testSendGet(){
 		try {      
-			//http://172.18.18.31:8399/arcgis/rest/services/bjroad6/MapServer/tile/2/1/1
 			DownLoadService request = new DownLoadServiceImpl();
-            HttpRespons hr = request.sendGet("http://www.iteye.com/");      
-//            System.out.println(hr.getUrlString());      
-//            System.out.println(hr.getProtocol());      
-//            System.out.println(hr.getHost());      
-//            System.out.println(hr.getPort());      
-//            System.out.println(hr.getContentEncoding());      
-//            System.out.println(hr.getMethod());      
-//            System.out.println(hr.getContent());      
-        } catch (Exception e) {      
+            HttpRespons hr = request.sendGet("http://mt2.google.cn/vt/lyrs=m@180000000&hl=zh-CN&gl=cn&src=app&x=0&y=3&z=2");      
+		} catch (Exception e) {      
             e.printStackTrace();      
         }  
 	}
