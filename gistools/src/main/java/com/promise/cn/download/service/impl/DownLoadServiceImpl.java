@@ -75,7 +75,6 @@ public class DownLoadServiceImpl implements DownLoadService {
         }      
         URL url = new URL(urlString);      
         urlConnection = (HttpURLConnection) url.openConnection();      
-       
         urlConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/534.36 (KHTML, like Gecko) Chrome/13.0.766.0 Safari/534.36");
         urlConnection.setRequestMethod(method);      
         urlConnection.setDoOutput(true);      
@@ -110,7 +109,6 @@ public class DownLoadServiceImpl implements DownLoadService {
             StringBuffer temp = new StringBuffer();      
             String line = bufferedReader.readLine();      
             while (line != null) {  
-            	System.out.println(line);
                 httpResponser.contentCollection.add(line);      
                 temp.append(line).append("\r\n");      
                 line = bufferedReader.readLine();      
