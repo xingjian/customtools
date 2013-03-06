@@ -81,7 +81,7 @@ public class DataConnectConfigVO {
 		this.type = type;
 	}
 	
-	public String toString(){
+	public String toStringXML(){
 		StringBuffer sb = new StringBuffer();
 		sb.append("	 <datasource>"+"\n");
 		sb.append("			<name>"+name+"</name>"+"\n");
@@ -92,6 +92,10 @@ public class DataConnectConfigVO {
 		sb.append("			<url>"+url+"</url>"+"\n");
 		sb.append("	 </datasource>"+"\n");
 		return sb.toString();
+	}
+	
+	public String toString(){
+		return name;
 	}
 	
 	

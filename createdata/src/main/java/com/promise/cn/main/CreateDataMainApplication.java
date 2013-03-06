@@ -17,9 +17,11 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
+import com.promise.cn.export.ExportDataApp;
 import com.promise.cn.service.CreateDataService;
 import com.promise.cn.service.impl.CreateDataServiceImpl;
 import com.promise.cn.util.CreateDataUtil;
@@ -51,7 +53,8 @@ public class CreateDataMainApplication {
 	private JDialog aboutDialog = null;
 	private JPanel aboutContentPane = null;
 	private JLabel aboutVersionLabel = null;
-	
+	private JTabbedPane tabPanel;
+	private JPanel createDataPanel;
 	private DataConnectPanel dcp;
 	private DataSourceManagerJDialog dmd;
 	private List<DataConnectConfigVO> tableData = new ArrayList<DataConnectConfigVO>();
@@ -59,6 +62,9 @@ public class CreateDataMainApplication {
 	private TableConfigPanel tcp = null;
 	private PolicyManagerJDialog pmd = null;
 	public List<PolicyVO> policyList = new ArrayList<PolicyVO>();
+	
+	public ExportDataApp eda = null;
+	
 	/**
 	 * @param args
 	 */
@@ -84,7 +90,7 @@ public class CreateDataMainApplication {
 			jFrame.setJMenuBar(getJJMenuBar());
 			jFrame.setSize(800, 600);
 			jFrame.setContentPane(getJContentPane());
-			jFrame.setTitle("模拟数据程序");
+			jFrame.setTitle("数据管理程序");
 			jFrame.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 16));
 			CreateDataUtil.setCenter(jFrame);
 			jFrame.setIconImage(CreateDataUtil.getImage("../images/home.gif"));
@@ -102,8 +108,13 @@ public class CreateDataMainApplication {
 	 * 初始化Jframe
 	 */
 	private void initJFrame(){
-		jFrame.add(getDataConnectPanel(), BorderLayout.NORTH);
-		jFrame.add(getTableConfigPanel(), BorderLayout.CENTER);
+		tabPanel = new JTabbedPane();
+		createDataPanel = new JPanel(new BorderLayout());
+		createDataPanel.add(getDataConnectPanel(), BorderLayout.NORTH);
+		createDataPanel.add(getTableConfigPanel(), BorderLayout.CENTER);
+		tabPanel.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
+		tabPanel.addTab("创建数据", createDataPanel);
+		jFrame.add(tabPanel,BorderLayout.CENTER);
 	}
 	
 	public TableConfigPanel getTableConfigPanel(){
@@ -307,12 +318,15 @@ public class CreateDataMainApplication {
 	private JMenuItem getCreateSQLMenuItem(){
 		if(null==createSQLMenuItem){
 			createSQLMenuItem = new JMenuItem();
-			createSQLMenuItem.setText("SQL生成工具");
+			createSQLMenuItem.setText("导出数据");
 			createSQLMenuItem.setFont(CreateDataUtil.getFont("微软雅黑", Font.BOLD, 12));
 			createSQLMenuItem.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					
+					if(null==eda){
+						eda = new ExportDataApp(tableData,cds);
+						tabPanel.add("导出数据", eda);
+					}
 				}
 			});
 			

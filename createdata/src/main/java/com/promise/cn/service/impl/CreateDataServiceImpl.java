@@ -53,7 +53,7 @@ public class CreateDataServiceImpl implements CreateDataService {
 			String filePath = CreateDataServiceImpl.class.getResource("/data_connect.xml").getPath();
 			XMLWriter writer = new XMLWriter(new FileWriter(filePath));
 			Document document = null;
-			document = DocumentHelper.parseText(dccVO.toString());
+			document = DocumentHelper.parseText(dccVO.toStringXML());
 			writer.write(document);
 			writer.close();
 			return true;
@@ -107,7 +107,7 @@ public class CreateDataServiceImpl implements CreateDataService {
 		StringBuffer result = new StringBuffer();
 		result.append("<datasources>"+"\n");
 		for(int i=0;i<dccVOList.size();i++){
-			result.append(dccVOList.get(i).toString());
+			result.append(dccVOList.get(i).toStringXML());
 		}
 		result.append("</datasources>");
 		String filePath = CreateDataServiceImpl.class.getResource("/data_connect.xml").getPath();
