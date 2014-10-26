@@ -17,5 +17,7 @@ import com.promise.cn.vo.TableVO;
  */
 public interface ExportDataService {
 
-	public List<TableVO> getTableVOListByDCC(DataConnectConfigVO dcc);
+	public List<TableVO> getTableVOListByDCC(DataConnectConfigVO dcc,String tableName);
+	
+	public boolean exportDataToExcel(DataConnectConfigVO dcc,TableVO table,String url,boolean isMultiFile);
 }

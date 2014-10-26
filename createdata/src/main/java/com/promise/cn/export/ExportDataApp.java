@@ -112,6 +112,12 @@ public class ExportDataApp extends JPanel {
 			}
 		});
 		southPanel.add(selectPathBtn);
+		jbtExport.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("准备导出数据到excel......");
+			}
+		});
 		southPanel.add(jbtExport);
 	}
 	
@@ -133,7 +139,10 @@ public class ExportDataApp extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				DataConnectConfigVO ccvTemp = (DataConnectConfigVO)jComboBox.getSelectedItem();
-				eds.getTableVOListByDCC(ccvTemp);
+				tableVOList.clear();
+				List<TableVO> listTemp = eds.getTableVOListByDCC(ccvTemp,jtf.getText());
+				tableVOList.addAll(listTemp);
+				jtable.updateUI();
 			}
 		});
 		
