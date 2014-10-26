@@ -29,6 +29,11 @@
 			<version>3.1.14</version>
 		</dependency>
 		<dependency>
+			<groupId>com.microsoft</groupId>
+			<artifactId>jdbc</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
 			<groupId>com.promise.cn</groupId>
 			<artifactId>sqljdbc</artifactId>
 			<version>1.0</version>
