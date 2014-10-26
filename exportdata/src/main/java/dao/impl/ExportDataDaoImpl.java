@@ -91,7 +91,7 @@ public class ExportDataDaoImpl implements ExportDataDao {
 					if (!fileDir.exists()) {
 						fileDir.mkdirs();
 					}
-					File file = new File(exportURL + title +sdff.format(new java.util.Date())+ ".doc");
+					File file = new File(exportURL + title+ ".doc");
 					InputStream is = rs.getBinaryStream(5);
 					if(null!=is){
 						DataInputStream in = new DataInputStream(is);

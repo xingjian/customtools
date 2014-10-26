@@ -10,6 +10,7 @@ package util;
  * @日期:2013-2-5 上午10:25:21 
  * @版本: V1.0   
  */
+@SuppressWarnings("all")
 public enum DataSourceType {
 	ORACLE("oracle"),SQLSERVER("sqlserver"),MYSQL("mysql");
 	
