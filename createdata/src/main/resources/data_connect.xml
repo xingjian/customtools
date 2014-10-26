@@ -2,8 +2,8 @@
 <datasources>
 	 <datasource>
 			<name>dhcc_oracle</name>
-			<userName>sde</userName>
-			<password>sde</password>
+			<userName>emdbuser</userName>
+			<password>admin123</password>
 			<driverClassName>oracle.jdbc.OracleDriver</driverClassName>
 			<url>jdbc:oracle:thin:@172.18.18.203:1521:emdb</url>
 	 </datasource>
@@ -20,5 +20,13 @@
 			<password>000000</password>
 			<driverClassName>com.mysql.jdbc.Driver</driverClassName>
 			<url>jdbc:mysql://localhost/whq</url>
+	 </datasource>
+	 <datasource>
+			<name>dhcc_sqlserver</name>
+			<userName>floodwarn</userName>
+			<password>floodwarn</password>
+			<type>null</type>
+			<driverClassName>com.microsoft.sqlserver.jdbc.SQLServerDriver</driverClassName>
+			<url>jdbc:sqlserver://172.18.18.34:1433;databaseName=floodwarncity</url>
 	 </datasource>
 </datasources>
