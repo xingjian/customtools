@@ -18,7 +18,7 @@ public class PBMathUtil {
 	 * @param n 小数点后的位数 -n小数点钱的位数
 	 * @return
 	 */
-	private static double DoubleRound(double d, int n) {
+	public static double DoubleRound(double d, int n) {
 		d = d * Math.pow(10, n);
 		d += 0.5d;
 		d = (long)d;
@@ -27,6 +27,7 @@ public class PBMathUtil {
 	}
 	
 	public PBMathUtil() {
+		
 	}
 
 }
