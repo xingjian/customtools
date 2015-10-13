@@ -1,0 +1,227 @@
+package com.promise.gistool.util;
+
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.geotools.data.DataStore;
+import org.geotools.data.DataStoreFinder;
+import org.geotools.data.postgis.PostgisNGDataStoreFactory;
+import org.geotools.data.shapefile.dbf.DbaseFileHeader;
+import org.geotools.data.shapefile.dbf.DbaseFileReader;
+import org.geotools.data.shapefile.files.ShpFiles;
+import org.geotools.data.shapefile.shp.ShapeType;
+import org.geotools.data.shapefile.shp.ShapefileHeader;
+import org.geotools.data.shapefile.shp.ShapefileReader;
+import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.data.simple.SimpleFeatureSource;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.feature.type.AttributeType;
+import org.opengis.feature.type.FeatureType;
+
+import com.promise.cn.util.DBType;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
+
+/**  
+ * 功能描述: GISDBUtil
+ * @author:<a href="mailto:xingjian@tongtusoft.com.cn">邢健</a>  
+ * @version: V1.0
+ * 日期:2015年8月26日 上午10:17:51  
+ */
+public class GISDBUtil {
+
+    /**
+     * ConnPostGis("postgis", "localhost", 5432, "postgis", "postgres", "root");
+     * @param dbtype
+     * @param host
+     * @param port
+     * @param database
+     * @param userName
+     * @param password
+     */
+    public static DataStore ConnPostGis(String dbtype, String host, String port,String database, String userName, String password) {
+        DataStore pgDatastore = null;
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put(PostgisNGDataStoreFactory.DBTYPE.key, dbtype);
+        params.put(PostgisNGDataStoreFactory.HOST.key, host);
+        params.put(PostgisNGDataStoreFactory.PORT.key, new Integer(port));
+        params.put(PostgisNGDataStoreFactory.DATABASE.key, database);
+        params.put(PostgisNGDataStoreFactory.SCHEMA.key, "public");
+        params.put(PostgisNGDataStoreFactory.USER.key, userName);
+        params.put(PostgisNGDataStoreFactory.PASSWD.key, password);
+        try {
+            pgDatastore = DataStoreFinder.getDataStore(params);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return pgDatastore;
+    }
+    
+    /**
+     * 根据shape创建表
+     * 目前支持WGS84坐标 表名用小写,大写的话表名带引号,列名也是同样
+     * 默认已经将列名和表名转换成小写
+     * @param tableName 表名
+     * @param shapePath shape路径
+     * @param dataStore 
+     * @param charSet 读取shape文件编码
+     * @return 结果状态
+     */
+    public static String CreateTableSchema(String tableName,String shapePath,DataStore dataStore,String charSet) {  
+        String result = "success";
+        SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();  
+        builder.setName(tableName.toLowerCase());  
+        builder.setCRS(DefaultGeographicCRS.WGS84);  
+        DbaseFileReader reader = null;
+        try {
+            reader = new DbaseFileReader(new ShpFiles(shapePath),false,Charset.forName(charSet));
+            DbaseFileHeader header = reader.getHeader();
+            int numFields = header.getNumFields();
+            for (int i=0; i<numFields; i++) {
+                String title = header.getFieldName(i);
+                builder.add(title, header.getFieldClass(i));
+            }
+            ShpFiles sf = new ShpFiles(shapePath);    
+            ShapefileReader sfr = new ShapefileReader(sf,false, false, new GeometryFactory());
+            ShapefileHeader sfh = sfr.getHeader();
+            builder.add("the_geom",GetClassByShapeType(sfh.getShapeType()));
+            SimpleFeatureType sft = builder.buildFeatureType();
+            dataStore.createSchema(sft); 
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null) {
+                try {reader.close();} catch (Exception e) {}
+            }
+        }
+        return result;  
+    }  
+    
+    /**
+     * 通过ShapeType获取集合对象Class
+     * @param st
+     * @return Class字节码
+     */
+    @SuppressWarnings("all")
+    public static Class GetClassByShapeType(ShapeType st){
+        Class typeClass=null;
+        String type = st.name;
+        if(type.toLowerCase().equals("point")){  
+            typeClass=Point.class; 
+        }else if(type.toLowerCase().equals("pointm")){  
+            typeClass=MultiPoint.class;
+        }else if(type.toLowerCase().equals("arc")){  
+            typeClass=LineString.class;
+        }else if(type.toLowerCase().equals("arcm")){  
+            typeClass=MultiLineString.class;
+        }else if(type.toLowerCase().equals("polygon")){
+            typeClass=Polygon.class;
+        }else if(type.toLowerCase().equals("polygonm")){
+            typeClass=MultiPolygon.class;  
+        }
+        return typeClass;
+    }
+    
+    
+    /**
+     * 根据attributes 生成创建表的语句 
+     * attributes数据格式 列名,类型,长度
+     * 目前只支持PostgreSQL
+     * @param attributes
+     * @param dbType
+     * @return
+     */
+    public static List<String> GetCreateTableSQL(String tableName,List<String> attributes,DBType dbType){
+        List<String> list = new ArrayList<String>();
+        if(dbType==DBType.PostgreSQL){
+        }
+        return list;
+    }
+    
+    /**
+     * 使用dataStore创建表空间 默认坐标系为WGS84
+     * @param tableName 表名称
+     * @param dataStore dataStore对象 请参考ConnPostGis方法获取
+     * @param columns 列名
+     * @return 运行状态
+     */
+    public static String CreateTableSchema(String tableName,DataStore dataStore,Map<String,Class> columns) {  
+        String result = "success";
+        SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();  
+        builder.setName(tableName);  
+        builder.setCRS(DefaultGeographicCRS.WGS84);  
+        for (Map.Entry<String, Class> entry : columns.entrySet()) {
+            builder.add(entry.getKey(), entry.getValue());
+        }                             
+        SimpleFeatureType sft = builder.buildFeatureType();
+        try {
+            dataStore.createSchema(sft);
+        } catch (IOException e) {
+            e.printStackTrace();
+            result = "fail";
+        }
+        return result;  
+    }
+    
+    /**
+     * 获取指定表的矢量数据
+     * @param dataStore
+     * @param tableName
+     * @return 集合SimpleFeature对象
+     */
+    public static List<SimpleFeature> GetFeaturesByTableName(DataStore dataStore,String tableName){
+        List<SimpleFeature> retList = new ArrayList<SimpleFeature>();
+        try {
+            SimpleFeatureSource fs = dataStore.getFeatureSource(tableName);
+            SimpleFeatureCollection fc = fs.getFeatures();
+            SimpleFeatureIterator fi = fc.features();
+            while (fi.hasNext()) {
+                SimpleFeature sf = fi.next();
+                retList.add(sf);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally{
+            dataStore.dispose();
+        }
+        return retList;
+    }
+    
+    /**
+     * 获取指定空间表的属性信息
+     * @param dataStore
+     * @param tableName
+     * @return
+     */
+    public static List<String> GetAttributeByTableName(DataStore dataStore,String tableName){
+        List<String> retList = new ArrayList<String>();
+        try {
+            SimpleFeatureSource fs = dataStore.getFeatureSource(tableName);
+            SimpleFeatureType ft=fs.getSchema();
+            for (int i = 0; i < ft.getAttributeCount(); i++) {
+                AttributeType at = ft.getType(i);
+                retList.add(at.getName().toString());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally{
+            dataStore.dispose();
+        }
+        return retList;
+    }
+    
+}
