@@ -1,15 +1,24 @@
-/** @文件名: PBSortUtil.java @创建人：邢健  @创建日期： 2013-12-3 下午3:03:01 */
+/** 文件名: PBSortUtil.java 创建人：邢健  创建日期： 2013-12-3 下午3:03:01 */
 
 package com.promise.cn.util;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 
 /**   
- * @类名: PBSortUtil.java 
- * @包名: com.promise.cn.util 
- * @描述: 排序算法 
- * @作者: xingjian xingjian@yeah.net   
- * @日期:2013-12-3 下午3:03:01 
- * @版本: V1.0   
+ * 类名: PBSortUtil.java 
+ * 包名: com.promise.cn.util 
+ * 描述: 排序算法 
+ * 作者: xingjian xingjianyeah.net   
+ * 日期:2013-12-3 下午3:03:01 
+ * 版本: V1.0   
  */
 public class PBSortUtil {
 
@@ -55,8 +64,4 @@ public class PBSortUtil {
 		}
 		return result;
 	}
-	
-	public PBSortUtil() {
-	}
-	
 }
