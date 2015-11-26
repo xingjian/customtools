@@ -1,6 +1,10 @@
 /**文件名: PrintUtil.java 作者： promisePB xingjianyeah.net 日期 2011-5-12 上午09:16:18 */
 package com.promise.cn.util;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -48,4 +52,24 @@ public class PrintUtil {
 			System.out.println(object.toString());
 		}
 	}
+	
+	/**
+	 * 输出文件内容
+	 * @param filePath
+	 */
+	public static void PrintFileByLine(String filePath){
+        try {
+            File file = new File(filePath);
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String s = null;
+            while((s = br.readLine())!=null){
+                if(s.trim()!=""){
+                    System.out.println(s);
+                }
+            }
+            br.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

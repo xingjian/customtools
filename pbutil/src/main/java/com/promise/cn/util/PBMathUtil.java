@@ -2,6 +2,7 @@
 
 package com.promise.cn.util;
 
+
 /**   
  * 类名: PBMathUtil.java 
  * 包名: com.promise.cn.util 
@@ -27,7 +28,7 @@ public class PBMathUtil {
 	}
 
 	/**
-	 * 计算2点直接直线距离
+	 * 计算2点距离 勾股定理
 	 * @param x1
 	 * @param y1
 	 * @param x2
@@ -37,4 +38,83 @@ public class PBMathUtil {
 	public static double Distance(double x1,double y1,double x2,double y2){
 	    return Math.sqrt(Math.pow(Math.abs((x1-x2)),2)+Math.pow(Math.abs((y1-y2)),2));
 	}
+	
+
+	/**
+     * 求高
+     * x,y 到 x1,y1,x2,y2的高
+     * @return value
+     */
+    public static double GetHeight(double x,double y,double x1,double y1,double x2,double y2){
+        double a = Math.sqrt(((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)));
+        double b = Math.sqrt(((x-x1)*(x-x1)+(y-y1)*(y-y1)));
+        double c = Math.sqrt(((x-x2)*(x-x2)+(y-y2)*(y-y2)));
+        double p = (a+b+c)/2;
+        double s = Math.sqrt(p*(p-a)*(p-b)*(p-c));
+        return 2*s/a;        
+    }
+    
+    /**
+     * @根据两点求出垂线过第三点的直线的交点 
+     * @param pt1 直线上的第一个点 
+     * @param pt2 直线上的第二个点 
+     * @param pt3 垂线上的点 
+     * @return 返回点到直线的垂直交点坐标 
+     */
+    public static double[] GetVerticalPoint(double x0,double y0,double x1,double y1,double x2,double y2){
+        //当平行与y轴
+        if(x1 == x2){
+            return new double[]{x1,y0};
+        }
+        //平行与x轴
+        if(y1 == y2){
+            return new double[]{x0,y1};
+        }
+        double k = (y2-y1)/(x2-x1);
+        double nx = (k*k*x1+k*(y0-y1)+x0)/(k*k+1);
+        double ny = k*(nx-x1)+y1;
+        return new double[]{nx,ny};
+    }
+    
+    /**
+     * 线段打断
+     * 线段AB,输入距离在线段内插入一个点C,并将线段分成两部分
+     * 求内差点C的坐标 
+     * @param xa a坐标x
+     * @param xb b坐标x
+     * @param ya a坐标y
+     * @param yb b坐标y
+     * @param distance c到b的长度
+     * @return double数组
+     */
+    public static double[] SplitSegmentByLength(double xa,double xb,double ya,double yb,double distance){
+        double length = Math.sqrt(Math.pow((xb-xa), 2)+Math.pow((yb-ya), 2));
+        if(length<distance){
+            return null;
+        }
+        double xc = xa+(xb-xa)*distance/length;
+        double yc = ya+(yb-ya)*distance/length;
+        return new double[]{xc,yc};
+    }
+    
+    
+    /**
+     * 已有线段c1c2,以线段为极轴
+     * 输入角度af和长度distance
+     * @param c1
+     * @param c2
+     * @param dis
+     * @return
+     */
+    public static double[] PolarCoordinates(double x1,double y1,double x2,double y2, double dis,double af){
+        double l = PBMathUtil.Distance(x1, y1, x2, y2);
+        double dx = x2 - x1;
+        double dy = y2 - y1;
+        dx = dx*Math.cos(Math.PI*af/180) - dy*Math.sin(Math.PI*af/180);
+        dy = dx*Math.sin(Math.PI*af/180) + dy*Math.cos(Math.PI*af/180);
+        double px = x1 + dx*dis/l;
+        double py = y1 + dy*dis/l;
+        return new double[]{px,py};
+    }
+    
 }

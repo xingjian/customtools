@@ -29,7 +29,7 @@ public class POIExcelUtil {
      * @param filePath 文件路径
      * @return 字符串集合
      */
-    public static List<String> ReadXLS(String filePath,String separator){
+    public static List<String> ReadXLS(String filePath,String separator,int rowSNum,int rowENum,int columnSNum,int columnENum){
         List<String> retList = new ArrayList<String>();
         try{
             File file = new File(filePath);
@@ -38,20 +38,59 @@ public class POIExcelUtil {
             HSSFWorkbook wb = new HSSFWorkbook(fs);
             for(int sheetIndex = 0; sheetIndex < wb.getNumberOfSheets(); sheetIndex++){
                 HSSFSheet st = wb.getSheetAt(sheetIndex);
-                for (int rowIndex = 0; rowIndex <= 12; rowIndex++) {
+                for (int rowIndex = rowSNum-1; rowIndex < rowENum; rowIndex++) {
                    HSSFRow row = st.getRow(rowIndex);
                    if (row == null) {
                        continue;
                    }
-                   Iterator<Cell> iter = row.cellIterator();
                    String rowStr="";
-                   while(iter.hasNext()){
-                       Cell cell = iter.next();
+                   for(int columnIndex=columnSNum-1;columnIndex<columnENum;columnIndex++){
+                       Cell cell = row.getCell(columnIndex);
                        String cellValue = GetCellValue(cell);
-                       rowStr +=cellValue+separator;
+                       if(cellValue.trim().equals("")){
+                           cellValue="0";
+                       }
+                       if(columnIndex==columnENum-1){
+                           rowStr +=cellValue;
+                       }else{
+                           rowStr +=cellValue+separator;    
+                       }
+                       
                    }
                    retList.add(rowStr);
                 }
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return retList;
+    }
+    
+    /**
+     * 读取excel指定行，并转换拼音
+     * 为了创建表用
+     * @param filePath 路径
+     * @param row 指定行
+     * @param column 列数
+     * @return
+     */
+    public static List<String> GetExcelRowPinYin(String filePath,int sheetIndex,int rowIndex){
+        List<String> retList = new ArrayList<String>();
+        try{
+            File file = new File(filePath);
+            BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
+            POIFSFileSystem fs = new POIFSFileSystem(in);
+            HSSFWorkbook wb = new HSSFWorkbook(fs);
+            HSSFSheet st = wb.getSheetAt(sheetIndex);
+            HSSFRow row = st.getRow(rowIndex);
+            if (row == null) {
+                return retList;
+            }
+            Iterator<Cell> iter = row.cellIterator();
+            while(iter.hasNext()){
+                Cell cell = iter.next();
+                String cellValue = GetCellValue(cell);
+                retList.add(StringUtil.ConverterToSpell(cellValue));
             }
         }catch(Exception e){
             e.printStackTrace();

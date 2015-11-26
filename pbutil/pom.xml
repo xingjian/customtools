@@ -23,10 +23,11 @@
 			<version>5.1.18</version>
 		</dependency>
 		<dependency>
-			<groupId>postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<version>9.4-1201.jdbc4</version>
-		</dependency>
+	      	  <groupId>postgresql</groupId>
+	      	  <artifactId>postgresql</artifactId>
+	      	  <version>9.1-901-1.jdbc4</version>
+	      	  <scope>compile</scope>
+        </dependency>
 		<dependency>    
         	<groupId>com.oracle</groupId>    
         	<artifactId>ojdbc14</artifactId>    
