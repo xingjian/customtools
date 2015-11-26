@@ -16,6 +16,9 @@ import org.geotools.data.DefaultTransaction;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.Transaction;
+import org.geotools.data.ogr.OGRDataStore;
+import org.geotools.data.ogr.OGRDataStoreFactory;
+import org.geotools.data.ogr.jni.JniOGRDataStoreFactory;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.data.shapefile.dbf.DbaseFileHeader;
@@ -27,6 +30,8 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.feature.FeatureCollection;
+import org.geotools.gml.producer.FeatureTransformer;
+import org.opengis.feature.Feature;
 import org.opengis.feature.Property;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -90,6 +95,10 @@ public class ConversionUtil {
             for (Map.Entry<String, String> entry : mapping.entrySet()) {
                 String key = entry.getKey().toLowerCase();
                 String[] array = entry.getValue().split(":");
+                //表的字段名称可以输入，或者输入为* 或者为空格
+                if(null==array[0]||array[0].trim().equals("*")||array[0].trim().equals("")){
+                    array[0] = key;
+                }
                 insertSQL = insertSQL+" "+array[0]+",";
                 if(findGeom&&(key.equals("the_geom")||key.equals("geometry"))){
                     theGeomIndex = columnCount;
@@ -256,5 +265,36 @@ public class ConversionUtil {
         }  
        
         return result;
+    }
+    
+    /**
+     * feature 转换GML
+     * @param feature
+     * @return
+     */
+    public static String FeatureToGML(Feature feature){
+        FeatureTransformer ft = new FeatureTransformer();
+        return null;
+    }
+    
+    /**
+     * features转换成标准的GeoJson到文件
+     * @param features
+     * @param file
+     * @return
+     */
+    public static String WriteGeoJSONFile(SimpleFeatureCollection features,File file){
+        Map<String, String> connectionParams = new HashMap<String, String>();
+        connectionParams.put("DriverName", "GeoJSON");
+        connectionParams.put("DatasourceName", file.getAbsolutePath());
+        OGRDataStoreFactory factory = new JniOGRDataStoreFactory();
+        OGRDataStore dataStore;
+        try {
+            dataStore = (OGRDataStore) factory.createNewDataStore(connectionParams);
+            dataStore.createSchema(features, true, null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "success";
     }
 }

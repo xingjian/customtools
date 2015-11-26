@@ -1,5 +1,10 @@
 package com.promise.gistool;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,15 +18,21 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.data.simple.SimpleFeatureIterator;
 import org.junit.Test;
+import org.opengis.feature.simple.SimpleFeature;
 
 import com.promise.cn.util.DBConnection;
 import com.promise.cn.util.PBMathUtil;
-import com.promise.cn.util.PrintUtil;
+import com.promise.cn.util.POIExcelUtil;
 import com.promise.cn.util.StringUtil;
+import com.promise.gistool.util.GISCoordinateTransform;
+import com.promise.gistool.util.GeoShapeUtil;
 import com.promise.gistool.util.GeoToolsGeometry;
 import com.tongtu.nomap.core.transform.BeijingToGis84;
 import com.tongtu.nomap.core.transform.Gis84ToCehui;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiLineString;
 
 /**  
@@ -141,7 +152,7 @@ public class BusCityDataTest {
         String username = "buscity";
         String passwd = "bs789&*(";
         Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
-        String tableName = "huanmian";
+        String tableName = "beijinghuanxian";
         String sql_update = "update "+tableName+" set the_geom=st_geometryfromtext(?,4326) where id=?";
         String sql_query = "select id, st_astext(the_geom) from "+tableName;
         Statement statement = connection.createStatement();
@@ -651,6 +662,108 @@ public class BusCityDataTest {
         return retList;
     }
     
+    /**
+     * 修改busline linename,linecode 
+     * 读取bus_line_station_ref
+     * 通过label == linelabel
+     */
+    @Test
+    public void testUpdateBuslineValue() throws Exception{
+        String url = "jdbc:postgresql://192.168.1.105:5432/buscity";
+        String username = "buscity";
+        String passwd = "bs789&*(";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String sql_query = "select linelabel,linecode,linename from bus_line_station_ref t4  group by linelabel,linecode,linename order by linecode";
+        String sql_update = "update busline set linename=?,linecode=? where label=?";
+        
+        Statement statement = connection.createStatement();
+        PreparedStatement ps = connection.prepareStatement(sql_update);
+        ResultSet rs = statement.executeQuery(sql_query);
+        int index=0;
+        while(rs.next()){
+            index++;
+             String linelabel = rs.getString(1);
+             int linecode = rs.getInt(2);
+             String linename = rs.getString(3);
+             ps.setString(1, linename);
+             ps.setInt(2, linecode);
+             ps.setString(3, linelabel);
+             ps.addBatch();
+             if(index%500==0){
+                 ps.executeBatch();
+             }
+        }
+        ps.executeBatch();
+    }
+    
+    
+    /**
+     * 修改busline linename,linecode 
+     * 读取bus_line_station_ref
+     * 通过label == linelabel
+     */
+    @Test
+    public void testUpdateBusstationValue() throws Exception{
+        String url = "jdbc:postgresql://192.168.1.105:5432/buscity";
+        String username = "buscity";
+        String passwd = "bs789&*(";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String sql_query = "select  linelabel,stationname,stationid,stationorder from bus_line_station_ref t1";
+        String sql_update = "update busstation set stationid=?,stationorder=? where tjcc=? and name=?";
+        
+        Statement statement = connection.createStatement();
+        PreparedStatement ps = connection.prepareStatement(sql_update);
+        ResultSet rs = statement.executeQuery(sql_query);
+        int index=0;
+        while(rs.next()){
+            index++;
+             String linelabel = rs.getString(1);
+             String stationname = rs.getString(2);
+             int stationid = rs.getInt(3);
+             int stationorder = rs.getInt(4);
+             ps.setInt(1, stationid);
+             ps.setInt(2, stationorder);
+             ps.setString(3, linelabel);
+             ps.setString(4, stationname);
+             ps.addBatch();
+             if(index%5000==0){
+                 ps.executeBatch();
+             }
+        }
+        ps.executeBatch();
+    }
+    
+    /**
+     * 计算wkt格式有多少对xy
+     * @param wkt
+     * @return
+     */
+    public int getGeoJSONXYCount(String json){
+        int retCount = 0;
+        Pattern pattern = Pattern.compile("([-\\+]?\\d+(\\.\\d+)?),([-\\+]?\\d+(\\.\\d+)?)");
+        Matcher matcher = pattern.matcher(json);
+        while(matcher.find()){
+            retCount++;
+        }
+        return retCount;
+    }
+    
+    /**
+     * 抽取wkt当中的xy对
+     * @param wkt
+     * @return
+     */
+    public List<String> getXYByGeoJSON(String json){
+        List<String> result = new ArrayList<String>();
+        Pattern pattern = Pattern.compile("([-\\+]?\\d+(\\.\\d+)?),([-\\+]?\\d+(\\.\\d+)?)");
+        Matcher matcher = pattern.matcher(json);
+        int i=0;
+        while(matcher.find()){
+            result.add(i, matcher.group());
+            i++;
+        }
+        return result;
+    }
     
     
     /**
@@ -708,5 +821,587 @@ public class BusCityDataTest {
             System.out.println(j+"***"+list.get(j));
         }
         
+    }
+    
+    /**
+     * 处理json格式数据
+     */
+    @Test
+    public void testHongNanTongDao() throws Exception{
+//        String name = "西大望路";
+//        String json = "{'paths':[[[12966277.285574466,4853682.582611528],[12966260.803840248,4852971.688390166],[12966251.697084926,4852625.3331057],[12966244.85955388,4852180.027699449],[12966243.157635663,4852061.75931309],[12966235.245208897,4851488.451742659],[12966227.273065718,4851002.210724772],[12966218.196168616,4850438.009909662],[12966196.793601645,4849143.817161443],[12966173.862493157,4847888.338971826],[12966193.185734099,4847265.6289955685],[12966193.30516695,4846755.770130341]]],'spatialReference':{'wkid':102113}}";
+
+//        String name = "两广路";
+//        String json = "{'paths':[[[12944140.787446097,4847512.805927073],[12944645.868997077,4847797.1755588725],[12944784.64997656,4847870.029601458],[12944973.473323,4847954.110332575],[12945125.869648147,4848020.1567023285],[12945330.57756453,4848106.626090579],[12945458.012422627,4848152.130008981],[12945567.17405365,4848197.514494526],[12945735.574381595,4848256.633758592],[12946065.32849894,4848370.333838169],[12946590.95250127,4848570.622738851],[12946902.552824402,4848729.707303974],[12946986.752988374,4848779.74967093],[12947145.956986353,4848879.834404844],[12947325.584002828,4848986.72681159],[12947523.484246379,4849098.277099746],[12947643.99199879,4849182.477263719],[12947814.661551012,4849307.5234646825],[12948146.804325491,4849512.350813921],[12948385.670038885,4849621.512444947],[12948540.33558831,4849710.251057474],[12948817.897547279,4849869.455055454],[12948997.64399661,4849921.766646688],[12949154.578770312,4849949.116770872],[12949393.444483709,4849958.193667981],[12949698.237134,4849948.997338016],[12950337.441783052,4849953.53578657],[12952987.656873196,4849880.801176839],[12954741.647806685,4849855.720276932],[12955883.66478244,4849889.878073945],[12956523.008504404,4849928.601390964],[12957014.116411136,4850019.370362053],[12957378.147758344,4850146.446921577],[12957906.518716363,4850292.632738172],[12958270.550063571,4850347.094120826],[12959689.412401114,4850419.709297696],[12961509.569137152,4850474.170680349],[12963092.771085506,4850474.170680349],[12964476.281297466,4850474.170680349],[12966214.02936238,4850424.725477692],[12967583.685363,4850424.725477694],[12968825.787072668,4850411.11013203],[12970436.219712399,4850402.0332349185],[12971728.48322188,4850397.494786364],[12973502.777740996,4850383.879440701],[12973662.101171829,4850388.417889256]]],'spatialReference':{'wkid':102113}}";
+//
+//        String name = "平安大街";
+//        String json = "{'paths':[[[12944140.787446097,4847512.805927073],[12944645.868997077,4847797.1755588725],[12944784.64997656,4847870.029601458],[12944973.473323,4847954.110332575],[12945125.869648147,4848020.1567023285],[12945330.57756453,4848106.626090579],[12945458.012422627,4848152.130008981],[12945567.17405365,4848197.514494526],[12945735.574381595,4848256.633758592],[12946065.32849894,4848370.333838169],[12946590.95250127,4848570.622738851],[12946902.552824402,4848729.707303974],[12946986.752988374,4848779.74967093],[12947145.956986353,4848879.834404844],[12947325.584002828,4848986.72681159],[12947523.484246379,4849098.277099746],[12947643.99199879,4849182.477263719],[12947814.661551012,4849307.5234646825],[12948146.804325491,4849512.350813921],[12948385.670038885,4849621.512444947],[12948540.33558831,4849710.251057474],[12948817.897547279,4849869.455055454],[12948997.64399661,4849921.766646688],[12949154.578770312,4849949.116770872],[12949393.444483709,4849958.193667981],[12949698.237134,4849948.997338016],[12950337.441783052,4849953.53578657],[12952987.656873196,4849880.801176839],[12954741.647806685,4849855.720276932],[12955883.66478244,4849889.878073945],[12956523.008504404,4849928.601390964],[12957014.116411136,4850019.370362053],[12957378.147758344,4850146.446921577],[12957906.518716363,4850292.632738172],[12958270.550063571,4850347.094120826],[12959689.412401114,4850419.709297696],[12961509.569137152,4850474.170680349],[12963092.771085506,4850474.170680349],[12964476.281297466,4850474.170680349],[12966214.02936238,4850424.725477692],[12967583.685363,4850424.725477694],[12968825.787072668,4850411.11013203],[12970436.219712399,4850402.0332349185],[12971728.48322188,4850397.494786364],[12973502.777740996,4850383.879440701],[12973662.101171829,4850388.417889256]]],'spatialReference':{'wkid':102113}}";
+//
+//        String json = "{'paths':[[[12949319.192328442,4857068.208058915],[12949264.730945788,4857696.424885133],[12949046.407683749,4859834.750751408],[12948964.237878343,4860599.121034259],[12948891.622701472,4860999.459969902],[12948409.59169185,4862455.585358732],[12948309.268092226,4862937.616368355],[12948291.114298008,4863629.371474335],[12948154.960841369,4865903.850797244],[12948145.88394426,4866622.836594551],[12948227.57601824,4866758.990051183],[12948336.976514973,4866832.082959481],[12948518.992188577,4866850.236753698],[12948582.53046834,4866904.698136352],[12948591.607365448,4867023.175530193],[12948473.129971607,4868169.730954468],[12948436.822383171,4868270.054554093],[12948391.437897626,4868406.208010726],[12948254.806709567,4868597.300581438],[12948245.729812458,4868615.454375655]]],'spatialReference':{'wkid':102113}}";
+        String name = "长安大街";
+        String json = "{'paths':[[[12966250.93053521,4852624.284924689],[12964235.381645562,4852640.16949463],[12963195.599195147,4852644.82737604],[12961571.31234404,4852651.635048873],[12960599.96492051,4852647.216033176],[12959585.263369996,4852624.404357546],[12958864.247214105,4852590.246560533],[12957724.61889548,4852542.592850707],[12956616.759716744,4852501.627380861],[12955677.30086595,4852465.0809267135],[12954710.372458117,4852462.811702436],[12952758.481281087,4852469.619375267],[12951331.079494407,4852475.352152377],[12950639.563254202,4852490.161826604],[12949061.974650241,4852501.507947984],[12948867.537959555,4852502.642560122],[12947559.389880285,4852501.567664413],[12945873.714541027,4852505.031217255],[12944605.457035897,4852503.896605114],[12943561.195853464,4852501.627380839],[12942523.802060295,4852499.358156559],[12941221.446474569,4852493.625379439],[12939327.539949685,4852500.433052271],[12936554.965898002,4852500.94064192]]],'spatialReference':{'wkid':102113}}";
+        List<String> list = GeoToolsGeometry.getXYByGeoJSON(json);
+        Geometry geo = GeoToolsGeometry.createGeometryLine(list,",","1");
+        String sql = "insert into tongdaooldline (id,name,the_geom) values (?,?,ST_GeomFromText(?,4326))";
+        String url = "jdbc:postgresql://192.168.1.105:5432/buscity";
+        String username = "buscity";
+        String passwd = "bs789&*(";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setString(1, StringUtil.GetUUIDString());
+        ps.setString(2, name);
+        ps.setString(3, GISCoordinateTransform.From900913To84(geo.toText()));
+        ps.addBatch();
+        ps.executeBatch();
+    }
+    
+    /**
+     * 匹配北京二环
+     */
+    @Test
+    public void testPatchERHuan() throws Exception{
+//        SimpleFeatureCollection sfc = GeoShapeUtil.ReadShapeFileFeatures("G:\\项目文档\\公交都市\\giss数据\\导航环线\\beijinghuanxian54.shp", "GBK");
+//        SimpleFeature sf = sfc.features().next();
+//        System.out.println(sf.getDefaultGeometryProperty().toString());
+//        String wkt54 = "MULTILINESTRING ((502714.7879646504 309268.04114394885, 502762.53140352434 304630.5453774695, 502762.12550444866 304329.0231627237, 502464.6339618199 304279.95152649615, 502191.3006077342 304221.07142619113, 502109.771950196 304029.7852786853, 502099.2915242518 300926.3285854072, 502824.5091864477 300941.6737621284, 503754.54690747394 301106.71605806483, 504745.0404044586 301206.3739018377, 506190.6693855033 301313.4679952121, 507851.0865540866 301354.15313162416, 508330.9625220178 301277.93876631337, 510132.9758900636 301227.38548013393, 510293.7475525077 301377.36814861355, 510356.8647117007 301776.5020819748, 510468.1694637435 302119.7554477086, 510282.1066241019 304207.97722501884, 510170.77057528787 304327.82078799664, 509649.8798736897 304566.2225596715, 509565.756605144 305196.9014127299, 509361.0772922621 309815.5852591119, 509232.45421024127 309969.56730120967, 508927.3173781525 309981.9180329594, 504099.0107226221 309876.8175136124, 503364.8771883102 309589.3121828786, 502714.7879646504 309268.04114394885))";
+//        String wkt84 = GISCoordinateTransform.From54To84(wkt54);
+//        System.out.println(wkt84);
+//        String wkt02 = GISCoordinateTransform.From84To02(wkt84);
+//        System.out.println(wkt02);
+//        "中关村大街"
+//        "西大望路"
+//        "两广路"
+//        "平安大街"
+//        "长安大街"
+//        "四环辅路"
+
+        String url = "jdbc:postgresql://192.168.1.105:5432/buscity";
+        String username = "buscity";
+        String passwd = "bs789&*(";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String sql_query = "select id,name,ST_AsText(ST_Buffer(ST_Transform(the_geom,900913),100,12)) wkt from tongdaooldline where name='京港澳高速'";
+        String sql_insert = "insert into xingjian_polygon_test (id,name,the_geom) values (?,?,ST_GeomFromText(?,4326))";
+        Statement statement = connection.createStatement();
+        PreparedStatement ps = connection.prepareStatement(sql_insert);
+        ResultSet rs = statement.executeQuery(sql_query);
+        int index=0;
+        while(rs.next()){
+            index++;
+            String id = rs.getString(1);
+            String name = rs.getString(2);
+            String wkt = rs.getString(3);
+            String wkt84 = GISCoordinateTransform.From900913To84(wkt);
+            ps.setString(1, id);
+            ps.setString(2, name);
+            ps.setString(3, wkt84);
+            ps.addBatch();
+        }
+        ps.executeBatch();
+    }
+    
+    /**
+     * 把公交通道多线合并省一个要素，并坐标转换成84坐标，存储到tongdaooldline表中
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void mergeLineGaoSu() throws Exception{
+        SimpleFeatureCollection sfc = GeoShapeUtil.ReadShapeFileFeatures("G:\\项目文档\\公交都市\\giss数据\\路况_图形_发布版\\路况_图形_发布版\\jgagsgl.shp", "GBK");
+        SimpleFeatureIterator sfi = sfc.features();
+        SimpleFeature sf = sfi.next();
+        Geometry geo1 = (Geometry)sf.getProperty("the_geom").getValue();
+        System.out.println(geo1.toText());
+        while(sfi.hasNext()){
+            SimpleFeature sf1 = sfi.next();
+            Geometry geo2 = (Geometry)sf1.getProperty("the_geom").getValue();
+            geo1 = geo1.union(geo2);
+        }
+        String name = "京港澳高速";
+        String sql = "insert into tongdaooldline (id,name,the_geom) values (?,?,ST_GeomFromText(?,4326))";
+        String url = "jdbc:postgresql://192.168.1.105:5432/buscity";
+        String username = "buscity";
+        String passwd = "bs789&*(";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setString(1, StringUtil.GetUUIDString());
+        ps.setString(2, name);
+        ps.setString(3, GISCoordinateTransform.From900913To84(geo1.toText()));
+        ps.addBatch();
+        ps.executeBatch();
+    }
+    
+    public int checkDMDirect(Map<String,NavigationObject> navigationMap,String linkids){
+        int d1 = 0;
+        int d2 = 0;
+        for(String s : linkids.split(",")){
+            NavigationObject no = navigationMap.get(s);
+            if(no.direct.equals("0")||no.direct.equals("1")||no.direct.equals("2")){//上行
+                d1++;  
+            }else if(no.direct.equals("3")){//下行
+                d2++;
+            } 
+        }
+        
+        return d1>d2?1:2;
+    }
+    
+    
+    /**
+     * 生成公交通道
+     * 把多个表的公交通道多记录合并，合并到一张表中，发布GIS图层
+     * 插入 oracle de_td_dm
+     * ID   VARCHAR2(32 BYTE)   No      1   id
+     * TDID    VARCHAR2(32 BYTE)   Yes     2   通道id
+     * DMNAME  VARCHAR2(100 BYTE)  Yes     3   断面名称
+     * SXX NUMBER(5,0) Yes     4   上下行 1：上行 2：下行
+     * ORDERNUM    NUMBER(5,0) Yes     5   断面在通道上的顺序
+     * 导航 0 未调查：默认为双方向都可以通行  1双向：双方向可以通行    2顺方向：单向通行，通行方向为起点到终点方向   3逆方向：单向通行，通行方向为终点到起点方向
+     */
+    @Test
+    public void createGJTDGISToPostGis() throws Exception{
+        String querySQLOracle = "select id,name from de_cfg_td";
+        String insertOracle = "insert into de_td_dm(id,tdid,dmname,sxx) values (?,?,?,?)";
+        String isnertPGSQL = "insert into bus_td (id,name,sxx,the_geom) values (?,?,?,ST_GeomFromText(?,4326))";
+        Connection connection = DBConnection.GetPostGresConnection("jdbc:postgresql://192.168.1.105:5432/buscity", "buscity", "bs789&*(");
+        //把需要的导航数据加载到内存中
+        Map<String,NavigationObject> navigationMap = new HashMap<String, NavigationObject>();
+        String sql_query_nl = "select t1.navigationid,ST_AsText(t2.the_geom) wkt,t2.direction from (select navigationid from buslinelink group by navigationid"+
+                ") t1 left join navigationline t2 on t1.navigationid = t2.id";
+        Statement statement = connection.createStatement();
+        ResultSet rs = statement.executeQuery(sql_query_nl);
+        while(rs.next()){
+            String navigationid = rs.getString(1);
+            String wkt = rs.getString(2);
+            String direct = rs.getString(3);
+            NavigationObject no = new NavigationObject(navigationid, direct, wkt);
+            navigationMap.put(navigationid, no);
+        }
+        
+        Connection connectOracle = DBConnection.GetOracleConnection("jdbc:oracle:thin:@182.92.183.85:1521:orcl", "buscity", "admin123ttyj7890uiop");
+        Statement stOracleQuery = connectOracle.createStatement();
+        ResultSet rsOraleQuery = stOracleQuery.executeQuery(querySQLOracle);
+        Map<String,String> decfgtdMap = new HashMap<String, String>();
+        while(rsOraleQuery.next()){
+            decfgtdMap.put(rsOraleQuery.getString(2), rsOraleQuery.getString(1));
+        }
+        //二环路,三环路,长安街,四环辅路,平安大街,两广路,西大望路,中关村大街,京通快速路,京藏高速,京开高速,京港澳高速
+        String str1 = "erhuantongdao:二环路,sanhuantongdao:三环路,tongdao_shfl:四环辅路,tongdao_cadj:长安街,tongdao_padj:平安大街,tongdao_lgl:两广路,"+
+                      "tongdao_xdwl:西大望路,tongdao_zgc:中关村大街,tongdao_jtksl:京通快速路,tongdao_jzgsl:京藏高速,tongdao_jtksl:京开高速,tongdao_jgagsl:京港澳高速"  ;
+        PreparedStatement psOracle = connectOracle.prepareStatement(insertOracle);
+        PreparedStatement psPGSQL = connection.prepareStatement(isnertPGSQL);
+        for(String str : str1.split(",")){
+            String[] arrTemp = str.split(":");
+            String tableName = arrTemp[0];
+            String gsName = arrTemp[1];
+            String sqlTongDao = "select id,name,ST_AsText(the_geom) wkt,linkids from "+tableName;
+            ResultSet rsTemp = connection.createStatement().executeQuery(sqlTongDao);
+            List<String[]> listArrTemp1 = new ArrayList<String[]>();
+            List<String[]> listArrTemp2 = new ArrayList<String[]>();
+            List<String> listArrTemp11 = new ArrayList<String>();
+            List<String> listArrTemp21 = new ArrayList<String>();
+            int i1=0;
+            int i2=0;
+            while(rsTemp.next()){
+                //id,tdid,dmname,sxx
+                String id = rsTemp.getString(1);
+                String name = rsTemp.getString(2);
+                String wkt = rsTemp.getString(3);
+                String linkids = rsTemp.getString(4);
+                
+                psOracle.setString(1, StringUtil.GetUUIDString());
+                psOracle.setString(2, decfgtdMap.get(gsName));
+                psOracle.setString(3, name);
+                
+                int sxx = checkDMDirect(navigationMap,linkids);
+                if(sxx==1){//上行
+                    listArrTemp1.add(i1,new String[]{id,name,wkt,linkids});
+                    listArrTemp11.add(i1,wkt);
+                    psOracle.setString(4, "1");
+                    i1++;
+                }else{//下行
+                    listArrTemp2.add(i2,new String[]{id,name,wkt,linkids});
+                    listArrTemp21.add(i2,wkt);
+                    psOracle.setString(4, "2");
+                    i2++;
+                }
+                psOracle.addBatch();
+            }
+            psOracle.executeBatch();
+            i1=0;
+            i2=0;
+            Geometry geo1 = GeoToolsGeometry.UnionManyGeo(listArrTemp11);
+            Geometry geo2 = GeoToolsGeometry.UnionManyGeo(listArrTemp21);
+            //id,name,sxx,the_geom
+            psPGSQL.setString(1, StringUtil.GetUUIDString());
+            psPGSQL.setString(2, gsName);
+            psPGSQL.setString(3, "1");
+            psPGSQL.setString(4, geo1.toText());
+            psPGSQL.addBatch();
+            psPGSQL.setString(1, StringUtil.GetUUIDString());
+            psPGSQL.setString(2, gsName);
+            psPGSQL.setString(3, "2");
+            psPGSQL.setString(4, geo2.toText());
+            psPGSQL.addBatch();
+        }  
+        psPGSQL.executeBatch();
+    }
+    
+    
+    /**
+     * 生成公交通道
+     * 把多个表的公交通道多记录合并，合并到一张表中，发布GIS图层
+     * 插入 oracle de_td_dm
+     * ID   VARCHAR2(32 BYTE)   No      1   id
+     * TDID    VARCHAR2(32 BYTE)   Yes     2   通道id
+     * DMNAME  VARCHAR2(100 BYTE)  Yes     3   断面名称
+     * SXX NUMBER(5,0) Yes     4   上下行 1：上行 2：下行
+     * ORDERNUM    NUMBER(5,0) Yes     5   断面在通道上的顺序
+     * 导航 0 未调查：默认为双方向都可以通行  1双向：双方向可以通行    2顺方向：单向通行，通行方向为起点到终点方向   3逆方向：单向通行，通行方向为终点到起点方向
+     * 根据传平修改，bus_td不合并
+     */
+    @Test
+    public void createGJTDGISToPostGisNew() throws Exception{
+        String isnertPGSQL = "insert into bus_td_dm_color (id,name,sxx,the_geom,dmname) values (?,?,?,ST_GeomFromText(?,4326),?)";
+        Connection connection = DBConnection.GetPostGresConnection("jdbc:postgresql://192.168.1.105:5432/buscity", "buscity", "bs789&*(");
+        //把需要的导航数据加载到内存中
+        Map<String,NavigationObject> navigationMap = new HashMap<String, NavigationObject>();
+        String sql_query_nl = "select t1.navigationid,ST_AsText(t2.the_geom) wkt,t2.direction from (select navigationid from buslinelink group by navigationid"+
+                ") t1 left join navigationline t2 on t1.navigationid = t2.id";
+        Statement statement = connection.createStatement();
+        ResultSet rs = statement.executeQuery(sql_query_nl);
+        while(rs.next()){
+            String navigationid = rs.getString(1);
+            String wkt = rs.getString(2);
+            String direct = rs.getString(3);
+            NavigationObject no = new NavigationObject(navigationid, direct, wkt);
+            navigationMap.put(navigationid, no);
+        }
+        //二环路,三环路,长安街,四环辅路,平安大街,两广路,西大望路,中关村大街,京通快速路,京藏高速,京开高速,京港澳高速
+        String str1 = "erhuantongdao:二环路,sanhuantongdao:三环路,tongdao_shfl:四环辅路,tongdao_cadj:长安街,tongdao_padj:平安大街,tongdao_lgl:两广路,"+
+                      "tongdao_xdwl:西大望路,tongdao_zgc:中关村大街,tongdao_jtksl:京通快速路,tongdao_jzgsl:京藏高速,tongdao_jtksl:京开高速,tongdao_jgagsl:京港澳高速"  ;
+        PreparedStatement psPGSQL = connection.prepareStatement(isnertPGSQL);
+        for(String str : str1.split(",")){
+            String[] arrTemp = str.split(":");
+            String tableName = arrTemp[0];
+            String gsName = arrTemp[1];
+            String sqlTongDao = "select id,name,ST_AsText(the_geom) wkt,linkids from "+tableName;
+            ResultSet rsTemp = connection.createStatement().executeQuery(sqlTongDao);
+            List<String[]> listArrTemp1 = new ArrayList<String[]>();
+            List<String[]> listArrTemp2 = new ArrayList<String[]>();
+            List<String> listArrTemp11 = new ArrayList<String>();
+            List<String> listArrTemp21 = new ArrayList<String>();
+            int i1=0;
+            int i2=0;
+            while(rsTemp.next()){
+                //id,tdid,dmname,sxx
+                String id = rsTemp.getString(1);
+                String name = rsTemp.getString(2);
+                String wkt = rsTemp.getString(3);
+                String linkids = rsTemp.getString(4);
+                int sxx = checkDMDirect(navigationMap,linkids);
+                if(sxx==1){//上行
+                    listArrTemp1.add(i1,new String[]{id,name,wkt,linkids});
+                    listArrTemp11.add(i1,wkt);
+                    i1++;
+                }else{//下行
+                    listArrTemp2.add(i2,new String[]{id,name,wkt,linkids});
+                    listArrTemp21.add(i2,wkt);
+                    i2++;
+                }
+                psPGSQL.setString(1, StringUtil.GetUUIDString());
+                psPGSQL.setString(2, gsName);
+                psPGSQL.setString(3, sxx+"");
+                psPGSQL.setString(4, wkt);
+                psPGSQL.setString(5, name);
+                psPGSQL.addBatch();
+            }
+            i1=0;
+            i2=0;
+        }  
+        psPGSQL.executeBatch();
+    }
+    
+    /**
+     * 对接公交数据
+     */
+    @Test
+    public void joinBusGPS() throws Exception{
+        String readfilePath = "G:\\项目文档\\公交都市\\2015-08-19\\2015-08-19";
+        String writefilePath = "G:\\项目文档\\公交都市\\2015-08-19\\BusMisResult.txt";
+        BufferedWriter writer = new BufferedWriter(new FileWriter(new File(writefilePath)));
+        File file = new File(readfilePath);
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String s = null;
+        Map<String,String> map = new HashMap<String, String>();
+        while((s = br.readLine())!=null){
+            if(s.trim()!=""){
+                System.out.println(s);
+                String[] arrTemp = s.split(",");
+                String keyTemp = arrTemp[2];
+                String value = arrTemp[3];
+                if(null==map.get(keyTemp)&&null!=keyTemp&&!keyTemp.trim().equals("")){
+                    map.put(keyTemp, value);
+                }
+            }
+        }
+        br.close();
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            writer.write(entry.getKey()+","+entry.getValue()+"\n");
+        }
+        writer.close();
+    }
+    
+    /**
+     * 合并双向通道
+     */
+    @Test
+    public void testMergeBUSTD() throws Exception{
+        String queryTD = "select name,string_agg(st_astext(the_geom),'%') wkts from bus_td group by name";
+        String insertSQL = "insert into bus_td_new (id,name,length,the_geom) values(?,?,?,ST_GeomFromText(?,4326))";
+        Connection connection = DBConnection.GetPostGresConnection("jdbc:postgresql://192.168.1.105:5432/buscity", "buscity", "bs789&*(");
+        PreparedStatement ps = connection.prepareStatement(queryTD);
+        PreparedStatement psInsert = connection.prepareStatement(insertSQL);
+        ResultSet rs = ps.executeQuery();
+        while(rs.next()){
+            String name =  rs.getString(1);
+            String wkts = rs.getString(2);
+            String[] wktArr = wkts.split("%");
+            List<String> wktList = Arrays.asList(wktArr);
+            Geometry result =  GeoToolsGeometry.UnionManyGeo(wktList);
+            String wktnew = result.toText();
+            double length = GISCoordinateTransform.From84To900913(result).getLength();
+            psInsert.setString(1, StringUtil.GetUUIDString());
+            psInsert.setString(2, name);
+            psInsert.setDouble(3, length);
+            psInsert.setString(4, wktnew);
+            psInsert.addBatch();
+        }
+        psInsert.executeBatch();
+    }
+    
+    /**
+     * 合并buslinelink到buslinelink_merge
+     */
+    @Test
+    public void testMergeBusLinelink() throws Exception{
+        String queryTD = "select buslineid,string_agg(st_astext(the_geom),'%') wkts from buslinelink group by buslineid";
+        String insertSQL = "insert into buslinelink_merge (id,buslineid,the_geom) values(?,?,ST_GeomFromText(?,4326))";
+        Connection connection = DBConnection.GetPostGresConnection("jdbc:postgresql://192.168.1.105:5432/buscity", "buscity", "bs789&*(");
+        PreparedStatement ps = connection.prepareStatement(queryTD);
+        PreparedStatement psInsert = connection.prepareStatement(insertSQL);
+        ResultSet rs = ps.executeQuery();
+        int count = 0;
+        while(rs.next()){
+            count++;
+            String buslineid =  rs.getString(1);
+            String wkts = rs.getString(2);
+            String[] wktArr = wkts.split("%");
+            List<String> wktList = Arrays.asList(wktArr);
+            Geometry result =  GeoToolsGeometry.UnionManyGeo(wktList);
+            String wktnew = result.toText();
+            psInsert.setString(1, StringUtil.GetUUIDString());
+            psInsert.setString(2, buslineid);
+            psInsert.setString(3, wktnew);
+            psInsert.addBatch();
+            System.out.println(buslineid+"------"+count);
+        }
+        psInsert.executeBatch();
+    }
+    
+    /**
+     * 处理12交通通道和公交线路的关系
+     */
+    @Test
+    public void testQBLineIntersectsTD() throws Exception{
+        String queryTD = "select name,st_astext(the_geom) wkt from bus_td_new";
+        String queryBusLine = "select id,st_astext(the_geom) wkt from buslinelink_merge";
+        String insertSQL = "insert into td_line_station_ref (id,tdname,ref_id,type) values(?,?,?,?)";
+        String updateSQL = "update bus_td_new set buslinecount=? where name=?";
+        Connection connection = DBConnection.GetPostGresConnection("jdbc:postgresql://192.168.1.105:5432/buscity", "buscity", "bs789&*(");
+        Statement psTD = connection.createStatement();
+        ResultSet rsTD = psTD.executeQuery(queryTD);
+        Statement psBusLine = connection.createStatement();
+        ResultSet rsBusLine = psBusLine.executeQuery(queryBusLine);
+        Map<String,Geometry> mapTD = new HashMap<String, Geometry>();
+        Map<String,Geometry> mapBusLine = new HashMap<String, Geometry>();
+        while(rsTD.next()){
+            mapTD.put(rsTD.getString(1), GeoToolsGeometry.createGeometrtyByWKT(rsTD.getString(2)));
+        }
+        while(rsBusLine.next()){
+            mapBusLine.put(rsBusLine.getString(1), GeoToolsGeometry.createGeometrtyByWKT(rsBusLine.getString(2)));
+        }
+        PreparedStatement psInsert = connection.prepareStatement(insertSQL);
+        PreparedStatement psUpdate = connection.prepareStatement(updateSQL);
+        for (Map.Entry<String, Geometry> entry : mapTD.entrySet()) {
+            String tdName = entry.getKey();
+            Geometry tdGeometry = entry.getValue();
+            int count = 0;
+            for (Map.Entry<String, Geometry> entryTemp : mapBusLine.entrySet()) {
+                String ref_id = entryTemp.getKey();
+                Geometry busLineGeometry = entryTemp.getValue();
+                if(GeoToolsGeometry.isIntersects(tdGeometry, busLineGeometry)){
+                    count++;
+                    psInsert.setString(1, StringUtil.GetUUIDString());
+                    psInsert.setString(2, tdName);
+                    psInsert.setString(3, ref_id);
+                    psInsert.setString(4, "1");// 1公交线路 2公交站点
+                    psInsert.addBatch();
+                }
+            }
+            psInsert.executeBatch();
+            psUpdate.setInt(1, count);
+            psUpdate.setString(2, tdName);
+            psUpdate.addBatch();
+            psUpdate.executeBatch();
+            System.out.println(tdName + "---"+count);
+        }
+       
+    }
+    
+    
+    /**
+     * 处理12交通通道和公交站点的关系（先使用公交车站点进行统计，在按重复名字去统计）
+     */
+    @Test
+    public void testQBStationIntersectsTD() throws Exception{
+        String queryTD = "select name,st_astext(the_geom) wkt from bus_td_new";
+        String queryBusStation = "select * from ( select t1.id,t1.busstationid,st_astext(t1.the_geom) wkt ,t2.name,t2.direct from busstationlink t1 left join busstation t2 on t1.busstationid=t2.id ) t3 where t3.busstationid is NOT NULL";
+        String insertSQL = "insert into td_line_station_ref (id,tdname,ref_id,type) values(?,?,?,?)";
+        String updateSQL = "update bus_td_new set busstationcount=? where name=?";
+        Connection connection = DBConnection.GetPostGresConnection("jdbc:postgresql://192.168.1.105:5432/buscity", "buscity", "bs789&*(");
+        Statement psTD = connection.createStatement();
+        ResultSet rsTD = psTD.executeQuery(queryTD);
+        Statement psBusLine = connection.createStatement();
+        ResultSet rsBusStation = psBusLine.executeQuery(queryBusStation);
+        Map<String,Geometry> mapTD = new HashMap<String, Geometry>();
+        Map<String,Geometry> mapBStation = new HashMap<String, Geometry>();
+        Map<String,String[]> mapBusStation = new HashMap<String, String[]>();
+        while(rsTD.next()){
+            mapTD.put(rsTD.getString(1), GeoToolsGeometry.createGeometrtyByWKT(rsTD.getString(2)));
+        }
+        while(rsBusStation.next()){
+            //id busstationid wkt name direct
+            String[] strArr = new String[5];
+            String id = rsBusStation.getString(1);
+            String wkt = rsBusStation.getString(3);
+            strArr[0] = id;
+            strArr[1] = rsBusStation.getString(2);
+            strArr[2] = wkt;
+            strArr[3] = rsBusStation.getString(4);
+            strArr[4] = rsBusStation.getString(5);
+            mapBusStation.put(id, strArr);
+            mapBStation.put(id, GeoToolsGeometry.createGeometrtyByWKT(wkt));
+        }
+        PreparedStatement psInsert = connection.prepareStatement(insertSQL);
+        PreparedStatement psUpdate = connection.prepareStatement(updateSQL);
+        double d = 5.0/111000;
+        for (Map.Entry<String, Geometry> entry : mapTD.entrySet()) {
+            String tdName = entry.getKey();
+            Geometry tdGeometry = entry.getValue();
+            int count = 0;
+            Map<String,Integer> mapTemp= new HashMap<String, Integer>();
+            for (Map.Entry<String, Geometry> entryTemp : mapBStation.entrySet()) {
+                String ref_id = entryTemp.getKey();
+                if(GeoToolsGeometry.distanceGeo(tdGeometry, entryTemp.getValue())<d){
+                    String[] arr1 = mapBusStation.get(ref_id);
+                    String arr1_name = arr1[3].trim();
+                    String arr1_direct = arr1[4].trim();
+                    if(mapTemp.get(arr1_name+arr1_direct)==null){
+                        mapTemp.put(arr1_name+arr1_direct, 1);
+                        count++;
+                        psInsert.setString(1, StringUtil.GetUUIDString());
+                        psInsert.setString(2, tdName);
+                        psInsert.setString(3, arr1[3]);
+                        psInsert.setString(4, "2");// 1公交线路 2公交站点
+                        psInsert.addBatch();
+                    }else{
+                        mapTemp.put(arr1_name+arr1_direct, mapTemp.get(arr1_name+arr1_direct)+1);
+                    }
+                }
+            }
+            psInsert.executeBatch();
+            psUpdate.setInt(1, count);
+            psUpdate.setString(2, tdName);
+            psUpdate.addBatch();
+            System.out.println(tdName + "---"+count);
+        }
+        psUpdate.executeBatch();
+    }
+    
+    /**
+     * 导入王昌同学的通道数据
+     */
+    @Test
+    public void testImportWangChangTD() throws Exception{
+        String filePath = "G:\\项目文档\\公交都市\\数据\\12条通道内所有线路2015.xls";
+        Connection connection = DBConnection.GetPostGresConnection("jdbc:postgresql://192.168.1.105:5432/buscity", "buscity", "bs789&*(");
+        List<String> list = POIExcelUtil.ReadXLS(filePath, ",", 1, 224, 1, 12);
+        String insertSQL = "insert into td_busline_ref_wc (id,tdname,buslinename) values (?,?,?)";
+        PreparedStatement ps = connection.prepareStatement(insertSQL);
+        String[] tdNameArr = list.get(0).split(",");
+        for(int i=1;i<list.size();i++){
+            String[] buslineNames = list.get(i).split(",");
+            for(int j=0;j<buslineNames.length;j++){
+                if(!buslineNames[j].equals("NULL")){
+                   ps.setString(1, StringUtil.GetUUIDString());
+                   ps.setString(2, tdNameArr[j]);
+                   ps.setString(3, buslineNames[j]);
+                   ps.addBatch();
+                }
+            }
+            ps.executeBatch();
+        }
+    }
+    
+    @Test
+    public void testPatchWCTDData() throws Exception{
+        String insertSQL = "insert into td_line_station_ref_wc (id,tdname,ref_id,type) values (?,?,?,?)";
+        String querySQL = "select t1.id,t1.buslineid,t2.linenumber from buslinelink_merge t1 left join busline t2 on t1.buslineid=t2.id";
+        String querySQL1 = "select id,tdname,buslinename from td_busline_ref_wc";
+        Connection connection = DBConnection.GetPostGresConnection("jdbc:postgresql://192.168.1.105:5432/buscity", "buscity", "bs789&*(");
+        Statement statement = connection.createStatement();
+        Statement statement1 = connection.createStatement();
+        PreparedStatement psInsert = connection.prepareStatement(insertSQL);
+        ResultSet rs = statement.executeQuery(querySQL);
+        ResultSet rs1 = statement1.executeQuery(querySQL1);
+        Map<String,String> map1 = new HashMap<String, String>();
+        Map<String,String> map2 = new HashMap<String, String>();
+        while(rs.next()){
+            String id = rs.getString(1);
+            String buslineid = rs.getString(2);
+            String linenumber = rs.getString(3).trim();
+            map1.put(linenumber, id);
+        }
+        
+        int okCount = 0;
+        int allCount = 0;
+        int failCouont = 0;
+        while(rs1.next()){
+            allCount++;
+            String idTemp = rs1.getString(1);
+            String tdNameTemp = rs1.getString(2);
+            String buslinenameTemp = rs1.getString(3);
+            String subbuslinenameTemp = buslinenameTemp.replaceAll("路", "").trim().replaceAll("线", "");
+            subbuslinenameTemp = subbuslinenameTemp.replaceAll("环", "");
+            
+            if(null!=map1.get(subbuslinenameTemp)){
+                okCount++;
+                psInsert.setString(1, StringUtil.GetUUIDString());
+                psInsert.setString(2, tdNameTemp);
+                psInsert.setString(3, map1.get(subbuslinenameTemp));
+                psInsert.setString(4, "3");
+                psInsert.addBatch();
+            }else{
+                failCouont++;
+                if(null!=map2.get(buslinenameTemp)){
+                    
+                }else{
+                    map2.put(buslinenameTemp, buslinenameTemp);
+                    System.out.println(buslinenameTemp);
+                }
+            }
+        }
+        psInsert.executeBatch();
+        System.out.println(allCount + "---"+okCount+"---"+failCouont);
     }
 }

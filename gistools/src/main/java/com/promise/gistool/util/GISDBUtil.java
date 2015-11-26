@@ -20,14 +20,13 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeType;
-import org.opengis.feature.type.FeatureType;
 
 import com.promise.cn.util.DBType;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
@@ -69,6 +68,20 @@ public class GISDBUtil {
             e.printStackTrace();
         }
         return pgDatastore;
+    }
+    
+    /**
+     * 获取DataStore中所有的空间表
+     * @param ds
+     */
+    public static String[] getAllLayers(DataStore ds){
+        try {
+            String[] typeNames=ds.getTypeNames();
+            return typeNames;
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
     
     /**
@@ -202,6 +215,25 @@ public class GISDBUtil {
     }
     
     /**
+     * 获取指定空间数据范围
+     * @param dataStore
+     * @param tableName
+     * @return ReferencedEnvelope对象
+     * 这个方法抛出异常，但不影响使用
+     */
+    public static ReferencedEnvelope GetBoundsByTableName(DataStore dataStore,String tableName){
+        ReferencedEnvelope bounds = null;
+        try {
+            SimpleFeatureSource fs = dataStore.getFeatureSource(tableName);
+            SimpleFeatureCollection fc = fs.getFeatures();
+            bounds =  fc.getBounds();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return bounds;
+    }
+    
+    /**
      * 获取指定空间表的属性信息
      * @param dataStore
      * @param tableName
@@ -223,5 +255,6 @@ public class GISDBUtil {
         }
         return retList;
     }
+    
     
 }

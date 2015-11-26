@@ -1,12 +1,17 @@
 package com.promise.gistool.util;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.geotools.geojson.feature.FeatureJSON;
+import org.geotools.geojson.geom.GeometryJSON;
 import org.geotools.geometry.jts.JTSFactoryFinder;
+import org.opengis.feature.simple.SimpleFeature;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -38,7 +43,7 @@ public class GeoToolsGeometry {
      * @param y
      * @return
      */
-    public Coordinate coordinate(double x,double y){  
+    public static Coordinate coordinate(double x,double y){  
         return new Coordinate(x,y);  
     }
     
@@ -77,6 +82,28 @@ public class GeoToolsGeometry {
         MultiPoint mpoint = (MultiPoint) reader.read(wktString);  
         return mpoint;  
     }
+    /**
+     * 创建LineString
+     * @param list
+     * @xysplit 分隔符
+     * item string 
+     * @type 0 LineString 1 MultiLineString
+     */
+    public static Geometry createGeometryLine(List<String> list,String xysplit,String type){
+        Coordinate[] coords = new Coordinate[list.size()];
+        for(int i=0;i<list.size();i++){
+            String[] str = list.get(i).split(xysplit);
+            coords[i] = coordinate(Double.parseDouble(str[0]),Double.parseDouble(str[1]));
+        }
+        LineString ls = createLine(coords);
+        if(type.trim().equals("1")){
+            LineString[] lineStrings = new LineString[1];
+            lineStrings[0] = ls;
+            return createMLine(lineStrings);
+        }else{
+            return ls;
+        }
+    }
     
     /**
      * createLine
@@ -105,7 +132,7 @@ public class GeoToolsGeometry {
      * @param lineStrings
      * @return
      */
-    public MultiLineString createMLine(LineString[] lineStrings){  
+    public static MultiLineString createMLine(LineString[] lineStrings){  
         MultiLineString ms = gf.createMultiLineString(lineStrings);  
         return ms;  
     }
@@ -115,7 +142,7 @@ public class GeoToolsGeometry {
      * @return
      * @throws ParseException
      */
-    public MultiLineString createMLineByWKT(String wktString)throws ParseException{  
+    public static MultiLineString createMLineByWKT(String wktString)throws ParseException{  
         WKTReader reader = new WKTReader( gf );  
         MultiLineString line = (MultiLineString) reader.read(wktString);
         return line;  
@@ -127,10 +154,46 @@ public class GeoToolsGeometry {
      * @return
      * @throws ParseException
      */
-    public Polygon createPolygonByWKT(String wktString) throws ParseException{  
+    public static Polygon createPolygonByWKT(String wktString) throws ParseException{  
         WKTReader reader = new WKTReader( gf );  
         Polygon polygon = (Polygon) reader.read(wktString);  
         return polygon;  
+    }
+
+    /**
+     * 根据wkt创建几何对象
+     * @param wktString
+     * @return
+     * @throws ParseException
+     */
+    public static Geometry createGeometrtyByWKT(String wktString) throws ParseException{  
+        WKTReader reader = new WKTReader( gf );  
+        return reader.read(wktString);  
+    }
+    
+    /**
+     * 根据JSON创建几何对象
+     * @param jsonString
+     * @return
+     * @throws Exception
+     */
+    public static Geometry CreateGeometrtyByJSON(String jsonString) throws Exception{  
+        //1(point) 2(multipoint) 3(line) 4(multiline) 5(polygon) 6(multipolygon)
+        String geoType = GetGeoTypeByJSONString(jsonString);
+        if(geoType.equals("1")){
+            return createPointGeoJSON(jsonString);
+        }else if(geoType.equals("2")){
+            return createMultiPointGeoJSON(jsonString);
+        }else if(geoType.equals("3")){
+            return createLineGeoJSON(jsonString);
+        }else if(geoType.equals("4")){
+            return createMultiLineGeoJSON(jsonString);
+        }else if(geoType.equals("5")){
+            return createPolygonGeoJSON(jsonString);
+        }else if(geoType.equals("6")){
+            return createMultiPolygonGeoJSON(jsonString);
+        }
+        return null;
     }
     
     /**
@@ -138,18 +201,18 @@ public class GeoToolsGeometry {
      * @param x
      * @param y
      * @param RADIUS
+     * @param sides 圆上面的点个数
      * @return
      */
-    public Polygon createCircle(double x, double y, final double RADIUS){  
-        final int SIDES = 32;//圆上面的点个数  
-        Coordinate coords[] = new Coordinate[SIDES+1];  
-        for( int i = 0; i < SIDES; i++){  
-            double angle = ((double) i / (double) SIDES) * Math.PI * 2.0;  
+    public static Polygon createCircle(double x, double y, final double RADIUS,int sides){  
+        Coordinate coords[] = new Coordinate[sides+1];  
+        for( int i = 0; i < sides; i++){  
+            double angle = ((double) i / (double) sides) * Math.PI * 2.0;  
             double dx = Math.cos( angle ) * RADIUS;  
             double dy = Math.sin( angle ) * RADIUS;  
             coords[i] = new Coordinate( (double) x + dx, (double) y + dy );  
         }  
-        coords[SIDES] = coords[0];  
+        coords[sides] = coords[0];  
         LinearRing ring = gf.createLinearRing( coords );  
         Polygon polygon = gf.createPolygon( ring, null );  
         return polygon;  
@@ -160,7 +223,7 @@ public class GeoToolsGeometry {
      * @return
      * @throws ParseException
      */
-    public MultiPolygon createMulPolygonByWKT(String wktString) throws ParseException{  
+    public static MultiPolygon createMulPolygonByWKT(String wktString) throws ParseException{  
         WKTReader reader = new WKTReader( gf );  
         MultiPolygon mpolygon = (MultiPolygon) reader.read(wktString);  
         return mpolygon;  
@@ -173,7 +236,7 @@ public class GeoToolsGeometry {
      * @param g2
      * @return
      */
-    public boolean isIntersects(Geometry g1,Geometry g2){
+    public static boolean isIntersects(Geometry g1,Geometry g2){
         return g1.intersects(g2);
     }
     
@@ -183,7 +246,7 @@ public class GeoToolsGeometry {
      * @param g2
      * @return
      */
-    public boolean isDisjoint(Geometry g1,Geometry g2){
+    public static boolean isDisjoint(Geometry g1,Geometry g2){
         return g1.disjoint(g2);
     }
     
@@ -193,7 +256,7 @@ public class GeoToolsGeometry {
      * @param g2
      * @return
      */
-    public boolean isCrosses(Geometry g1,Geometry g2){
+    public static boolean isCrosses(Geometry g1,Geometry g2){
         return g1.crosses(g2);
     }
     
@@ -203,7 +266,7 @@ public class GeoToolsGeometry {
      * @param g2
      * @return
      */
-    public boolean isWithin(Geometry g1,Geometry g2){
+    public static boolean isWithin(Geometry g1,Geometry g2){
         return g1.within(g2);
     }
     
@@ -213,7 +276,7 @@ public class GeoToolsGeometry {
      * @param g2
      * @return
      */
-    public boolean isContains(Geometry g1,Geometry g2){
+    public static boolean isContains(Geometry g1,Geometry g2){
         return g1.contains(g2);
     }
     
@@ -222,7 +285,7 @@ public class GeoToolsGeometry {
      * @param wkt
      * @return
      */
-    public int getWktXYCount(String wkt){
+    public static int getWktXYCount(String wkt){
         int retCount = 0;
         Pattern pattern = Pattern.compile("([-\\+]?\\d+(\\.\\d+)?) ([-\\+]?\\d+(\\.\\d+)?)");
         Matcher matcher = pattern.matcher(wkt);
@@ -233,14 +296,55 @@ public class GeoToolsGeometry {
     }
     
     /**
+     * 返回几何对象的质心点
+     * @param geom
+     * @return
+     */
+    public static Point GetCentroid(Geometry geom){
+        return geom.getCentroid();
+    }
+    
+    /**
      * 抽取wkt当中的xy对
      * @param wkt
      * @return
      */
-    public List<String> getXYByWkt(String wkt){
+    public static List<String> getXYByWkt(String wkt){
         List<String> result = new ArrayList<String>();
         Pattern pattern = Pattern.compile("([-\\+]?\\d+(\\.\\d+)?) ([-\\+]?\\d+(\\.\\d+)?)");
         Matcher matcher = pattern.matcher(wkt);
+        int i=0;
+        while(matcher.find()){
+            result.add(i, matcher.group());
+            i++;
+        }
+        return result;
+    }
+    
+    /**
+     * 计算Geojson格式有多少对xy
+     * @param wkt
+     * @return
+     */
+    public static int getGeoJSONXYCount(String json){
+        int retCount = 0;
+        Pattern pattern = Pattern.compile("([-\\+]?\\d+(\\.\\d+)?),([-\\+]?\\d+(\\.\\d+)?)");
+        Matcher matcher = pattern.matcher(json);
+        while(matcher.find()){
+            retCount++;
+        }
+        return retCount;
+    }
+    
+    /**
+     * 抽取Geojson当中的xy对
+     * @param wkt
+     * @return
+     */
+    public static List<String> getXYByGeoJSON(String json){
+        List<String> result = new ArrayList<String>();
+        Pattern pattern = Pattern.compile("([-\\+]?\\d+(\\.\\d+)?),([-\\+]?\\d+(\\.\\d+)?)");
+        Matcher matcher = pattern.matcher(json);
         int i=0;
         while(matcher.find()){
             result.add(i, matcher.group());
@@ -255,7 +359,7 @@ public class GeoToolsGeometry {
      * @param b
      * @return
      */
-    public double distanceGeo(Geometry a,Geometry b){  
+    public static double distanceGeo(Geometry a,Geometry b){  
         return a.distance(b);  
     }
     
@@ -265,9 +369,35 @@ public class GeoToolsGeometry {
      * @param radius
      * @return
      */
-    public Geometry buffer(Geometry geo,double radius){
+    public static Geometry buffer(Geometry geo,double radius){
         return geo.buffer(radius);
     }
+    
+    /**
+     * 缓冲区(如果负责参考BufferOp)
+     * @param geo
+     * @param radius
+     * @param quadrantSegments 边数目默认是8
+     * @return
+     */
+    public static Geometry buffer(Geometry geo,double radius,int quadrantSegments){
+        return geo.buffer(radius,quadrantSegments);
+    }
+    
+    /**
+     * 缓冲区(如果负责参考BufferOp)
+     * @param geo
+     * @param radius
+     * @param quadrantSegments 边数目默认是8
+     * BufferOp.CAP_ROUND - (default) a semi-circle 
+     * BufferOp.CAP_BUTT - a straight line perpendicular to the end segment 
+     * BufferOp.CAP_SQUARE - a half-square 
+     * @return
+     */
+    public static Geometry buffer(Geometry geo,double radius,int quadrantSegments,int endCapStyle){
+        return geo.buffer(radius,quadrantSegments,endCapStyle);
+    }
+    
     
     /**
      * 判断是否重叠
@@ -276,7 +406,7 @@ public class GeoToolsGeometry {
      * @param geo2
      * @return
      */
-    public boolean isOverlap(Geometry geo1,Geometry geo2){
+    public static boolean isOverlap(Geometry geo1,Geometry geo2){
         return geo1.equals(geo2);
     }
     
@@ -287,7 +417,7 @@ public class GeoToolsGeometry {
      * @param geo2
      * @return
      */
-    public boolean isTouchs(Geometry geo1,Geometry geo2){
+    public static boolean isTouchs(Geometry geo1,Geometry geo2){
         return geo1.touches(geo2);
     }
     
@@ -297,7 +427,7 @@ public class GeoToolsGeometry {
      * @param geo2
      * @return
      */
-    public Geometry intersection(Geometry geo1,Geometry geo2){
+    public static Geometry intersection(Geometry geo1,Geometry geo2){
         return geo1.intersection(geo2);
     }
     
@@ -308,7 +438,7 @@ public class GeoToolsGeometry {
      * @param geo2
      * @return
      */
-    public Geometry symDifference(Geometry geo1,Geometry geo2){
+    public static Geometry symDifference(Geometry geo1,Geometry geo2){
         return geo1.symDifference(geo2);
     }
     
@@ -318,8 +448,86 @@ public class GeoToolsGeometry {
      * @param geo2
      * @return
      */
-    public Geometry union(Geometry geo1,Geometry geo2){
+    public static Geometry union(Geometry geo1,Geometry geo2){
         return geo1.union(geo2);
+    }
+    
+    /**
+     * 根据wkt返回geometry类型 1(point) 2(multipoint) 3(line) 4(multiline) 5(polygon) 6(multipolygon)
+     * @param wktString
+     * @return
+     */
+    public static String GetGeoTypeByWKTString(String wktString){
+        if(wktString.toLowerCase().indexOf("multipoint")!=-1){
+            return "2";
+        }else if(wktString.toLowerCase().indexOf("point")!=-1){
+            return "1";
+        }else if(wktString.toLowerCase().indexOf("multilinestring")!=-1){
+            return "4";
+        }else if(wktString.toLowerCase().indexOf("linestring")!=-1){
+            return "3";
+        }else if(wktString.toLowerCase().indexOf("multipolygon")!=-1){
+            return "6";
+        }else if(wktString.toLowerCase().indexOf("polygon")!=-1){
+            return "5";
+        }
+        return null;
+    }
+    
+    /**
+     * 根据json返回geometry类型 1(point) 2(multipoint) 3(line) 4(multiline) 5(polygon) 6(multipolygon)
+     * @param wktString
+     * @return
+     */
+    public static String GetGeoTypeByJSONString(String jsonString){
+        if(jsonString.toLowerCase().indexOf("multipoint")!=-1){
+            return "2";
+        }else if(jsonString.toLowerCase().indexOf("point")!=-1){
+            return "1";
+        }else if(jsonString.toLowerCase().indexOf("multilinestring")!=-1){
+            return "4";
+        }else if(jsonString.toLowerCase().indexOf("linestring")!=-1){
+            return "3";
+        }else if(jsonString.toLowerCase().indexOf("multipolygon")!=-1){
+            return "6";
+        }else if(jsonString.toLowerCase().indexOf("polygon")!=-1){
+            return "5";
+        }
+        return null;
+    }
+    
+    
+    /**
+     * 多个几何对象合并
+     * 传入的的格式为wkt格式集合
+     * @param wktList
+     * @return
+     */
+    public static Geometry UnionManyGeo(List<String> wktList) throws Exception{
+        Geometry geo = null;
+        for(String wkt : wktList){
+            String geoType = GetGeoTypeByWKTString(wkt);
+            Geometry geo1 = null;
+            if(geoType.equals("1")){
+                geo1 = createPointByWKT(wkt);
+            }else if(geoType.equals("2")){
+                geo1 = createMulPointByWKT(wkt);
+            }else if(geoType.equals("3")){
+                geo1 = createLineByWKT(wkt);
+            }else if(geoType.equals("4")){
+                geo1 = createMLineByWKT(wkt);
+            }else if(geoType.equals("5")){
+                geo1 = createPolygonByWKT(wkt);
+            }else if(geoType.equals("6")){
+                geo1 = createMulPolygonByWKT(wkt);
+            }
+            if(null==geo){
+                geo = geo1;
+            }else{
+                geo = union(geo, geo1);
+            }
+        }
+        return geo;
     }
     
     /**
@@ -328,7 +536,7 @@ public class GeoToolsGeometry {
      * @param 
      * @return
      */
-    public Geometry difference(Geometry geo1,Geometry geo2){
+    public static Geometry difference(Geometry geo1,Geometry geo2){
         return geo1.difference(geo2);
     }
     
@@ -337,7 +545,7 @@ public class GeoToolsGeometry {
      * @param geo
      * @return
      */
-    public Geometry convexHull(Geometry geo){
+    public static Geometry convexHull(Geometry geo){
         return geo.convexHull();
     }
     
@@ -347,7 +555,7 @@ public class GeoToolsGeometry {
      * @param wkts
      * @return
      */
-    public Collection<Geometry> mergerLines(List<String> wkts){
+    public static Collection<Geometry> mergerLines(List<String> wkts){
         Collection<Geometry> collect = null;
         try {
             LineMerger lineMerger = new LineMerger();
@@ -362,5 +570,102 @@ public class GeoToolsGeometry {
             e.printStackTrace();
         }
         return collect;
+    }
+    
+    /**
+     * geojson 转换点
+     * @param geojson
+     * @return
+     * @throws IOException
+     */
+    public static Point createPointGeoJSON(String geojson) throws IOException{
+        GeometryJSON gjson = new GeometryJSON();
+        Point point = gjson.readPoint(geojson); 
+        return point;
+    }
+    
+    /**
+     * geojson 转换line
+     * @param geojson
+     * @return
+     * @throws IOException
+     */
+    public static LineString createLineGeoJSON(String geojson) throws IOException{
+        GeometryJSON gjson = new GeometryJSON();
+        LineString lineString = gjson.readLine(geojson); 
+        return lineString;
+    }
+    
+    /**
+     * geojson 转换Polygon
+     * @param geojson
+     * @return
+     * @throws IOException
+     */
+    public static Polygon createPolygonGeoJSON(String geojson) throws IOException{
+        GeometryJSON gjson = new GeometryJSON();
+        Polygon polygon = gjson.readPolygon(geojson); 
+        return polygon;
+    }
+    
+    /**
+     * geojson 转换multiPoint
+     * @param geojson
+     * @return
+     * @throws IOException
+     */
+    public static MultiPoint createMultiPointGeoJSON(String geojson) throws IOException{
+        GeometryJSON gjson = new GeometryJSON();
+        MultiPoint multiPoint = gjson.readMultiPoint(geojson); 
+        return multiPoint;
+    }
+    
+    /**
+     * geojson 转换MultiLineString
+     * @param geojson
+     * @return
+     * @throws IOException
+     */
+    public static MultiLineString createMultiLineGeoJSON(String geojson) throws IOException{
+        GeometryJSON gjson = new GeometryJSON();
+        MultiLineString multiLine = gjson.readMultiLine(geojson); 
+        return multiLine;
+    }
+    
+    /**
+     * geojson 转换MultiPolygon
+     * @param geojson
+     * @return
+     * @throws IOException
+     */
+    public static MultiPolygon createMultiPolygonGeoJSON(String geojson) throws IOException{
+        GeometryJSON gjson = new GeometryJSON();
+        MultiPolygon multiPolygon = gjson.readMultiPolygon(geojson); 
+        return multiPolygon;
+    }
+    
+    /**
+     * Feature对象转换成GeoJSON
+     * @param feature
+     * @return
+     * @throws IOException
+     */
+    public static String FeatureToJSON(SimpleFeature feature) throws IOException{
+        FeatureJSON fjson = new FeatureJSON();
+        StringWriter writer = new StringWriter();
+        fjson.writeFeature(feature, writer);
+        String json = writer.toString();
+        return json;
+    }
+    
+    /**
+     * GeoJSON对象转换成Feature
+     * @param GeoJSON
+     * @return
+     * @throws IOException
+     */
+    public static SimpleFeature JSONToFeature(String json) throws IOException{
+        FeatureJSON fjson = new FeatureJSON();
+        return fjson.readFeature(json);
     }
 }

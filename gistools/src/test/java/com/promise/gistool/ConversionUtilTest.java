@@ -1,5 +1,6 @@
 package com.promise.gistool;
 
+import java.io.File;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.Map;
 import junit.framework.Assert;
 
 import org.geotools.data.DataStore;
+import org.geotools.data.simple.SimpleFeatureCollection;
 import org.junit.Test;
 import org.opengis.feature.simple.SimpleFeature;
 
@@ -17,6 +19,7 @@ import com.promise.cn.util.PBFileUtil;
 import com.promise.cn.util.PrintUtil;
 import com.promise.gistool.util.ConversionUtil;
 import com.promise.gistool.util.GISDBUtil;
+import com.promise.gistool.util.GeoShapeUtil;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPoint;
@@ -54,14 +57,47 @@ public class ConversionUtilTest {
     @Test
     public void testShapeToPostGISDHSJ(){
         String shapePath = "G:\\项目文档\\公交都市\\giss数据\\cl\\beijingroad.shp";
-        String url = "jdbc:postgresql://192.168.1.105:5432/buscity";
-        String username = "buscity";
-        String passwd = "bs789&*(";
+        String url = "jdbc:postgresql://localhost:5432/zfsj";
+        String username = "postgis";
+        String passwd = "postgis";
         Map<String,String> mapping = PBFileUtil.ReadPropertiesFile("G:\\项目文档\\公交都市\\数据\\navigationline.properties");
         Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
         String result = ConversionUtil.ShapeToPostGIS(shapePath, connection, "GBK","navigationline",mapping);
         Assert.assertEquals("success", result);
     }
+    
+    /**
+     * 测试 shape数据导入PostGIS SQL语句方式
+     * 导入导航数据(河北)
+     */
+    @Test
+    public void testShapeToPostGISDHSJHeBei(){
+        String shapePath = "G:\\项目文档\\公交都市\\giss数据\\地图\\导航shape\\navigationline_hebei.shp";
+        String url = "jdbc:postgresql://192.168.1.105:5432/buscity";
+        String username = "buscity";
+        String passwd = "bs789&*(";
+        Map<String,String> mapping = PBFileUtil.ReadPropertiesFile("G:\\项目文档\\公交都市\\数据\\navigationline.properties");
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String result = ConversionUtil.ShapeToPostGIS(shapePath, connection, "GBK","navigationline_hebei",mapping);
+        Assert.assertEquals("success", result);
+    }
+    
+    /**
+     * 测试 shape数据导入PostGIS SQL语句方式
+     * 导入导航数据(天津)
+     */
+    @Test
+    public void testShapeToPostGISDHSJTianjin(){
+        String shapePath = "G:\\项目文档\\公交都市\\giss数据\\地图\\导航shape\\navigationline_tianjin.shp";
+        String url = "jdbc:postgresql://192.168.1.105:5432/buscity";
+        String username = "buscity";
+        String passwd = "bs789&*(";
+        Map<String,String> mapping = PBFileUtil.ReadPropertiesFile("G:\\项目文档\\公交都市\\数据\\navigationline.properties");
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String result = ConversionUtil.ShapeToPostGIS(shapePath, connection, "GBK","navigationline_tianjin",mapping);
+        Assert.assertEquals("success", result);
+    }
+    
     
     /**
      * 测试 shape数据导入PostGIS SQL语句方式
@@ -77,6 +113,23 @@ public class ConversionUtilTest {
         PrintUtil.PrintObject(mapping);
         Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
         String result = ConversionUtil.ShapeToPostGIS(shapePath, connection, "GBK","busline",mapping);
+        Assert.assertEquals("success", result);
+    }
+    
+    /**
+     * 测试 shape数据导入PostGIS SQL语句方式
+     * 导入北京环线54坐标的
+     */
+    @Test
+    public void testShapeToPostGISBeijingHX(){
+        String shapePath = "G:\\项目文档\\公交都市\\giss数据\\导航环线\\beijinghuanxian54.shp";
+        String url = "jdbc:postgresql://192.168.1.105:5432/buscity";
+        String username = "buscity";
+        String passwd = "bs789&*(";
+        Map<String,String> mapping = PBFileUtil.ReadPropertiesFile("G:\\项目文档\\公交都市\\数据\\beijinghuanxian54.properties");
+        PrintUtil.PrintObject(mapping);
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String result = ConversionUtil.ShapeToPostGIS(shapePath, connection, "GBK","beijinghuanxian",mapping);
         Assert.assertEquals("success", result);
     }
     
@@ -218,7 +271,7 @@ public class ConversionUtilTest {
      */
     @Test
     public void testGetShapeAttributes(){
-        String shapePath = "G:\\项目文档\\公交都市\\giss数据\\beijing\\huanxian54.shp";
+        String shapePath = "G:\\项目文档\\公交都市\\giss数据\\导航环线\\beijinghuanxian54.shp";
         List<String> attributes = ConversionUtil.GetShapeAttributes(shapePath, "GBK");
         PrintUtil.PrintObject(attributes);
     }
@@ -331,4 +384,11 @@ public class ConversionUtilTest {
         PrintUtil.PrintObject(list);
     }
     
+    @Test
+    public void testWriteGeoJSONFile(){
+        File file = new File("D:\\my.geojson");
+        String shapePath = "G:\\项目文档\\手机信令\\gis数据\\zxcxzhzhydflqc.shp";
+        SimpleFeatureCollection features = GeoShapeUtil.ReadShapeFileFeatures(shapePath, "UTF-8");
+        ConversionUtil.WriteGeoJSONFile(features, file);
+    }
 }
