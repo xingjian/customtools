@@ -45,8 +45,8 @@ public class GISCoordinateTransformTest {
     
     @Test
     public void testFrom84To02ShapeFile(){
-        String inputShapeFile = "G:\\项目文档\\节能减排\\gis\\data\\wgs1984\\traffic3.shp";
-        String outputShapleFile = "G:\\项目文档\\节能减排\\gis\\data\\wgs1984\\traffic3_02.shp";
+        String inputShapeFile = "G:\\项目文档\\节能减排\\gis\\data\\wgs1984\\traffic1.shp";
+        String outputShapleFile = "G:\\项目文档\\节能减排\\gis\\data\\wgs1984\\traffic13_02.shp";
         try {
            String result = GISCoordinateTransform.From84To02(inputShapeFile, outputShapleFile, "GBK");
            System.out.println(result);

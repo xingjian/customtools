@@ -48,7 +48,31 @@ public class GeoToolsUtil {
         }
         return retList;
     }
- 
+    
+    /**
+     * 根据中心点绘制正方形
+     * @param x
+     * @param y
+     * @param length 边长
+     * @return
+     */
+    public static Polygon CreateSquareByLength(double x,double y,double length){
+        Polygon polygon = GeoToolsGeometry.createCircle(x, y, length/Math.sqrt(2), 4);
+        return polygon;
+    }
+    
+    /**
+     * 根据中心点绘制正方形
+     * @param x
+     * @param y
+     * @param length 边长
+     * @return
+     */
+    public static Polygon CreateSquareByLength(double x,double y,double length,double rotate){
+        Polygon polygon = GeoToolsGeometry.createCircle(x, y, length/Math.sqrt(2), 4,rotate);
+        return polygon;
+    }
+    
     /**
      * 要素的切割
      * @param listSF listSF被切割对象

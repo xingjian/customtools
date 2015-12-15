@@ -15,6 +15,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1403,5 +1404,147 @@ public class BusCityDataTest {
         }
         psInsert.executeBatch();
         System.out.println(allCount + "---"+okCount+"---"+failCouont);
+    }
+    
+    /**
+     * 生成断面和路链的关系  20151209
+     * @throws Exception
+     */
+    @Test
+    public void testCopyDMToOracle() throws Exception{
+        String url = "jdbc:postgresql://192.168.1.105:5432/buscity";
+        String username = "buscity";
+        String passwd = "bs789&*(";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        Connection connectOracle = DBConnection.GetOracleConnection("jdbc:oracle:thin:@182.92.183.85:1521:orcl", "buscity", "admin123ttyj7890uiop");
+        String query1 = "select name,linkids from station_dm";
+        String insertSQL = "insert into dm_navigationlink_ref (name,linkid) values (?,?)";
+        PreparedStatement ps = connectOracle.prepareStatement(insertSQL);
+        Statement statement = connection.createStatement();
+        ResultSet rs1 = statement.executeQuery(query1);
+        int insertCount = 0;
+        while(rs1.next()){
+            String dmName = rs1.getString(1);
+            String linkids = rs1.getString(2);
+            if(null!=linkids){
+                String[] linkidArr = linkids.split(",");
+                for(String linkid : linkidArr){
+                   ps.setString(1, dmName); 
+                   ps.setString(2, linkid);
+                   insertCount++;
+                   ps.addBatch();
+                   if(insertCount%5000==0){
+                       ps.executeBatch();
+                       System.out.println("insertCount===="+insertCount);
+                   }
+                   
+                }
+            }
+        }
+        ps.executeBatch();
+    }
+    
+    
+    @Test
+    public void testBusChannelSplit() throws Exception{
+        String url = "jdbc:postgresql://192.168.1.105:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        Connection connectOracle = DBConnection.GetOracleConnection("jdbc:oracle:thin:@182.92.183.85:1521:orcl", "buscity", "admin123ttyj7890uiop");
+        String query1 = "select name,direction,code,dmname from bus_channel_split";
+        String insert1 = "insert into de_td_dm (id,tdid,dmname,sxx) values (?,?,?,?)";
+        PreparedStatement ps =  connectOracle.prepareStatement(insert1);
+        Statement statement = connection.createStatement();
+        ResultSet rs = statement.executeQuery(query1);
+        while(rs.next()){
+            ps.setString(1, StringUtil.GetUUIDString());
+            ps.setInt(2, Integer.parseInt(rs.getString(3)));
+            String dmname="";
+            if(null!=rs.getString(4)){
+                dmname = rs.getString(4).trim();
+            }
+            ps.setString(3, dmname);
+            ps.setString(4, rs.getString(2));
+            ps.addBatch();
+        }
+        ps.executeBatch();
+    }
+    
+    @Test
+    public void testBusTdDmColor() throws Exception{
+        String insert1 = "INSERT INTO bus_td_dm_color(id, name, sxx, the_geom, dmname,color) VALUES (?, ?, ?, ST_GeomFromText(?,4326), ?,?)";
+        String url = "jdbc:postgresql://192.168.1.105:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String query1 = "select name,direction,code,st_astext(the_geom),dmname from bus_channel_split";
+        PreparedStatement ps =  connection.prepareStatement(insert1);
+        Statement statement = connection.createStatement();
+        ResultSet rs = statement.executeQuery(query1);
+        int i=0;
+        while(rs.next()){
+            ps.setString(1, StringUtil.GetUUIDString());
+            ps.setString(2,rs.getString(1));
+            ps.setString(3, rs.getString(2));
+            ps.setString(4, rs.getString(4));
+            ps.setString(5, rs.getString(5));
+            i++;
+            ps.setInt(6, (i%4)+1);
+            ps.addBatch();
+        }
+        ps.executeBatch();
+    }
+    
+    
+    /**
+     * 生成断面和线路的关系 20151209
+     */
+    @Test
+    public void testGeneratorDMBuslineRef() throws Exception{
+        String url = "jdbc:postgresql://192.168.1.105:5432/buscity";
+        String username = "buscity";
+        String passwd = "bs789&*(";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        Connection connectOracle = DBConnection.GetOracleConnection("jdbc:oracle:thin:@182.92.183.85:1521:orcl", "buscity", "admin123ttyj7890uiop");
+        String query1 = "select buslineid,string_agg(navigationid,',') from buslinelink group by buslineid";
+        String query2 = "select name,linkids from station_dm";
+        String insertSQL = "insert into dm_busline_ref (name,buslineid) values (?,?)";
+        PreparedStatement ps = connectOracle.prepareStatement(insertSQL);
+        Statement statement = connection.createStatement();
+        ResultSet rs1 = statement.executeQuery(query1);
+        Map<String,String> map = new HashMap<String,String>();
+        while(rs1.next()){
+            String buslineid = rs1.getString(1);
+            String linkids = rs1.getString(2);
+            map.put(buslineid, linkids);
+        }
+        Statement statement2 = connection.createStatement();
+        ResultSet rs2 = statement2.executeQuery(query2);
+        int insertCount = 0;
+        while(rs2.next()){
+            String dmName = rs2.getString(1);
+            String linkids = rs2.getString(2);
+            if(null!=linkids){
+                for(Entry<String, String > entry:map.entrySet()){
+                    String buslineidTemp = entry.getKey();
+                    String[] arrStr = entry.getValue().split(",");
+                    for(String str:arrStr){
+                        if(linkids.indexOf(str)!=-1){
+                            ps.setString(1, dmName);
+                            ps.setString(2, buslineidTemp);
+                            ps.addBatch();
+                            insertCount++;
+                            if(insertCount%5000==0){
+                                ps.executeBatch();
+                                System.out.println("insertCount===="+insertCount);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        ps.executeBatch();
     }
 }

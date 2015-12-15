@@ -73,9 +73,9 @@ public class ConversionUtilTest {
     @Test
     public void testShapeToPostGISDHSJHeBei(){
         String shapePath = "G:\\项目文档\\公交都市\\giss数据\\地图\\导航shape\\navigationline_hebei.shp";
-        String url = "jdbc:postgresql://192.168.1.105:5432/buscity";
-        String username = "buscity";
-        String passwd = "bs789&*(";
+        String url = "jdbc:postgresql://192.168.1.105:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata";
         Map<String,String> mapping = PBFileUtil.ReadPropertiesFile("G:\\项目文档\\公交都市\\数据\\navigationline.properties");
         Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
         String result = ConversionUtil.ShapeToPostGIS(shapePath, connection, "GBK","navigationline_hebei",mapping);
@@ -89,9 +89,9 @@ public class ConversionUtilTest {
     @Test
     public void testShapeToPostGISDHSJTianjin(){
         String shapePath = "G:\\项目文档\\公交都市\\giss数据\\地图\\导航shape\\navigationline_tianjin.shp";
-        String url = "jdbc:postgresql://192.168.1.105:5432/buscity";
-        String username = "buscity";
-        String passwd = "bs789&*(";
+        String url = "jdbc:postgresql://192.168.1.105:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata";
         Map<String,String> mapping = PBFileUtil.ReadPropertiesFile("G:\\项目文档\\公交都市\\数据\\navigationline.properties");
         Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
         String result = ConversionUtil.ShapeToPostGIS(shapePath, connection, "GBK","navigationline_tianjin",mapping);
@@ -262,7 +262,7 @@ public class ConversionUtilTest {
     public void testShapeToPostGIS2(){
         String shapePath = "G:\\项目文档\\公交都市\\giss数据\\cl\\环面.shp";
         DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "postgis", "postgis", "postgis");
-        String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK","beijinghuanmian1");
+        String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK","beijinghuanmian1",MultiPolygon.class,"");
         Assert.assertEquals("success", result);
     }
     
@@ -285,7 +285,7 @@ public class ConversionUtilTest {
         String shapePath = "G:\\项目文档\\公交都市\\giss数据\\地图\\导航shape\\shp\\Rbeijing_polyline.shp";
         DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "postgis", "postgis", "postgis");
         String result = GISDBUtil.CreateTableSchema(tableName,shapePath,dataStore,"GBK");
-        String resultInsert = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK",tableName);
+        String resultInsert = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK",tableName,MultiLineString.class,"");
         PrintUtil.PrintObject(result);
         Assert.assertEquals("success", result);
     }
@@ -390,5 +390,22 @@ public class ConversionUtilTest {
         String shapePath = "G:\\项目文档\\手机信令\\gis数据\\zxcxzhzhydflqc.shp";
         SimpleFeatureCollection features = GeoShapeUtil.ReadShapeFileFeatures(shapePath, "UTF-8");
         ConversionUtil.WriteGeoJSONFile(features, file);
+    }
+    
+    @Test
+    public void testShapeToPostGis(){
+        String shapePath = "G:\\项目文档\\节能减排\\gis\\data\\wgs1984\\traffic3.shp";
+        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "pollutionreduction", "postgis", "postgis");
+        String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "traffic3", MultiLineString.class, "EPSG:4326");
+        System.out.println(result);
+    }
+    
+    @Test
+    public void testDBFToPostGis(){
+        String dbfPath = "G:\\项目文档\\公交都市\\giss数据\\地图\\2014地图\\14S-G_beijing\\beijingshape\\PNamebeijing.dbf";
+        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "sw_navigation", "postgis", "postgis");
+        List<String> str = ConversionUtil.GetDBFAttributes(dbfPath, "GBK");
+        ConversionUtil.DBFToPostGIS(dbfPath, "GBK", "pnamebeijing", dataStore);
+        PrintUtil.PrintObject(str);
     }
 }

@@ -1,7 +1,9 @@
 package com.promise.gistool.util;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,6 +17,7 @@ import org.geotools.data.DataStore;
 import org.geotools.data.DefaultTransaction;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.FeatureStore;
+import org.geotools.data.FeatureWriter;
 import org.geotools.data.Transaction;
 import org.geotools.data.ogr.OGRDataStore;
 import org.geotools.data.ogr.OGRDataStoreFactory;
@@ -30,6 +33,8 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.feature.FeatureCollection;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.gml.producer.FeatureTransformer;
 import org.opengis.feature.Feature;
 import org.opengis.feature.Property;
@@ -163,15 +168,16 @@ public class ConversionUtil {
     /**
      * 通过dataStore导入shape文件
      * 目前不能使用,因为获取的几何对象类型有出入,比如line变成多线，面变成多面
+     * 传入几何类型和坐标信息
      * @param shapePath shape路径
      * @param dataStore dataStore对象 请参考ConnPostGis方法获取
      * @param charSet 读取shape文件编码设置
      * @param tableName 表名
      * @return 运行结果状态
      */
-    public static String ShapeToPostGIS(String shapePath,DataStore dataStore,String charSet,String tableName){
+    public static String ShapeToPostGIS(String shapePath,DataStore dataStore,String charSet,String tableName,Class classzs,String crs){
         String result = "success";
-        String createTableResult = GISDBUtil.CreateTableSchema(tableName,shapePath,dataStore,"GBK");
+        String createTableResult = GISDBUtil.CreateTableSchema(tableName,shapePath,dataStore,charSet,classzs,crs);
         if("success".equals(createTableResult)){
             Transaction tran = new DefaultTransaction("add");
             try {
@@ -231,6 +237,92 @@ public class ConversionUtil {
             }
         }
         return attributes;
+    }
+    
+    
+    /**
+     * 读取dbf属性信息
+     * C (Character) -> String
+     * N (Numeric)   -> Integer or Long or Double (depends on field's decimal count and fieldLength)
+     * F (Floating)  -> Double
+     * L (Logical)   -> Boolean
+     * D (Date)      -> java.util.Date (Without time)
+     * @param dbfPath dbf路径
+     * @param charSet 编码设置
+     * @return 属性信息 格式 列名,类型,长度
+     */
+    public static List<String> GetDBFAttributes(String dbfPath,String charSet){
+        List<String> attributes = new ArrayList<String>();
+        DbaseFileReader reader = null;
+        FileChannel in = null;
+        try {
+            in = new FileInputStream(dbfPath).getChannel();  
+            reader =  new DbaseFileReader(in,false,Charset.forName(charSet));
+            DbaseFileHeader header = reader.getHeader();
+            int numFields = header.getNumFields();
+            for (int i=0; i<numFields; i++) {
+                String title = header.getFieldName(i);
+                char fieldType = header.getFieldType(i);
+                int fieldLength = header.getFieldLength(i);
+                attributes.add(title+","+fieldType+","+fieldLength);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null) {
+                try {reader.close();} catch (Exception e) {}
+            }
+            if(null!=in){
+                try {in.close();} catch (IOException e) {e.printStackTrace();}
+            }
+        }
+        return attributes;
+    }
+    
+    
+    /**
+     * import dfb file to postgis
+     * @param dbfPath
+     * @param charSet
+     * @return
+     */
+    public static String DBFToPostGIS(String dbfPath,String charSet,String tableName,DataStore dataStore){
+        String result = "success";
+        try {  
+            List<String> attributes = new ArrayList<String>();
+            FileChannel in = new FileInputStream(dbfPath).getChannel();  
+            DbaseFileReader dbfReader =  new DbaseFileReader(in, false,Charset.forName(charSet));  
+            DbaseFileHeader header = dbfReader.getHeader();
+            int numFields = header.getNumFields();
+            
+            SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();  
+            builder.setName(tableName);
+            for (int i=0; i<numFields; i++) {
+                String title = header.getFieldName(i);
+                builder.add(title, header.getFieldClass(i));
+            }
+            SimpleFeatureType sft = builder.buildFeatureType();
+            dataStore.createSchema(sft);
+            int fields = header.getNumFields();
+            FeatureWriter<SimpleFeatureType, SimpleFeature> writer = dataStore.getFeatureWriter(tableName, Transaction.AUTO_COMMIT);
+            while (dbfReader.hasNext()){
+                writer.hasNext();
+                SimpleFeature feature = writer.next();
+                DbaseFileReader.Row row =  dbfReader.readRow();
+                for (int i=0; i<fields; i++) {
+                    feature.setAttribute(header.getFieldName(i), row.read(i));
+                }
+                writer.write();
+            }
+            writer.close();
+            dbfReader.close();  
+            in.close();
+            dataStore.dispose();
+        } catch (Exception e) { 
+            result = "error";
+            e.printStackTrace();  
+        }
+        return result;
     }
     
     /**

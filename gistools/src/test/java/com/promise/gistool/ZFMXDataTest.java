@@ -286,7 +286,7 @@ public class ZFMXDataTest {
         String username = "postgis";
         String passwd = "postgis";
         Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
-        String insertSQL = "insert into dbscan_fo_zfmx1026_2015_01tousu_13_14 (id,value,the_geom) values (?,?,ST_GeomFromText(?,4326))";
+        String insertSQL = "insert into dbscan_fo_zfmx1026_2015_taxi_jiancha_raolu (id,value,the_geom) values (?,?,ST_GeomFromText(?,4326))";
         PreparedStatement ps = connection.prepareStatement(insertSQL);
         Iterator<String> iter = list.iterator();
         while(iter.hasNext()){

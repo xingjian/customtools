@@ -21,10 +21,14 @@ import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeType;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.NoSuchAuthorityCodeException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.promise.cn.util.DBType;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -123,6 +127,56 @@ public class GISDBUtil {
         }
         return result;  
     }  
+    
+    /**
+     * 根据shape创建表
+     * 目前支持WGS84坐标 表名用小写,大写的话表名带引号,列名也是同样
+     * 默认已经将列名和表名转换成小写
+     * @param tableName 表名
+     * @param shapePath shape路径
+     * @param dataStore 
+     * @param charSet 读取shape文件编码
+     * @return 结果状态
+     */
+    public static String CreateTableSchema(String tableName,String shapePath,DataStore dataStore,String charSet,Class classzs,String crs) {  
+        String result = "success";
+        SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();  
+        builder.setName(tableName);  
+        if(null==crs||crs.trim().equals("")){
+            builder.setCRS(DefaultGeographicCRS.WGS84);
+        }else{
+            try {
+                builder.setCRS(CRS.decode(crs));
+            } catch (NoSuchAuthorityCodeException e) {
+                e.printStackTrace();
+            } catch (FactoryException e) {
+                e.printStackTrace();
+            }
+        }
+        DbaseFileReader reader = null;
+        try {
+            reader = new DbaseFileReader(new ShpFiles(shapePath),false,Charset.forName(charSet));
+            DbaseFileHeader header = reader.getHeader();
+            int numFields = header.getNumFields();
+            for (int i=0; i<numFields; i++) {
+                String title = header.getFieldName(i);
+                builder.add(title, header.getFieldClass(i));
+            }
+            if(null!=classzs){
+                builder.add("the_geom",classzs);
+            }
+            SimpleFeatureType sft = builder.buildFeatureType();
+            dataStore.createSchema(sft); 
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null) {
+                try {reader.close();} catch (Exception e) {}
+            }
+        }
+        return result;  
+    }
+    
     
     /**
      * 通过ShapeType获取集合对象Class

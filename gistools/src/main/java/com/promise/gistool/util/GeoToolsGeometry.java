@@ -208,14 +208,37 @@ public class GeoToolsGeometry {
         Coordinate coords[] = new Coordinate[sides+1];  
         for( int i = 0; i < sides; i++){  
             double angle = ((double) i / (double) sides) * Math.PI * 2.0;  
-            double dx = Math.cos( angle ) * RADIUS;  
-            double dy = Math.sin( angle ) * RADIUS;  
+            double dx = Math.cos( angle ) * RADIUS;
+            double dy = Math.sin( angle ) * RADIUS;
             coords[i] = new Coordinate( (double) x + dx, (double) y + dy );  
-        }  
-        coords[sides] = coords[0];  
-        LinearRing ring = gf.createLinearRing( coords );  
-        Polygon polygon = gf.createPolygon( ring, null );  
-        return polygon;  
+        }
+        coords[sides] = coords[0];
+        LinearRing ring = gf.createLinearRing( coords );
+        Polygon polygon = gf.createPolygon( ring, null );
+        return polygon;
+    }
+    
+    /**
+     * 创建一个园
+     * @param x
+     * @param y
+     * @param RADIUS
+     * @param sides 圆上面的点个数
+     * @param initAngle 初始点的角度
+     * @return
+     */
+    public static Polygon createCircle(double x, double y, final double RADIUS,int sides,double initAngle){  
+        Coordinate coords[] = new Coordinate[sides+1];  
+        for( int i = 0; i < sides; i++){  
+            double angle = ((double) i / (double) sides) * Math.PI * 2.0+initAngle;  
+            double dx = Math.cos( angle ) * RADIUS;
+            double dy = Math.sin( angle ) * RADIUS;
+            coords[i] = new Coordinate( (double) x + dx, (double) y + dy );  
+        }
+        coords[sides] = coords[0];
+        LinearRing ring = gf.createLinearRing( coords );
+        Polygon polygon = gf.createPolygon( ring, null );
+        return polygon;
     }
     
     /**
