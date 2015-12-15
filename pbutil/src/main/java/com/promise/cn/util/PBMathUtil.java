@@ -16,7 +16,7 @@ public class PBMathUtil {
 	/**
 	 * 四舍五入
 	 * @param d
-	 * @param n 小数点后的位数 -n小数点钱的位数
+	 * @param n 小数点后的位数 -n小数点前的位数
 	 * @return
 	 */
 	public static double DoubleRound(double d, int n) {
@@ -117,4 +117,50 @@ public class PBMathUtil {
         return new double[]{px,py};
     }
     
+    /**
+     * 三点画圆
+     * @param xa a x值
+     * @param ya a y值
+     * @param xb b x值
+     * @param yb b y值
+     * @param xc c x值
+     * @param yc c y值
+     * @return 返回圆心坐标和半径 result[0] result[1] 中心坐标 result[3] 半径值
+     */
+    public static double[] CreateCircleByPoint(double xa,double ya,double xb,double yb,double xc,double yc){
+        double[] result = new double[3];
+        double A = xb - xa;
+        double B = yb - ya;
+        double C = xc - xa;
+        double D = yc - ya;
+        double E = A*(xa+xb)+B*(ya+yb);
+        double F = C*(xa+xc)+D*(ya+yc);
+        double G = 2*(A*(yc-yb)-B*(xc-xb));
+        double xp = (D*E - B*F)/G;
+        double yp = (A*F - C*E)/G;
+        double r = Math.sqrt(Math.pow((xa-xp),2)+Math.pow((ya-yp),2));
+        result[0] = xp;
+        result[1] = yp;
+        result[2] = r;
+        return result;
+    }
+    
+    /**
+     * 前面交汇
+     * 在三角形ABP,已知点  A B的坐标为xa,ya,xb,yb,并且知道角PAB,PBA
+     * java里面没有余切 1/Math.tan(theta)
+     * @param xa
+     * @param ya
+     * @param xb
+     * @param yb
+     * @param anglePAB
+     * @param anglePBA
+     * @return 返回p点坐标
+     */
+    public static double[] CalcFrontIntersection(double xa,double ya,double xb,double yb,double anglePAB,double anglePBA){
+        double[] result = new double[2];
+        result[0] = (xa*(1/Math.tan(anglePBA)) + xb*(1/Math.tan(anglePAB)) -ya + yb)/((1/Math.tan(anglePAB))+(1/Math.tan(anglePBA)));
+        result[1] = (ya*(1/Math.tan(anglePBA)) + yb*(1/Math.tan(anglePAB)) + xa - xb)/((1/Math.tan(anglePAB))+(1/Math.tan(anglePBA)));
+        return result;
+    }
 }

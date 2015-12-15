@@ -3,10 +3,15 @@ package com.promise.cn.util;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -96,6 +101,54 @@ public class POIExcelUtil {
             e.printStackTrace();
         }
         return retList;
+    }
+    
+    /**
+     * 通过sql导出数据到excel
+     * @param sql
+     * @param conect
+     * @return
+     */
+    public static String ExportDataBySQL(String sql,Connection connect,String excelPath){
+        String result = "success";
+        try{
+            ResultSet resultSet = connect.createStatement().executeQuery(sql);
+            ResultSetMetaData rsmd = resultSet.getMetaData();
+            int nColumn = rsmd.getColumnCount();
+            HSSFWorkbook workbook = new HSSFWorkbook();  
+            HSSFSheet sheet = workbook.createSheet();  
+            workbook.setSheetName(0,"export1");  
+            HSSFRow row= sheet.createRow(0); 
+            HSSFCell cell;
+            for(int i=1;i<=nColumn;i++){  
+                cell = row.createCell(i-1);
+                cell.setCellType(HSSFCell.CELL_TYPE_STRING);  
+                cell.setCellValue(rsmd.getColumnLabel(i));  
+           }
+          int iRow=1;
+          //写入各条记录，每条记录对应Excel中的一行
+          while(resultSet.next()){
+              row= sheet.createRow(iRow);
+              for(int j=1;j<=nColumn;j++){
+                  cell = row.createCell(j-1);
+                  cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+                  if(null==resultSet.getObject(j)){
+                      cell.setCellValue("");
+                  }else{
+                      cell.setCellValue(resultSet.getObject(j).toString());
+                  }
+              }
+              iRow++;
+          }
+          FileOutputStream fOut = new FileOutputStream(excelPath);
+          workbook.write(fOut);
+          fOut.flush();
+          fOut.close();
+        }catch(Exception e){
+            result = "error";
+            e.printStackTrace();
+        }
+        return result;
     }
     
     /**
