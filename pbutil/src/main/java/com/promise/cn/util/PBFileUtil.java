@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -65,7 +66,6 @@ public class PBFileUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }  
-       
         return result;
     }
     
@@ -89,6 +89,34 @@ public class PBFileUtil {
             }
             in.close();
         }catch(Exception e){
+            e.printStackTrace();
+        }
+        return result;
+    }
+    
+    /**
+     * 读取csv文件，返回List<String>集合
+     * @param filePath csv文件路径
+     * @param encoding 读取文件的编码
+     * @return
+     */
+    public static List<String> ReadCSVFile(String filePath,String encoding){
+        List<String> result = new ArrayList<String>();
+        try {
+            FileInputStream fis = new FileInputStream(filePath);
+            InputStreamReader isr = new InputStreamReader(fis,encoding);
+            BufferedReader br = new BufferedReader(isr);
+            String s = null;
+            while((s = br.readLine())!=null){
+                if(s.trim()!=""){
+                    result.add(s);
+                    System.out.println(s);
+                }
+            }
+            br.close();
+            isr.close();
+            fis.close();
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return result;

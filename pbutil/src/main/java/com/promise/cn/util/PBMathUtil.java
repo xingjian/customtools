@@ -163,4 +163,26 @@ public class PBMathUtil {
         result[1] = (ya*(1/Math.tan(anglePBA)) + yb*(1/Math.tan(anglePAB)) + xa - xb)/((1/Math.tan(anglePAB))+(1/Math.tan(anglePBA)));
         return result;
     }
+    
+    /**
+     * 计算方差
+     * 方差是实际值与期望值之差平方的期望值,而标准差是方差平方根
+     * 方差,通俗点讲,就是和中心偏离的程度!用来衡量一批数据的波动大小（即这批数据偏离平均数的大小）并把它叫做这组数据的方差.记作S².
+     * 在样本容量相同的情况下,方差越大,说明数据的波动越大,越不稳定 .
+     * @param source
+     * @return
+     */
+    public static double CalcVariance(double[] source){
+        int sum = 0;
+        int num = source.length;
+        for(int i = 0;i < num;i++){
+            sum += source[i];
+        }
+        double average = (sum / num);
+        double sum1 = 0;
+        for(int i = 0;i < num;i++){
+            sum1 += Math.sqrt(((double)source[i] -average) * (source[i] -average));
+        }
+        return (sum1 / (num - 1));
+    }
 }
