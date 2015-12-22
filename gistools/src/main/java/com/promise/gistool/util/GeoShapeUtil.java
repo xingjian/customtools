@@ -1,6 +1,7 @@
 package com.promise.gistool.util;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -18,12 +19,17 @@ import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.FeatureWriter;
 import org.geotools.data.Transaction;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.factory.GeoTools;
@@ -38,6 +44,7 @@ import org.geotools.xml.Configuration;
 import org.geotools.xml.Parser;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.feature.type.AttributeType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.identity.FeatureId;
@@ -46,6 +53,7 @@ import org.xml.sax.SAXException;
 
 import com.promise.cn.util.PBFileUtil;
 import com.promise.cn.util.StringUtil;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPoint;
@@ -116,7 +124,7 @@ public class GeoShapeUtil {
     public static FeatureCollection FilterByFid(FeatureSource<SimpleFeatureType, SimpleFeature> fs,Set<FeatureId> fids) throws IOException {  
         FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(GeoTools.getDefaultHints());  
         Filter filt = (Filter) ff.id(fids);  
-        FeatureCollection col = fs.getFeatures(filt);  
+        FeatureCollection col = fs.getFeatures(filt);
         return col;  
     }
     
@@ -416,5 +424,83 @@ public class GeoShapeUtil {
             e.printStackTrace();
         }
         return "success";
+    }
+    
+    /**
+     * shape数据格式转换成excel
+     * 空间字段转换成wkt
+     * @param shapeFilePath
+     * @param excelPath
+     * @param sfEncoding shapefile编码
+     * @param includeGeom 是否包括空间字段wkt true 包括wkt false 不包括
+     */
+    public static boolean ExportShapeToExcel(String shapeFilePath,String excelPath,String sfEncoding,boolean includeGeom){
+        try{
+            SimpleFeatureCollection sfc = ReadShapeFileFeatures(shapeFilePath,sfEncoding);
+            SimpleFeatureIterator sfi = sfc.features();
+            SimpleFeatureType ft= sfc.getSchema();
+            String[] attArr = null;
+            if(!includeGeom){//不包括空间字段
+                attArr = new String[ft.getAttributeCount()-1];
+                int j = 0;
+                for (int i = 0; i < ft.getAttributeCount(); i++) {
+                    AttributeType at = ft.getType(i);
+                    String cLabel = at.getName().toString();
+                    if(!ConstantUtil.IsGeometryTypeKey(cLabel)){
+                        attArr[j] = cLabel;
+                        j++;
+                    }
+                }
+            }else{
+                attArr = new String[ft.getAttributeCount()];
+                for (int i = 0; i < ft.getAttributeCount(); i++) {
+                    AttributeType at = ft.getType(i);
+                    attArr[i] = at.getName().toString();
+                }
+            }
+            
+            int nColumn = attArr.length;
+            HSSFWorkbook workbook = new HSSFWorkbook();  
+            HSSFSheet sheet = workbook.createSheet();  
+            workbook.setSheetName(0,"export1");  
+            HSSFRow row= sheet.createRow(0); 
+            HSSFCell cell;
+            for(int i=0;i<nColumn;i++){  
+                cell = row.createCell(i);
+                cell.setCellType(HSSFCell.CELL_TYPE_STRING);  
+                cell.setCellValue(attArr[i]);  
+            }
+            int iRow=1;
+            while(sfi.hasNext()){
+                SimpleFeature feature = sfi.next();
+                row= sheet.createRow(iRow);
+                for(int j=0;j<nColumn;j++){
+                    cell = row.createCell(j);
+                    cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+                    String attArrStr = attArr[j];
+                    if(ConstantUtil.IsGeometryTypeKey(attArrStr)){
+                        cell.setCellValue(((Geometry)feature.getDefaultGeometry()).toText());
+                    }else{
+                        if(null==feature.getAttribute(attArr[j]).toString()){
+                            cell.setCellValue("");
+                        }else{
+                            cell.setCellValue(feature.getAttribute(attArr[j]).toString());
+                        }
+                    }
+                }
+                iRow++;
+                //写入各条记录，每条记录对应Excel中的一行
+                FileOutputStream fOut = new FileOutputStream(excelPath);
+                workbook.write(fOut);
+                fOut.flush();
+                fOut.close();
+            } 
+            return true;
+        }catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
+        
+        
     }
 }

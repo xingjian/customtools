@@ -389,4 +389,18 @@ public class ConversionUtil {
         }
         return "success";
     }
+    
+    /**
+     * shape文件转换成geojson
+     * @param geoJSONFilePath
+     * @param shapeFile
+     * @param sfEncoding
+     * @return
+     */
+    public static String ShapeToGeoJSON(String geoJSONFilePath,String shapeFile,String sfEncoding){
+        File file = new File(geoJSONFilePath);
+        SimpleFeatureCollection features = GeoShapeUtil.ReadShapeFileFeatures(shapeFile, sfEncoding);
+        String result = ConversionUtil.WriteGeoJSONFile(features, file);
+        return result;
+    }
 }

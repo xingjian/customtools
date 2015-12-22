@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.geotools.feature.FeatureIterator;
 import org.geotools.geojson.feature.FeatureJSON;
 import org.geotools.geojson.geom.GeometryJSON;
 import org.geotools.geometry.jts.JTSFactoryFinder;
@@ -690,5 +691,27 @@ public class GeoToolsGeometry {
     public static SimpleFeature JSONToFeature(String json) throws IOException{
         FeatureJSON fjson = new FeatureJSON();
         return fjson.readFeature(json);
+    }
+    
+    /**
+     * 读取GeoJSON文件
+     * @param jsonFilePath
+     * @return 返回SimpleFeature集合
+     */
+    public static List<SimpleFeature> ReadJSONFile(String jsonFilePath){
+        FeatureJSON io = new FeatureJSON();
+        FeatureIterator<SimpleFeature> features;
+        List<SimpleFeature> sfList = new ArrayList<SimpleFeature>();
+        try {
+            features = io.streamFeatureCollection(jsonFilePath);
+            SimpleFeature sfTemp = null;
+            while(features.hasNext()) {
+                sfTemp = features.next();
+                sfList.add(sfTemp);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return sfList;
     }
 }
