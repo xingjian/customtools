@@ -4,14 +4,18 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.geotools.data.DataStore;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.junit.Test;
 import org.opengis.feature.simple.SimpleFeature;
 
 import com.promise.cn.util.DBConnection;
+import com.promise.gistool.util.ConversionUtil;
+import com.promise.gistool.util.GISDBUtil;
 import com.promise.gistool.util.GeoShapeUtil;
 import com.promise.gistool.util.GeoToolsGeometry;
+import com.vividsolutions.jts.geom.MultiPolygon;
 
 /**  
  * 功能描述: GeoShapeUtil测试用例
@@ -83,6 +87,26 @@ public class GeoShapeUtilTest {
         String sql_query = "select t1.id,t1.qxm,t1.fid,st_astext(t1.the_geom) wkt,t2.count from zxcxzhzhydflqc t1 left join result_home201409_result5h1 t2 on t1.fid=t2.fid";
         String shapeFilePath = "d:\\result_home201409_result5h2.shp";
         String result = GeoShapeUtil.ExportTableToShape(connection, sql_query, shapeFilePath,"GBK","6","EPSG:4326");
+        System.out.println(result);
+    }
+    
+    @Test
+    public void testExportTrainLine(){
+        String sql = "select buslineid,st_astext(the_geom) wkt from buslinelink where buslineid in (select id from busline where sygs='地铁')";
+        String url = "jdbc:postgresql://192.168.1.105:5432/buscity";
+        String username = "buscity";
+        String passwd = "bs789&*(";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String shapeFilePath = "d:\\buslinelink_subline.shp";
+        String result = GeoShapeUtil.ExportTableToShape(connection, sql, shapeFilePath,"GBK","4","EPSG:4326");
+        System.out.println(result);
+    }
+    
+    @Test
+    public void testExportShapeToExcel(){
+        String shapePath = "D:\\area3\\area4.shp";
+        String excelPath = "D:\\result.xls";
+        boolean result = GeoShapeUtil.ExportShapeToExcel(shapePath, excelPath, "GBK", false);
         System.out.println(result);
     }
 }

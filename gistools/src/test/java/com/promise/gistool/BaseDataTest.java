@@ -468,4 +468,12 @@ public class BaseDataTest {
         Point point = GeoToolsGeometry.createPoint(result[0], result[1]);
         System.out.println(point.toText());
     }
+    
+    @Test
+    public void tesArea3tShapeToPostGis(){
+        String shapePath = "D:\\area3\\area4.shp";
+        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "sw_navigation", "postgis", "postgis");
+        String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "area4", MultiPolygon.class, "EPSG:4326");
+        System.out.println(result);
+    }
 }

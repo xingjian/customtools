@@ -388,7 +388,7 @@ public class ConversionUtilTest {
     public void testWriteGeoJSONFile(){
         File file = new File("D:\\my.geojson");
         String shapePath = "G:\\项目文档\\手机信令\\gis数据\\zxcxzhzhydflqc.shp";
-        SimpleFeatureCollection features = GeoShapeUtil.ReadShapeFileFeatures(shapePath, "UTF-8");
+        SimpleFeatureCollection features = GeoShapeUtil.ReadShapeFileFeatures(shapePath, "GBK");
         ConversionUtil.WriteGeoJSONFile(features, file);
     }
     
