@@ -11,12 +11,14 @@ import java.util.Map;
 
 import junit.framework.Assert;
 
+import org.geotools.data.DataStore;
 import org.junit.Test;
 
 import com.promise.cn.util.DBConnection;
 import com.promise.cn.util.PBFileUtil;
 import com.promise.cn.util.PrintUtil;
 import com.promise.gistool.util.ConversionUtil;
+import com.promise.gistool.util.GISDBUtil;
 import com.promise.gistool.util.GeoShapeUtil;
 import com.promise.gistool.util.GeoToolsGeometry;
 import com.promise.gistool.util.GeoToolsUtil;
@@ -321,5 +323,14 @@ public class XiNingTraffic {
         Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
         String result = ConversionUtil.ShapeToPostGIS(shapePath, connection, "GBK","xningfilter4841",mapping);
         Assert.assertEquals("success", result);
+    }
+    
+    
+    @Test
+    public void testImportXiNingNan2Shape(){
+        String shapePath = "G:\\项目文档\\西宁交通\\西宁双向\\pingxing0114\\xiningnan2_all.shp";
+        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "ttyjbj.ticp.net", "5432", "xiningtraffic", "postgres", "fld789&*(");
+        String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK");
+        System.out.println(result);
     }
 }

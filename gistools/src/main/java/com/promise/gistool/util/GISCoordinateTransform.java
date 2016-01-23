@@ -132,6 +132,10 @@ public class GISCoordinateTransform {
         Pattern pattern = Pattern.compile("([-\\+]?\\d+(\\.\\d+)?) ([-\\+]?\\d+(\\.\\d+)?)");
         String wktCopy= wkt54;
         Matcher matcher = pattern.matcher(wkt54);
+        String firstStr = "";
+        String endStr = "";
+        int xyCount = GeoToolsGeometry.getWktXYCount(wkt54);
+        int loopIndex = 0;
         while(matcher.find()){
             String temp = wkt54.substring(matcher.start(),matcher.end());
             String[] xyArrTemp = temp.split(" ");
@@ -139,6 +143,20 @@ public class GISCoordinateTransform {
             double y_double = Double.parseDouble(xyArrTemp[1]);
             double[] wgs84XYArr = BeijingToGis84.transSingle(x_double, y_double);
             wktCopy = wktCopy.replaceFirst(temp, wgs84XYArr[0]+" "+wgs84XYArr[1]);
+            if(loopIndex==0){
+                firstStr = wgs84XYArr[0]+" "+wgs84XYArr[1];
+            }
+            if(loopIndex==xyCount-1){
+                endStr = wgs84XYArr[0]+" "+wgs84XYArr[1];
+            }
+            loopIndex++;
+        }
+        if(GeoToolsGeometry.GetGeoTypeByWKTString(wkt54).equals("5")){//处理面闭合的情况
+            //POLYGON ((484842.9970703125 306711.80450439453, 484842.9970703125 306711.80450439453))
+            wktCopy = wktCopy.replaceFirst(firstStr, endStr);
+        }else if(GeoToolsGeometry.GetGeoTypeByWKTString(wkt54).equals("6")){//处理多面情况
+          //MULTIPOLYGON (((484842.9970703125 306711.80450439453, 484842.9970703125 306711.80450439453)))
+            wktCopy = wktCopy.replaceFirst(firstStr, endStr);
         }
         return wktCopy;
     }
@@ -153,6 +171,10 @@ public class GISCoordinateTransform {
         Pattern pattern = Pattern.compile("([-\\+]?\\d+(\\.\\d+)?) ([-\\+]?\\d+(\\.\\d+)?)");
         String wktCopy= wkt84;
         Matcher matcher = pattern.matcher(wkt84);
+        String firstStr = "";
+        String endStr = "";
+        int xyCount = GeoToolsGeometry.getWktXYCount(wkt84);
+        int loopIndex = 0;
         while(matcher.find()){
             String temp = wkt84.substring(matcher.start(),matcher.end());
             String[] xyArrTemp = temp.split(" ");
@@ -160,6 +182,20 @@ public class GISCoordinateTransform {
             double y_double = Double.parseDouble(xyArrTemp[1]);
             double[] wgs84XYArr = Gis84ToCehui.transform(x_double, y_double);
             wktCopy = wktCopy.replaceFirst(temp, wgs84XYArr[0]+" "+wgs84XYArr[1]);
+            if(loopIndex==0){
+                firstStr = wgs84XYArr[0]+" "+wgs84XYArr[1];
+            }
+            if(loopIndex==xyCount-1){
+                endStr = wgs84XYArr[0]+" "+wgs84XYArr[1];
+            }
+            loopIndex++;
+        }
+        if(GeoToolsGeometry.GetGeoTypeByWKTString(wkt84).equals("5")){//处理面闭合的情况
+            //POLYGON ((484842.9970703125 306711.80450439453, 484842.9970703125 306711.80450439453))
+            wktCopy = wktCopy.replaceFirst(firstStr, endStr);
+        }else if(GeoToolsGeometry.GetGeoTypeByWKTString(wkt84).equals("6")){//处理多面情况
+          //MULTIPOLYGON (((484842.9970703125 306711.80450439453, 484842.9970703125 306711.80450439453)))
+            wktCopy = wktCopy.replaceFirst(firstStr, endStr);
         }
         return wktCopy;
     }

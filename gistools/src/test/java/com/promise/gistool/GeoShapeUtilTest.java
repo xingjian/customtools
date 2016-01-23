@@ -4,18 +4,14 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.geotools.data.DataStore;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.junit.Test;
 import org.opengis.feature.simple.SimpleFeature;
 
 import com.promise.cn.util.DBConnection;
-import com.promise.gistool.util.ConversionUtil;
-import com.promise.gistool.util.GISDBUtil;
 import com.promise.gistool.util.GeoShapeUtil;
 import com.promise.gistool.util.GeoToolsGeometry;
-import com.vividsolutions.jts.geom.MultiPolygon;
 
 /**  
  * 功能描述: GeoShapeUtil测试用例
@@ -101,6 +97,21 @@ public class GeoShapeUtilTest {
         String result = GeoShapeUtil.ExportTableToShape(connection, sql, shapeFilePath,"GBK","4","EPSG:4326");
         System.out.println(result);
     }
+    
+    @Test
+    public void testExportBusstation(){
+        String sql = "select t1.id,t1.busstationid,st_astext(t1.the_geom) wkt,t1.linkid,t2.name from ("+
+                    " select * from busstationlink where busstationid in (select id from busstation where buslineid in (select id from busline where isvalid='1')) "+
+                       " ) t1 left join busstation t2 on t1.busstationid=t2.id";
+        String url = "jdbc:postgresql://192.168.1.105:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String shapeFilePath = "d:\\busstationlink0110.shp";
+        String result = GeoShapeUtil.ExportTableToShape(connection, sql, shapeFilePath,"GBK","1","EPSG:4326");
+        System.out.println(result);
+    }
+    
     
     @Test
     public void testExportShapeToExcel(){

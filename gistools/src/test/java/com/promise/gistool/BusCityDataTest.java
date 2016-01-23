@@ -35,6 +35,7 @@ import com.tongtu.nomap.core.transform.BeijingToGis84;
 import com.tongtu.nomap.core.transform.Gis84ToCehui;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.Point;
 
 /**  
  * 功能描述: 公交都市项目数据
@@ -149,19 +150,21 @@ public class BusCityDataTest {
     @Test
     public void conver84To02() throws Exception {
         Pattern pattern = Pattern.compile("([-\\+]?\\d+(\\.\\d+)?) ([-\\+]?\\d+(\\.\\d+)?)");
-        String url = "jdbc:postgresql://192.168.1.105:5432/buscity";
-        String username = "buscity";
-        String passwd = "bs789&*(";
+        String url = "jdbc:postgresql://192.168.1.105:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata";
         Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
-        String tableName = "beijinghuanxian";
+        String tableName = "busline_history_bak";
         String sql_update = "update "+tableName+" set the_geom=st_geometryfromtext(?,4326) where id=?";
-        String sql_query = "select id, st_astext(the_geom) from "+tableName;
+        String sql_query = "select id, st_astext(the_geom) from "+tableName+" where batchtime='201511'";
         Statement statement = connection.createStatement();
         PreparedStatement ps = connection.prepareStatement(sql_update);
         ResultSet rs = statement.executeQuery(sql_query);
+        int i=1;
         while(rs.next()){
             String id = rs.getString(1);
             String wkt = rs.getString(2);
+            System.out.println(id +"-----"+i);
             String wktCopy= wkt;
             Matcher matcher = pattern.matcher(wkt);
             while(matcher.find()){
@@ -175,6 +178,7 @@ public class BusCityDataTest {
             ps.setString(1, wktCopy);
             ps.setString(2, id);
             ps.addBatch();
+            i++;
        }
         ps.executeBatch();
     }
@@ -182,11 +186,11 @@ public class BusCityDataTest {
     @Test
     public void conver54To84() throws Exception {
         Pattern pattern = Pattern.compile("([-\\+]?\\d+(\\.\\d+)?) ([-\\+]?\\d+(\\.\\d+)?)");
-        String url = "jdbc:postgresql://192.168.1.105:5432/buscity";
-        String username = "buscity";
-        String passwd = "bs789&*(";
+        String url = "jdbc:postgresql://192.168.1.105:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata";
         Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
-        String tableName = "beijinghuanxian";
+        String tableName = "busstation_history";
         String sql_update = "update "+tableName+" set the_geom=st_geometryfromtext(?,4326) where id=?";
         String sql_query = "select id, st_astext(the_geom) from "+tableName;
         Statement statement = connection.createStatement();
@@ -306,9 +310,9 @@ public class BusCityDataTest {
      */
     @Test
     public void testCreateStationDM() throws Exception{
-        String url = "jdbc:postgresql://192.168.1.105:5432/buscity";
-        String username = "buscity";
-        String passwd = "bs789&*(";
+        String url = "jdbc:postgresql://192.168.1.105:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata";
         Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
         String sql_query = "select id,name,ST_AsText(the_geom) wkt,linkids,buslineid,buslinename from station_dm_singlebus  order by buslinename";
         String sql_insert = "insert into station_dm (id,name,linkids,buslineid,buslinename,the_geom) values(?,?,?,?,?,ST_GeomFromText(?,4326))";
@@ -316,6 +320,7 @@ public class BusCityDataTest {
         PreparedStatement ps = connection.prepareStatement(sql_insert);
         ResultSet rs = statement.executeQuery(sql_query);
         Map<String,String> map = new HashMap<String, String>();
+        Map<String,String> mapBusName = new HashMap<String, String>();
         int index=1;
         while(rs.next()){
             String id = rs.getString(1);
@@ -324,8 +329,10 @@ public class BusCityDataTest {
             String linkids = rs.getString(4);
             String buslineid = rs.getString(5);
             String buslinename = rs.getString(6);
+            
             if(null==map.get(name)){
                 map.put(name, id);
+                mapBusName.put(name, buslinename);
                 ps.setString(1, id);
                 ps.setString(2, name);
                 ps.setString(3, linkids);
@@ -337,9 +344,27 @@ public class BusCityDataTest {
                 if(index%2000==0){
                     ps.executeBatch();
                 }
+            }else{
+                mapBusName.put(name, mapBusName.get(name)+","+buslinename);
             }
         }
         ps.executeBatch();
+        String updateSQL = "update station_dm set cc=? ,buslinenames=? where name=?";
+        PreparedStatement psUpdate = connection.prepareStatement(updateSQL);
+        int index1 = 0;
+        for (Map.Entry<String, String> entry : mapBusName.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            psUpdate.setInt(1, value.split(",").length);
+            psUpdate.setString(2, value);
+            psUpdate.setString(3, key);
+            index1++;
+            psUpdate.addBatch();
+            if(index1%2000==0){
+                psUpdate.executeBatch();
+            }
+        }
+        psUpdate.executeBatch();
     }
     
     
@@ -352,9 +377,9 @@ public class BusCityDataTest {
     public void testCreateDM(){
         try{
             GeoToolsGeometry gtg = new GeoToolsGeometry();
-            String url = "jdbc:postgresql://192.168.1.105:5432/buscity";
-            String username = "buscity";
-            String passwd = "bs789&*(";
+            String url = "jdbc:postgresql://192.168.1.105:5432/basedata";
+            String username = "basedata";
+            String passwd = "basedata";
             //把需要的导航数据加载到内存中
             Map<String,NavigationObject> navigationMap = new HashMap<String, NavigationObject>();
             Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
@@ -380,7 +405,7 @@ public class BusCityDataTest {
                 busstationlinkMap.put(busstationid, wkt);
             }
             
-            String sql1 = "select t1.*,t2.arrow from (select s_stationname,e_stationname,linkids,s_stationid,e_stationid,buslineid,buslinename,index from busstation_distance_temp  order by buslinename,index"
+            String sql1 = "select t1.*,t2.arrow from (select s_stationname,e_stationname,linkids,s_stationid,e_stationid,buslineid,buslinename,index from busstation_distance_2016_01_07  order by buslinename,index"
                         +") t1 left join busline t2 on t1.buslineid=t2.id";
             Statement statement1 = connection.createStatement();
             ResultSet rs1 = statement1.executeQuery(sql1);
@@ -399,7 +424,7 @@ public class BusCityDataTest {
                  String buslineid = rs1.getString(6);
                  String buslinename = rs1.getString(7);
                  String arrow = rs1.getString(9);
-                 if(null!=linkids&&!(linkids.trim().equals(""))){
+                 if(null!=linkids&&!(linkids.trim().equals(""))&&linkids.length()>32){
                      index++;
                      String multilineWkt = "MULTILINESTRING(";
                      String[] linkidArr = linkids.split(",");
@@ -1543,6 +1568,382 @@ public class BusCityDataTest {
                         }
                     }
                 }
+            }
+        }
+        ps.executeBatch();
+    }
+    
+    /**
+     * 按照公交线路打断100
+     */
+    @Test
+    public void testHundredBusLine() throws Exception{
+        GeoToolsGeometry gtg = new GeoToolsGeometry();
+        String url = "jdbc:postgresql://192.168.1.105:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String querySQL = "select t1.navigationid,ST_AsText(t2.the_geom) wkt,t2.direction,t2.snodeid,t2.enodeid from (select navigationid from buslinelink group by navigationid"
+                    +") t1 left join navigationline t2 on t1.navigationid = t2.id";
+        Statement statement = connection.createStatement();
+        ResultSet rs1 = statement.executeQuery(querySQL);
+        Map<String,NavigationObject> map1 = new HashMap<String,NavigationObject>();
+        while(rs1.next()){
+            String navigationid = rs1.getString(1);
+            String wktStr = rs1.getString(2);
+            String direction = rs1.getString(3);
+            String snode = rs1.getString(4);
+            String enode = rs1.getString(5);
+            NavigationObject nObject = new NavigationObject();
+            nObject.setId(navigationid);
+            nObject.setEnode(enode);
+            nObject.setSnode(snode);
+            nObject.setWkt(wktStr);
+            nObject.setGeometry(GeoToolsGeometry.createGeometrtyByWKT(wktStr));
+            nObject.setDirect(direction);
+            map1.put(navigationid, nObject);
+        }
+        //5534a40c66a44f8fae27348c2878cf39 653路 五路居-北苑家园
+        //String okbuslinesql = "select buslineid,buslinename from busstation_distance_2015_12_21  where buslineid not in(select buslineid from busstation_distance_2015_12_21 where distance = 0 group by buslineid ) group by buslineid,buslinename";
+        String okbuslinesql = "select buslineid,buslinename from busstation_distance_2015_12_21  where buslineid not in(select buslineid from busstation_distance_2015_12_21 where distance = 0  group by buslineid ) and buslineid='eed2c6102f96467b839de5d7a17b13f7' group by buslineid,buslinename ";
+        Statement statementall = connection.createStatement();
+        ResultSet rsall = statementall.executeQuery(okbuslinesql);
+        int uuuu = 1;
+        while(rsall.next()){
+            //String buslineid = "5534a40c66a44f8fae27348c2878cf39";
+            String buslineName = rsall.getString("buslinename");
+            String buslineid = rsall.getString("buslineid");
+            System.out.println("start----"+uuuu+"----"+buslineName+"----"+buslineid);
+            String querySQL1 = "select * from busstation_distance_2015_12_21 where buslineid='"+buslineid+"' order by buslineid,index";
+            String querySQL2 = "select t1.id,t1.name,t1.index,t2.linkid,ST_AsText(t2.the_geom) wkt from busstation t1 left join busstationlink t2 on t1.id = t2.busstationid where t1.buslineid='"+buslineid+"' order by t1.index";
+            Statement statement1 = connection.createStatement();
+            ResultSet rs2 = statement1.executeQuery(querySQL1);
+            Statement statement2 = connection.createStatement();
+            ResultSet rs3 = statement2.executeQuery(querySQL2);
+            StringBuffer sbf = new StringBuffer();
+            while(rs2.next()){
+                String linkids = rs2.getString("linkids")+",";
+                sbf.append(linkids);
+            }
+            String firstLink = null;
+            String firstWKT = null;
+            String endLink = null;
+            String endWKT = null;
+            while(rs3.next()){
+                if(rs3.isFirst()){
+                    firstLink = rs3.getString("linkid");
+                    firstWKT = rs3.getString("wkt");
+                }
+                if(rs3.isLast()){
+                    endLink = rs3.getString("linkid");
+                    endWKT = rs3.getString("wkt");
+                }
+            }
+            String[] linkArr = sbf.toString().split(",");
+            List<String> points = new ArrayList<String>();
+            int pointsIndex = 0;
+            Map<String,String> mapPoint= new HashMap<String, String>();
+            points.add(pointsIndex,GeoToolsGeometry.getXYByWkt(firstWKT).get(0));
+            pointsIndex++;
+            mapPoint.put(GeoToolsGeometry.getXYByWkt(firstWKT).get(0), GeoToolsGeometry.getXYByWkt(firstWKT).get(0));
+            String forward = "";
+            for(int i=0;i<linkArr.length;i++){
+                NavigationObject naviTemp = map1.get(linkArr[i]);
+                if(i==0&&firstLink.equals(naviTemp.getId())){
+                    List<String> wktList = pointSplitLine(firstWKT,naviTemp);
+                    MultiLineString subline1 = gtg.createMLineByWKT(wktList.get(0));
+                    MultiLineString subline2 = gtg.createMLineByWKT(wktList.get(1));
+                    MultiLineString naviLine = gtg.createMLineByWKT(map1.get(linkArr[1]).wkt);
+                    double dis1 = gtg.distanceGeo(subline1, naviLine);
+                    double dis2 = gtg.distanceGeo(subline2, naviLine);
+                    if(dis1<dis2){
+                        List<String> lTemp1 = GeoToolsGeometry.getXYByWkt(subline1.toText());
+                        for(String s1:lTemp1){
+                            if(!mapPoint.containsKey(s1)){
+                                mapPoint.put(s1, s1);
+                                points.add(pointsIndex, s1);
+                                pointsIndex++;
+                            }
+                        }
+                    }else{
+                        List<String> lTemp1 = GeoToolsGeometry.getXYByWkt(subline2.toText());
+                        
+                        for(String s1:lTemp1){
+                            if(!mapPoint.containsKey(s1)){
+                                mapPoint.put(s1, s1);
+                                points.add(pointsIndex, s1);
+                                pointsIndex++;
+                            }
+                            
+                        }
+                    }
+                    forward = points.get(pointsIndex);
+                }else if(i==linkArr.length-1&&endLink.equals(linkArr[linkArr.length-1])){
+                    List<String> wktList = pointSplitLine(endWKT,naviTemp);
+                    MultiLineString subline1 = gtg.createMLineByWKT(wktList.get(0));
+                    MultiLineString subline2 = gtg.createMLineByWKT(wktList.get(1));
+                    MultiLineString naviLine = gtg.createMLineByWKT(map1.get(linkArr[linkArr.length-2]).wkt);
+                    double dis1 = gtg.distanceGeo(subline1, naviLine);
+                    double dis2 = gtg.distanceGeo(subline2, naviLine);
+                    if(dis1<dis2){
+                        List<String> lTemp1 = GeoToolsGeometry.getXYByWkt(subline1.toText());
+                        for(String s1:lTemp1){
+                            if(!mapPoint.containsKey(s1)){
+                                mapPoint.put(s1, s1);
+                                mapPoint.put(s1, s1);
+                                points.add(pointsIndex, s1);
+                                pointsIndex++;
+                            }
+                            
+                        }
+                    }else{
+                        List<String> lTemp1 = GeoToolsGeometry.getXYByWkt(subline2.toText());
+                        for(String s1:lTemp1){
+                            if(!mapPoint.containsKey(s1)){
+                                mapPoint.put(s1, s1);
+                                points.add(pointsIndex, s1);
+                                pointsIndex++;
+                            }
+                        }
+                    }
+                }else{
+                    if(null!=forward){
+                        String[] arrFor = forward.split(" ");
+                        List<String> lTemp1 = GeoToolsGeometry.getXYByWkt(naviTemp.wkt);
+                        String[] arrFor1 = lTemp1.get(0).split(" ");
+                        String[] arrFor2 = lTemp1.get(lTemp1.size()-1).split(" ");
+                        Point pointForward = GeoToolsGeometry.createPoint(Double.parseDouble(arrFor[0]), Double.parseDouble(arrFor[1]));
+                        Point pointForward1 = GeoToolsGeometry.createPoint(Double.parseDouble(arrFor1[0]), Double.parseDouble(arrFor1[1]));
+                        Point pointForward2 = GeoToolsGeometry.createPoint(Double.parseDouble(arrFor2[0]), Double.parseDouble(arrFor2[1]));
+                        
+                        double d1 = GeoToolsGeometry.distanceGeo(pointForward, pointForward1);
+                        double d2 = GeoToolsGeometry.distanceGeo(pointForward, pointForward2);
+                        if(d1<d2){
+                            for(String s1:lTemp1){
+                                if(!mapPoint.containsKey(s1)){
+                                    mapPoint.put(s1, s1);
+                                    points.add(pointsIndex, s1);
+                                    pointsIndex++;
+                                }
+                            } 
+                        }else{
+                            for(int j=lTemp1.size()-1;j>=0;j--){
+                                String s1 = lTemp1.get(j);
+                                if(!mapPoint.containsKey(s1)){
+                                    mapPoint.put(s1, s1);
+                                    points.add(pointsIndex, s1);
+                                    pointsIndex++;
+                                }
+                            }
+                        }
+                        forward = points.get(pointsIndex);
+                    }
+                }
+                
+            }
+            System.out.println(points.size());
+            //开始计算个点之间的位置关系
+            String[] resultArr = new String[points.size()];
+            resultArr[0] = mapPoint.get(GeoToolsGeometry.getXYByWkt(firstWKT).get(0));
+            points.remove(0);
+            int m = 1;
+            int count = points.size();
+            for(int a=0;a<=count-1;a++){
+                int iii = calcDisMin(resultArr[a],points);
+                resultArr[m] = points.get(iii);
+                m++;
+                points.remove(iii);
+            }
+            //System.out.println(resultArr.length);
+            
+            String insertSQL = "insert into busline_point (buslineid,buslinename,index,the_geom) values (?,?,?,ST_GeomFromText(?,4326))";
+            PreparedStatement ps = connection.prepareStatement(insertSQL);
+            for(int p=0;p<resultArr.length;p++){
+                ps.setString(1, buslineid);
+                ps.setString(2,buslineName);
+                ps.setInt(3, p);
+                String[] arrtt = resultArr[p].split(" ");
+                String wkt = GeoToolsGeometry.createPoint(Double.parseDouble(arrtt[0]), Double.parseDouble(arrtt[1])).toText();
+                ps.setString(4, wkt);
+                ps.addBatch();
+            }
+            ps.executeBatch();
+            int sum = 100;
+            double target = 100;
+            String resultStr=resultArr[0];
+            for(int w=0;w<resultArr.length-1;w++){
+                String wkt1 = resultArr[w];
+                String wkt2 = resultArr[w+1];
+                String[] arrtt = wkt1.split(" ");
+                String[] arrtt2 = wkt2.split(" ");
+                double[] d1 = GISCoordinateTransform.From84To900913(Double.parseDouble(arrtt[0]), Double.parseDouble(arrtt[1]));
+                double[] d2 = GISCoordinateTransform.From84To900913(Double.parseDouble(arrtt2[0]), Double.parseDouble(arrtt2[1]));
+                Point p1 = GeoToolsGeometry.createPoint(d1[0],d1[1]);
+                Point p2 = GeoToolsGeometry.createPoint(d2[0],d2[1]);
+                double dis = GeoToolsGeometry.distanceGeo(p1, p2);
+//                double dis = PBMathUtil.Distance(d1[0],d1[1],d2[0], d2[1]);
+                if(dis>target){
+                    double[] d3 = PBMathUtil.SplitSegmentByLength(d1[0],d2[0],d1[1], d2[1], target);
+                    double[] d33 = GISCoordinateTransform.From900913To84(d3[0],d3[1]);
+                    resultStr = resultStr+","+d33[0]+" "+d33[1];
+                    dis = dis-target;
+                    while(dis>sum){
+                        double[] dt = PBMathUtil.SplitSegmentByLength(d3[0],d2[0],d3[1], d2[1], sum);
+                        double[] dtt = GISCoordinateTransform.From900913To84(dt[0],dt[1]);
+                        resultStr = resultStr+","+dtt[0]+" "+dtt[1];
+                        d3 = dt;
+                        dis = dis-sum;
+                    }
+                    target = sum - dis;
+                }else if(dis==target){
+                    resultStr = resultStr+","+wkt2;
+                    target = sum;
+                    if(w+1==resultArr.length-1){
+                        break;
+                    }
+                }else{
+                    target = target - dis;
+                    if(w+1==resultArr.length-1){
+                        resultStr = resultStr+","+wkt2;
+                        break;
+                    }
+                }
+            }
+            
+            String[] resultArr11 = resultStr.split(",");
+            
+            String insertSQL11 = "insert into buslinesplit100point (id,buslineid,buslinename,stationflag,direct,index,the_geom) values (?,?,?,?,?,?,ST_GeomFromText(?,4326))";
+            PreparedStatement ps11 = connection.prepareStatement(insertSQL11);
+            for(int p=0;p<resultArr11.length;p++){
+              ps11.setString(1, StringUtil.GetUUIDString());
+              ps11.setString(2, buslineid);
+              ps11.setString(3, buslineName);
+              if(p==0){
+                  ps11.setString(4, "1");
+              }else if(p==resultArr11.length-1){
+                  ps11.setString(4, "2");
+              }else{
+                  ps11.setString(4, "0");
+              }
+              ps11.setString(5, "");
+              ps11.setInt(6, p+1);
+              String[] arrtt = resultArr11[p].split(" ");
+              String wkt = GeoToolsGeometry.createPoint(Double.parseDouble(arrtt[0]), Double.parseDouble(arrtt[1])).toText();
+              ps11.setString(7, wkt);
+              ps11.addBatch();
+            }
+            ps11.executeBatch();
+            System.out.println("end----"+uuuu+"----"+buslineName+"----"+buslineid);
+            uuuu++;
+        }
+        
+        
+    }
+    
+    
+    
+    
+    public void testInsert100TestData(String str) throws Exception{//buslinesplit100point
+        String[] resultArr = str.split(",");
+        GeoToolsGeometry gtg = new GeoToolsGeometry();
+        String url = "jdbc:postgresql://192.168.1.105:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String insertSQL = "insert into testbuslinepoint (buslineid,index,the_geom) values (?,?,ST_GeomFromText(?,4326))";
+        PreparedStatement ps = connection.prepareStatement(insertSQL);
+        for(int p=0;p<resultArr.length;p++){
+          ps.setString(1, "aaaaaa");
+          ps.setInt(2, p);
+          String[] arrtt = resultArr[p].split(" ");
+          String wkt = GeoToolsGeometry.createPoint(Double.parseDouble(arrtt[0]), Double.parseDouble(arrtt[1])).toText();
+          ps.setString(3, wkt);
+          ps.addBatch();
+        }
+        ps.executeBatch();
+    }
+    
+    @Test
+    public void testTestData() throws Exception{
+        String str = "116.281738235931 39.932405677162,116.28263542889594 39.93238415923538,116.28352590313804 39.932302135888925,116.28441315453105 39.932197105684,116.28486225235493 39.93179396235399,116.28486131236598 39.93110530414042,116.28486000000001 39.930416463356515,116.28486000000001 39.92972760970467,116.28486000000001 39.9290387491207,116.28488778100186 39.928350288450766,116.28490015909676 39.92766190936984,116.28486002016574 39.92697378443066,116.28486000000001 39.92628513301848,116.28485957805476 39.925596456973395,116.28487830279205 39.92490770519034,116.28489534200409 39.92421944608392,116.28569670058715 39.92412080342953,116.28659426712375 39.924092762457335,116.28749191268844 39.924066165551515,116.28838951981402 39.924043832389984,116.28928741296623 39.924023972295224,116.29018516086471 39.9239997525976,116.29108310026426 39.92398541033587,116.29198125702149 39.92397999999997,116.29287952983167 39.923975703141664,116.29377775953185 39.923968075722875,116.29467583138711 39.92395203872548,116.29557350430477 39.9239262574464,116.29647124904939 39.92391562494739,116.29736891104615 39.92391,116.29826706286576 39.92390000000001,116.29916535772742 39.92389884671409,116.30006351635245 39.92389,116.30096164685875 39.92388000000001,116.30185913254745 39.92388000000001,116.30275740224963 39.92388455767406,116.3036556118498 39.92389512484585,116.3045362664253 39.92380079437816,116.30543442426413 39.92380376627845,116.30633271946488 39.92380837292042,116.30723098683681 39.923804718301646,116.30812922917102 39.923804034353054,116.30902744084085 39.92381444001124,116.30981225005085 39.92359355206276,116.3106329394491 39.92373293945096,116.31067682294147 39.924363177065025,116.31041 39.924960647386186,116.31040493037997 39.92564952607339,116.3104 39.92633839845898,116.31040722265566 39.92702726287868,116.31041999999998 39.92771602973754,116.31041999999998 39.92840490363203,116.31041999999998 39.92909377059442,116.31041999999998 39.92978263062472,116.3104121712524 39.930471437690954,116.31041 39.93116027109088,116.31040603746212 39.93184906373724,116.31076520422461 39.93225,116.31166351950884 39.93225,116.31249295148848 39.93231000000001,116.31339123059868 39.932315615383516,116.31428951763743 39.932320000000026,116.31518783292167 39.932320000000026,116.31608614820593 39.932320000000026,116.3169844167512 39.932322913523784,116.31788234394651 39.932322983998866,116.31878051375244 39.932330000000015,116.3196788290367 39.932330000000015,116.32057714432094 39.932330000000015,116.32147530215428 39.932320000000026,116.3223735965583 39.932322946638166,116.32327185497218 39.93233064818721,116.32417007085805 39.932340000000025,116.32506838614229 39.932340000000025,116.3259 39.93238099867799,116.3259 39.93306982562732,116.32588540419046 39.93375842906055,116.3258679603499 39.93444711029587,116.32584585733719 39.93513563821362,116.32583000000001 39.93582425467677,116.32580978225559 39.93651283725195,116.32580956873683 39.93720145573846,116.3257907831123 39.93788963911652,116.32579000000001 39.93857840177312,116.32575 39.93926573871734,116.32566980124066 39.93995159008118,116.32558266963252 39.94063708944774,116.32550064139662 39.94132289081242,116.32542246904293 39.94200901426859,116.32534176971177 39.94269495961609,116.32525011156756 39.94338003244661,116.3251470779757 39.944064203369166,116.32504540928109 39.94474848767028,116.32494862613638 39.94543291436142,116.32486430331237 39.946118458953734,116.3247532582698 39.94680184397571,116.32466200625016 39.94748695191955,116.32457168916206 39.94817207243635,116.32449080138383 39.948857881627944,116.32439408661085 39.94954252365874,116.32430145054317 39.95022745158624,116.32421475181158 39.950912877533995,116.3241264895613 39.95159808353678,116.32403686618031 39.95228314221179,116.32394411322119 39.95296808828603,116.32385465181079 39.953653271980556,116.32376992186347 39.95433881487262,116.32367800478222 39.95502372339523,116.3235699719453 39.95570716605737,116.32345601513516 39.95639019305693,116.32334125846867 39.957073078433204,116.32322522682905 39.95775588834932,116.32311633126818 39.95843934993414,116.32303115792998 39.959124772131155,116.32295382389829 39.959810512672405,116.32288334002796 39.96049660496375,116.32280969677429 39.961182831247434,116.32272502659062 39.96186826650218,116.32263228617714 39.96255311757773,116.32254157220476 39.963238121177596,116.32242029873024 39.963920327247486,116.32225443631617 39.96459669114836,116.32203207752076 39.96526376806895,116.32179572784133 39.96592798515555,116.32155689121403 39.966591694570795,116.32131803725305 39.96725496855479,116.32102833671372 39.9679066592572,116.32074149893651 39.968559048196326,116.32046002041315 39.96921281275411,116.32017610765708 39.96986595675849,116.31991802564544 39.97052537560631,116.31965640961158 39.97118397665662,116.31939312831364 39.97184218170149,116.319128494248 39.97250005967545,116.31884893801455 39.97315427891934,116.31857054286627 39.97380877867022,116.31827899919249 39.97445992496055,116.31813188293337 39.97512149079447,116.31788851258221 39.975783966494156,116.31852741683593 39.97596332805592,116.31942479886668 39.97598499841642,116.32032281467538 39.97599906257506,116.32121975900961 39.976036963635075,116.3221170460239 39.97606989159722,116.32301493659263 39.97609104503711,116.3239130436022 39.97610309463078,116.32481104661844 39.97611942565516,116.32570721680797 39.97615669656972,116.326603523451 39.97620250838915,116.32750049586777 39.97623774981377,116.32839725887024 39.976275899125085,116.32929483981732 39.97629939359418,116.33019235473857 39.976328067278494,116.3310899735196 39.97635499911789,116.33198803371575 39.97636997378287,116.33288482381221 39.976408494128634,116.33378153955482 39.976439999999975,116.33467979731694 39.9764364189187,116.33557791145458 39.97642424177108,116.33647604785311 39.97641072908311,116.33737419464077 39.976397400080685,116.33827239199816 39.976387446241915,116.33917055078231 39.976375256972965,116.34006858675329 39.976360000000014,116.34096690203755 39.976360000000014,116.3418652173218 39.976360000000014,116.34276353260603 39.976360000000014,116.3436618353672 39.97636233858734,116.34456012039807 39.976367988178716,116.34545823984737 39.97638000000002,116.34635626317265 39.976395890573706,116.34725431922307 39.97640999999999,116.3481521921683 39.97642481376083,116.3490503366915 39.97643252101266,116.34994861001017 39.976439174889,116.35084689726364 39.976442520183774,116.35174509456243 39.97645339294932,116.35264317859328 39.976469011801754,116.35354147924622 39.97646999999999,116.3544396434651 39.97648019841886,116.35533788071876 39.97648927152247,116.35623605734374 39.976501323959326,116.35713419164648 39.97651514141046,116.35803241648193 39.9765242824743,116.35893069597114 39.976530000000004,116.35982895750838 39.97653744879258,116.36072718232566 39.97654710931354,116.36162537780979 39.97655605926045,116.3625234848761 39.97657000000001,116.36342173519684 39.976578202188584,116.36431998430086 39.97658655799391,116.3652182723235 39.97658999999998,116.36611615426334 39.97660336121146,116.36701426628709 39.97661800434323,116.36791241506027 39.976630000000014,116.36881055533937 39.97663657985452,116.36970877965759 39.97664,116.37060648899366 39.97664193450028,116.37150464770265 39.97665041399778,116.37240291909195 39.97665721908418,116.37330121003247 39.97666062072774,116.3741994129585 39.97667150803656,116.37509761457166 39.97668172769174,116.37599569034577 39.97669762283825,116.3768938799347 39.976707072835,116.37779212570128 39.97671516268916,116.37869041070097 39.976719999999965,116.37958872406537 39.97672033145626,116.3804870039552 39.976726442203955,116.38138362375639 39.97673999999999,116.38228190681774 39.97674469279708,116.38318017145953 39.97675200142895,116.38407843363157 39.97675948694696,116.3849767337535 39.97676150210597,116.3858749869645 39.97676959447715,116.38677319509067 39.976780028527585,116.38767144940502 39.97678804865552,116.3885692185711 39.9768,116.3894673091109 39.97681124692124,116.39036544582282 39.97682493674772,116.3912636153287 39.97683580200634,116.39216172039447 39.97685000000002,116.39306003567873 39.97685000000002,116.39395808499009 39.97685999999998,116.39485519428138 39.97687,116.39575350956562 39.97687,116.39665182484988 39.97687,116.39754943266364 39.97685999999998,116.39844771523174 39.97686238250385,116.39934587671142 39.976874064598555,116.4002440374124 39.97688683465677,116.4011421981134 39.976899604712585,116.40204029660316 39.97691122022444,116.40293851087225 39.976920000000014,116.40383679214656 39.976924673437324,116.40473502221816 39.97693387355254,116.40563326403708 39.97694000000002,116.40653150925075 39.97694748911277,116.4074295646007 39.97696,116.40756999999999 39.97755022083811,116.40756999999999 39.97823859299835,116.40756999999999 39.97892695822434,116.40756403985338 39.97961529078421,116.40755660972044 39.98030361654247,116.40755096765214 39.98099194738936,116.40754399723771 39.98168026400083,116.40754 39.98236858220415,116.40754 39.98305690582516,116.40755925549504 39.98374470941606,116.40758331360004 39.984432772288244,116.40760088776824 39.985120899333815,116.40761289177554 39.98580913377133,116.40762489578287 39.98649736127554,116.40762999999998 39.98718561716943,116.40763702829571 39.98787382113708,116.40765 39.98856195802797,116.40767 39.98924994630882,116.40767 39.98993820059989,116.40767685401629 39.99062640927359,116.40769719561222 39.991314466500974,116.40771469675265 39.99200256781774,116.40773065686265 39.99269068561027,116.40774623673363 39.9933788017184,116.40776181660458 39.994066910893736,116.40777739647551 39.994755013136256,116.40779230751347 39.995443072250524,116.40781868774691 39.996130965365566,116.40783517715707 39.99681899654869,116.40784719777275 39.997507107159066,116.40786332418611 39.998195167349536,116.40788 39.99888306008153,116.40788671335542 39.99957119699502,116.40789 40.000259337339,116.4079059180462 40.0009473370039,116.4079131353332 40.00163541357949,116.40793349655543 40.00232335905366,116.40794 40.00301143506889,116.40794 40.00369955068277,116.40794 40.00438765936132,116.40794747432852 40.005075729326705,116.40795999999999 40.00576373411779,116.40798277113537 40.00645157331744,116.408008380763 40.00713937458903,116.40803291668456 40.007827189228536,116.40805163545511 40.008515106906415,116.40806999999998 40.009203020478914,116.40873701005924 40.00936999999998,116.40963512246918 40.00936000000002,116.41053290596368 40.009349999999976,116.41143121459554 40.00934936772105,116.41232943131955 40.009340000000016,116.4132277206758 40.009337809435195,116.41412594352595 40.00933,116.41502420647612 40.0093241662478,116.4159224843853 40.00932000000002,116.41652918545302 40.00949927645222,116.41645280889735 40.010184621596736,116.41639153668835 40.010871048510595,116.41636610715524 40.01155825033722,116.41641450485679 40.012245266383616,116.41646695036135 40.01293210430346,116.41659734537558 40.01361224797313,116.41674691552689 40.01429065309474,116.41688916065122 40.01496997267027,116.41703004586915 40.01564945378086,116.41716980760947 40.016329064322335,116.4173092223941 40.017008709964365,116.41745573843687 40.01768746821708,116.41760356810214 40.01836605646834,116.4177092155741 40.01904911717661,116.41777000000002 40.019734286744786,116.41777000000002 40.0204222337858,116.41777000000002 40.02111017389079,116.4177762593032 40.021798077457895,116.41778 40.02248598600053,116.41778999999998 40.02317381906912,116.41779686603299 40.02386165092314,116.4178 40.02454951960264,116.41784718842837 40.02523626116162,116.41794470326536 40.025919977843394,116.41806296830923 40.02660077824386,116.41817075601512 40.02728285246735,116.4182129389813 40.027969925540305,116.41823486398417 40.02865755177454,116.41824488221464 40.02934528945173,116.41826 40.030033028797,116.41825000000001 40.03072078578384,116.41825000000001 40.031408622044765,116.41820358109153 40.03209493249829,116.41808836444135 40.03277695114125,116.41792955904356 40.03345374963796,116.41775056227199 40.03412775094584,116.41757416845378 40.03480200707484,116.41736213590835 40.03546849520485,116.41698887460461 40.0360933546934,116.41658030103247 40.036705761083276,116.41619234222706 40.03732598475699,116.41652623648405 40.0376406572111,116.41742449482891 40.03764840081759,116.418322587248 40.03765818959745,116.41921953300695 40.03762243794952,116.42011379940274 40.037558169278014,116.4210082495846 40.03749450345689,116.4219049220811 40.037456807720126,116.42229999999999 40.037816997848616,116.42229542100799 40.03850474017695,116.42228995948771 40.03919247126148,116.42228 40.039880174234796,116.42228 40.040567918119606,116.42227255146251 40.04125559607786,116.42297946142519 40.041410452592785,116.42387738899687 40.041430000000005,116.42477556166742 40.04144078390256,116.4256736271883 40.04145674727103,116.42657184825511 40.0414563349142,116.42747001576619 40.04145557722646,116.428201481076 40.0414297531541";
+        String[] resultArr = str.split(",");
+        GeoToolsGeometry gtg = new GeoToolsGeometry();
+        String url = "jdbc:postgresql://192.168.1.105:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String insertSQL = "insert into testbuslinepoint (buslineid,index,the_geom) values (?,?,ST_GeomFromText(?,4326))";
+        PreparedStatement ps = connection.prepareStatement(insertSQL);
+        for(int p=0;p<resultArr.length;p++){
+          ps.setString(1, "aaaaaa");
+          ps.setInt(2, p);
+          String[] arrtt = resultArr[p].split(" ");
+          String wkt = GeoToolsGeometry.createPoint(Double.parseDouble(arrtt[0]), Double.parseDouble(arrtt[1])).toText();
+          ps.setString(3, wkt);
+          ps.addBatch();
+        }
+        ps.executeBatch();
+    }
+    
+    
+    public int calcDisMin(String s1,List<String> list){
+        String[] arr1 = s1.split(" ");
+        double x1 = Double.parseDouble(arr1[0]);
+        double y1 = Double.parseDouble(arr1[1]);
+        String[] arrTemp = list.get(0).split(" ");
+        double x2 = Double.parseDouble(arrTemp[0]);
+        double y2 = Double.parseDouble(arrTemp[1]);
+        double disTemp = PBMathUtil.Distance(x1, y1, x2, y2);
+        int ret = 0;
+        for(int i=1;i<list.size();i++){
+            String[] arrTemp1 = list.get(i).split(" ");
+            double x21 = Double.parseDouble(arrTemp1[0]);
+            double y21 = Double.parseDouble(arrTemp1[1]);
+            double disTemp1 = PBMathUtil.Distance(x1, y1, x21, y21);
+            if(disTemp1<disTemp){
+                disTemp = disTemp1;
+                ret = i;
+            }
+        }
+        return ret;
+    }
+    
+    @Test
+    public void testUpdataBuslineNetwork0106() throws Exception{
+        String url = "jdbc:postgresql://192.168.1.105:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String queryBusline = "select * from busline";
+        Statement state = connection.createStatement();
+        ResultSet rs1 = state.executeQuery(queryBusline);
+        Map<String,String> map1 = new HashMap<String,String>();
+        while(rs1.next()){
+            String id = rs1.getString("id");
+            String label = rs1.getString("label");
+            map1.put(id,label);
+        }
+        String sql = "select * from busline_network_0106";
+        Statement statement = connection.createStatement();
+        ResultSet rs = statement.executeQuery(sql);
+        String updateSQL = "update busline_network_0106 set buslinenames=? where navigationid=?";
+        PreparedStatement ps = connection.prepareStatement(updateSQL);
+        int c = 0;
+        while(rs.next()){
+            String navigation = rs.getString("navigationid");
+            String buslineids = rs.getString("buslineids");
+            String[] buslineidArr = buslineids.split(",");
+            String buslineNames = "";
+            for(String buslineid:buslineidArr){
+                buslineNames = buslineNames+map1.get(buslineid)+",";
+            }
+            buslineNames = buslineNames.substring(0, buslineNames.length()-1);
+            ps.setString(1, buslineNames);
+            ps.setString(2, navigation);
+            ps.addBatch();
+            c++;
+            if(c%5000==0){
+                ps.executeBatch();
             }
         }
         ps.executeBatch();

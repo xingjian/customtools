@@ -408,4 +408,39 @@ public class ConversionUtilTest {
         ConversionUtil.DBFToPostGIS(dbfPath, "GBK", "pnamebeijing", dataStore);
         PrintUtil.PrintObject(str);
     }
+    
+    /**
+     * 导入历史公交线路
+     */
+    @Test
+    public void testShapeToPostGISBusLineHistory(){
+        String shapePath = "G:\\项目文档\\公交都市\\公交线路调整\\公交线路20151222\\2015-11\\北京_公交线路_polyline.shp";
+        String url = "jdbc:postgresql://192.168.1.105:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata";
+        Map<String,String> mapping = PBFileUtil.ReadPropertiesFile("G:\\项目文档\\公交都市\\数据\\busline.properties");
+        PrintUtil.PrintObject(mapping);
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String result = ConversionUtil.ShapeToPostGIS(shapePath, connection, "GBK","busline_history",mapping);
+        Assert.assertEquals("success", result);
+        //String updatasql = "update busline_history set batchtime='201501',systime='2015-12-30 16:17:00' where batchtime is null"
+    }
+    
+    /**
+     * 导入历史公交站点
+     */
+    @Test
+    public void testShapeToPostGISBusStationHistory(){
+        String shapePath = "G:\\项目文档\\公交都市\\公交线路调整\\公交线路20151222\\2015-11\\北京_公交车站_font_point.shp";
+        String url = "jdbc:postgresql://192.168.1.105:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata";
+        Map<String,String> mapping = PBFileUtil.ReadPropertiesFile("G:\\项目文档\\公交都市\\数据\\busstation.properties");
+        PrintUtil.PrintObject(mapping);
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String result = ConversionUtil.ShapeToPostGIS(shapePath, connection, "GBK","busstation_history",mapping);
+        Assert.assertEquals("success", result);
+        //update busstation_history set batchtime='201509',systime='2015-12-30 19:12:00' where batchtime is null
+        //update busline_history set batchtime='201509',systime='2015-12-30 19:12:00' where batchtime is null
+    }
 }

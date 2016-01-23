@@ -33,10 +33,10 @@ public class GISCoordinateTransformTest {
     
     @Test
     public void testFrom54To02ShapeFile(){
-        String inputShapeFile = "G:\\项目文档\\微波路段\\城市道路84+北京地方\\城市道路全属性_北京地方\\北京地方全属性\\Road_LN_03.shp";
-        String outputShapleFile = "G:\\项目文档\\微波路段\\城市道路84+北京地方\\城市道路全属性_北京地方\\北京地方全属性\\Road_LN_04.shp";
+        String inputShapeFile = "C:\\Users\\xingjian\\Desktop\\080305\\080305_划线车位_夜间.shp";
+        String outputShapleFile = "C:\\Users\\xingjian\\Desktop\\080305\\080305_划线车位_夜间04.shp";
         try {
-           String result = GISCoordinateTransform.From84To02(inputShapeFile, outputShapleFile, "GBK");
+           String result = GISCoordinateTransform.From54To02(inputShapeFile, outputShapleFile, "GBK");
            System.out.println(result);
         } catch (Exception e) {
             e.printStackTrace();
@@ -45,8 +45,8 @@ public class GISCoordinateTransformTest {
     
     @Test
     public void testFrom84To02ShapeFile(){
-        String inputShapeFile = "G:\\项目文档\\节能减排\\gis\\data\\wgs1984\\traffic1.shp";
-        String outputShapleFile = "G:\\项目文档\\节能减排\\gis\\data\\wgs1984\\traffic13_02.shp";
+        String inputShapeFile = "G:\\项目文档\\停车场\\excelgis\\tccline_tab.shp";
+        String outputShapleFile = "G:\\tccline_tab.shp";
         try {
            String result = GISCoordinateTransform.From84To02(inputShapeFile, outputShapleFile, "GBK");
            System.out.println(result);
