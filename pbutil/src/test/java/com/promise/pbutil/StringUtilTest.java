@@ -1,5 +1,8 @@
 package com.promise.pbutil;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.junit.Test;
 
 import com.promise.cn.util.StringUtil;
@@ -34,5 +37,24 @@ public class StringUtilTest {
         }
         System.out.println(minute);
         System.out.println(Math.sin(Math.PI*30/180));
+    }
+    
+    @Test
+    public void testMatchString(){
+        Pattern pattern = Pattern.compile("([-\\+]?\\d+(\\.\\d+)?) ([-\\+]?\\d+(\\.\\d+)?)");
+        String wktCopy= "MULTIPOLYGON (((484842.9970703125 306711.8045043945300, 484842.9970703125 306711.80450439453)))";
+        Matcher matcher = pattern.matcher(wktCopy);
+        //System.out.println(matcher.);
+        
+        Pattern p = Pattern.compile("(name:)([a-zA-Z]*)(,age:)([0-9]*)");
+        Matcher m = p.matcher("name:vunv,age:20");
+        while (m.find()) {
+        System.out.println(m.group(2));
+        System.out.println(m.group(4));
+        }
+        //m.appendTail("aaaaa");
+        
+        wktCopy = wktCopy.replaceFirst("484842.9970703125 306711.8045043945300", "fffff");
+        System.out.println(wktCopy);
     }
 }

@@ -88,7 +88,7 @@ public class PBMathUtil {
      * @return double数组
      */
     public static double[] SplitSegmentByLength(double xa,double xb,double ya,double yb,double distance){
-        double length = Math.sqrt(Math.pow((xb-xa), 2)+Math.pow((yb-ya), 2));
+        double length = Distance(xa,ya,xb,yb);
         if(length<distance){
             return null;
         }

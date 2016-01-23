@@ -110,7 +110,6 @@ public class PBFileUtil {
             while((s = br.readLine())!=null){
                 if(s.trim()!=""){
                     result.add(s);
-                    System.out.println(s);
                 }
             }
             br.close();

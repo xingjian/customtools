@@ -121,4 +121,44 @@ public class PBFileUtilTest {
        String excelPath = "d:\\result.xls";
        String result = POIExcelUtil.ExportDataBySQL("select * from area4", connection, excelPath);
     }
+    
+    @Test
+    public void testReadCSVFile1() throws Exception{
+        String filePath = "G:\\项目文档\\节能减排\\data\\trafficflow.csv";
+        List<String> list = PBFileUtil.ReadCSVFile(filePath, "UTF-8");
+        String url = "jdbc:postgresql://localhost:5432/pollutionreduction";
+        String username = "postgres";
+        String passwd = "postgres";
+        String insertSQL = "INSERT INTO trafficflow(linkid, roadtype, conf, district, loop, startnode, endnode, sectype,"+ 
+            "seclen, linenum, flow_all, flow_car, flow_bus, flow_taxi, load,"+ 
+            "speed) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        PreparedStatement ps = connection.prepareStatement(insertSQL);
+        int countIndex = 0;
+        for(String str:list){
+            String[] arr = str.split(",");
+            ps.setInt(1, Integer.parseInt(arr[0]));
+            ps.setString(2, arr[1]);
+            ps.setString(3, arr[2]);
+            ps.setString(4, arr[3]);
+            ps.setString(5, arr[4]);
+            ps.setInt(6, Integer.parseInt(arr[5]));
+            ps.setInt(7, Integer.parseInt(arr[6]));
+            ps.setString(8, arr[7]);
+            ps.setDouble(9, Double.parseDouble(arr[8]));
+            ps.setInt(10, Integer.parseInt(arr[9]));
+            ps.setDouble(11, Double.parseDouble(arr[10]));
+            ps.setDouble(12, Double.parseDouble(arr[11]));
+            ps.setDouble(13, Double.parseDouble(arr[12]));
+            ps.setDouble(14, Double.parseDouble(arr[13]));
+            ps.setInt(15, Integer.parseInt(arr[14]));
+            ps.setDouble(16, Double.parseDouble(arr[15]));
+            ps.addBatch();
+            countIndex++;
+            if(countIndex%5000==0){
+                ps.executeBatch();
+            }
+        }
+        ps.executeBatch();
+    }
 }
