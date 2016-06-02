@@ -12,6 +12,10 @@ import org.geotools.feature.FeatureIterator;
 import org.geotools.geojson.feature.FeatureJSON;
 import org.geotools.geojson.geom.GeometryJSON;
 import org.geotools.geometry.jts.JTSFactoryFinder;
+import org.geotools.graph.util.geom.GeometryUtil;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.opengis.feature.simple.SimpleFeature;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -37,7 +41,7 @@ import com.vividsolutions.jts.operation.linemerge.LineMerger;
 public class GeoToolsGeometry {
 
     public static GeometryFactory gf = JTSFactoryFinder.getGeometryFactory();
-    
+    public static JSONParser jsonparser = new JSONParser();
     /**
      * create Coordinate
      * @param x
@@ -657,6 +661,15 @@ public class GeoToolsGeometry {
     }
     
     /**
+     * 创建MultiPolygon
+     * @param polygons
+     * @return
+     */
+    public static MultiPolygon createMultiPolygon(Polygon[] polygons){
+       return  gf.createMultiPolygon(polygons);
+    }
+    
+    /**
      * geojson 转换MultiPolygon
      * @param geojson
      * @return
@@ -680,6 +693,76 @@ public class GeoToolsGeometry {
         fjson.writeFeature(feature, writer);
         String json = writer.toString();
         return json;
+    }
+    
+    /**
+     * 根据arcgis格式的json转换成Geometry
+     * @param agjson
+     * @return
+     */
+    public static Geometry ArcgisJSONToGeometry(String agjson){
+        Geometry geom = null;
+        try {
+            JSONObject jsonObject = (JSONObject)jsonparser.parse(agjson);
+            int srid = 0;
+            JSONObject wktObject = (JSONObject)jsonObject.get("spatialReference");
+            if(null!=wktObject&&null!=wktObject.get("wkid")){
+                srid = Integer.parseInt(wktObject.get("wkid").toString());
+            }
+            if(null!=jsonObject.get("rings")){//面要素
+                JSONArray ringsArr = (JSONArray)(jsonObject.get("rings"));
+                Polygon[] polygonArr = new Polygon[ringsArr.size()];
+                for(int i=0;i<ringsArr.size();i++){
+                    JSONArray subringsArr = (JSONArray)ringsArr.get(i);
+                    Coordinate[] coords = new Coordinate[subringsArr.size()];
+                    for(int j=0;j<subringsArr.size();j++){
+                        JSONArray coorArr = (JSONArray)subringsArr.get(j);
+                        coords[j] = new Coordinate(Double.parseDouble(coorArr.get(0).toString()),Double.parseDouble(coorArr.get(1).toString()));
+                    }
+                    LinearRing ring = gf.createLinearRing(coords);
+                    LinearRing holes[] = null;
+                    Polygon polygon = gf.createPolygon(ring,holes);
+                    polygonArr[i] = polygon;
+                }
+                geom = gf.createMultiPolygon(polygonArr);
+                geom.setSRID(srid);
+            }else if(null!=jsonObject.get("paths")){//线
+                JSONArray pathsArr = (JSONArray)(jsonObject.get("paths"));
+                LineString[] lineStringArr = new LineString[pathsArr.size()];
+                for(int i=0;i<pathsArr.size();i++){
+                    JSONArray subPathArr = (JSONArray)pathsArr.get(i);
+                    Coordinate[] coords = new Coordinate[subPathArr.size()];
+                    for(int j=0;j<subPathArr.size();j++){
+                        JSONArray coorArr = (JSONArray)subPathArr.get(j);
+                        coords[j] = new Coordinate(Double.parseDouble(coorArr.get(0).toString()),Double.parseDouble(coorArr.get(1).toString()));
+                    }
+                    LineString lineString = gf.createLineString(coords);
+                    lineStringArr[i] = lineString;
+                }
+                geom = gf.createMultiLineString(lineStringArr);
+                geom.setSRID(srid);
+            }else if(null!=jsonObject.get("x")&&null!=jsonObject.get("y")){//点
+                geom = createPoint(Double.parseDouble(jsonObject.get("x").toString()),Double.parseDouble(jsonObject.get("y").toString()));
+                geom.setSRID(srid);
+            }else if (null!=jsonObject.get("xmin") && null!=jsonObject.get("yin")&& null!=jsonObject.get("xmax")&& null!=jsonObject.get("ymax")) {
+                double xmin = Double.parseDouble(jsonObject.get("xmin").toString());
+                double ymin = Double.parseDouble(jsonObject.get("ymin").toString());
+                double xmax = Double.parseDouble(jsonObject.get("xmax").toString());
+                double ymax = Double.parseDouble(jsonObject.get("ymax").toString());
+                Coordinate[] coordinates = new Coordinate[5];
+                coordinates[0] = new Coordinate(xmin, ymin);
+                coordinates[1] = new Coordinate(xmin, ymax);
+                coordinates[2] = new Coordinate(xmax, ymax);
+                coordinates[3] = new Coordinate(xmax, ymin);
+                coordinates[4] = new Coordinate(xmin, ymin);
+                LinearRing shell = GeometryUtil.gf().createLinearRing(coordinates);
+                geom = GeometryUtil.gf().createPolygon(shell, null);
+                geom.setSRID(srid);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return geom;
     }
     
     /**

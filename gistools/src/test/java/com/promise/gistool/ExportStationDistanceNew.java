@@ -39,9 +39,7 @@ public class ExportStationDistanceNew {
 
   public void init_flow() throws Exception {
     Class.forName("org.postgresql.Driver");
-    //String url = "jdbc:postgresql://123.116.104.249:5432/buscity";
-    String url = "jdbc:postgresql://192.168.1.105:5432/basedata";
-    //conn_flow = DriverManager.getConnection(url, "buscity", "bs789&*(");
+    String url = "jdbc:postgresql://10.212.140.212:5432/basedata";
     conn_flow = DriverManager.getConnection(url, "basedata", "basedata");
   }
 
@@ -1266,7 +1264,8 @@ public class ExportStationDistanceNew {
 
     PreparedStatement ps = null;
     try {
-      String batch_sql = "INSERT INTO busstation_distance_2016_01_07(id,buslineid,buslinename,s_stationid,e_stationid,s_stationname,e_stationname,distance,linkids,index,remark) values(?,?,?,?,?,?,?,?,?,?,?)";
+        System.out.println("insertDbByBusstationDistance......distance_list"+distance_list.size());
+      String batch_sql = "INSERT INTO busstation_distance_2016_05_04(id,buslineid,buslinename,s_stationid,e_stationid,s_stationname,e_stationname,distance,linkids,index,remark) values(?,?,?,?,?,?,?,?,?,?,?)";
       ps = conn_flow.prepareStatement(batch_sql);
       conn_flow.setAutoCommit(false);
       String[] bo;
@@ -1294,6 +1293,7 @@ public class ExportStationDistanceNew {
         //
         ps.addBatch();
         if(i%1000==0){
+            System.out.println("insertDbByBusstationDistance......"+i);
           ps.executeBatch();
           conn_flow.commit();  
           ps.clearBatch();

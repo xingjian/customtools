@@ -1,5 +1,6 @@
 package com.promise.gistool;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -42,6 +43,15 @@ import com.vividsolutions.jts.geom.Polygon;
  */
 public class BaseDataTest {
 
+    
+    @Test
+    public void testXNingqxShapeToPostGis(){
+        String shapePath = "G:\\项目文档\\西宁交通\\gis\\xining\\xningqx.shp";
+        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "xiningtaffic", "postgis", "postgis");
+        String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "xningqx", MultiPolygon.class, "EPSG:4326");
+        System.out.println(result);
+    }
+    
     @Test
     public void testShapeToPostGis(){
         String shapePath = "G:\\项目文档\\公交都市\\giss数据\\地图\\2014地图\\14S-G_beijing\\beijingshape\\POIbeijing.shp";
@@ -240,9 +250,9 @@ public class BaseDataTest {
     public void testCalcStastionDistance(){
         try{
         GeoToolsGeometry gtg = new GeoToolsGeometry();
-        String url = "jdbc:postgresql://192.168.1.105:5432/basedata";
+        String url = "jdbc:postgresql://ttyjbj.ticp.net:5432/basedata";
         String username = "basedata";
-        String passwd = "basedata";
+        String passwd = "basedata!@#&*(";
         //把需要的导航数据加载到内存中
         Map<String,NavigationObject> navigationMap = new HashMap<String, NavigationObject>();
         Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
@@ -270,10 +280,10 @@ public class BaseDataTest {
         }
         
         //
-        String sqlQ = "select s_stationid,e_stationid,linkids,id from busstation_distance_temp where distance >0";
+        String sqlQ = "select s_stationid,e_stationid,linkids,id from busstation_distance_2016_03_01 where distance >0";
         Statement statement1 = connection.createStatement();
         ResultSet rs1 = statement1.executeQuery(sqlQ);
-        String updataBSDistance = "update busstation_distance set the_geom=st_geometryfromtext(?,4326) where id=?";
+        String updataBSDistance = "update busstation_distance_2016_03_01 set the_geom=st_geometryfromtext(?,4326) where id=?";
         PreparedStatement psBusStation = connection.prepareStatement(updataBSDistance);
         int index = 0;
         while(rs1.next()){
@@ -283,82 +293,90 @@ public class BaseDataTest {
             String id = rs1.getString(4);
             String multilineWkt = "MULTILINESTRING(";
             String[] linkidArr = linkids.split(",");
-            String s_nameWkt = busstationlinkMap.get(s_stationid);
-            NavigationObject s_namelinkWkt = navigationMap.get(linkidArr[0]);
-            String e_nameWkt = busstationlinkMap.get(e_stationid);
-            NavigationObject e_namelinkWkt = navigationMap.get(linkidArr[linkidArr.length-1]);
-            List<String> wktList = pointSplitLine(s_nameWkt, s_namelinkWkt);
-            MultiLineString subline1 = gtg.createMLineByWKT(wktList.get(0));
-            MultiLineString subline2 = gtg.createMLineByWKT(wktList.get(1));
-            MultiLineString naviLine = gtg.createMLineByWKT(navigationMap.get(linkidArr[1]).wkt);
-            double dis1 = gtg.distanceGeo(subline1, naviLine);
-            double dis2 = gtg.distanceGeo(subline2, naviLine);
-            List<String> startString = null;
-            if(dis1>dis2){//取dis2 wktList(1)
-                startString = getXYByWkt(wktList.get(1));
-            }else{//取dis1 wktList(2)
-                startString = getXYByWkt(wktList.get(0));
-            }
-            String startStringwkt="(";
-            for(int k=0;k<startString.size();k++){
-                if(k==startString.size()-1){
-                    startStringwkt +=startString.get(k)+"),";
-                }else{
-                    startStringwkt +=startString.get(k)+",";
+            System.out.println(linkids);
+            if(linkidArr.length>1){
+                String s_nameWkt = busstationlinkMap.get(s_stationid);
+                NavigationObject s_namelinkWkt = navigationMap.get(linkidArr[0]);
+                String e_nameWkt = busstationlinkMap.get(e_stationid);
+                NavigationObject e_namelinkWkt = navigationMap.get(linkidArr[linkidArr.length-1]);
+                if(null==s_nameWkt){
+                    System.out.println(s_stationid);//8d81de06fc9447dd880bd24ce2e90d0f
+                    return;
                 }
-            }
-            multilineWkt +=startStringwkt;
-            
-            if(linkidArr.length>2){
-                for(int i=1;i<linkidArr.length-1;i++){
-                    String middleLineWkt="(";
-                    NavigationObject navigationWkt = navigationMap.get(linkidArr[i]);
-                    List<String> middStrList = getXYByWkt(navigationWkt.wkt);
-                    for(int u = 0;u<middStrList.size();u++){
-                        if(u==middStrList.size()-1){
-                            middleLineWkt += middStrList.get(u)+"),";
-                        }else{
-                            middleLineWkt += middStrList.get(u)+",";
-                        }
-                        
+                List<String> wktList = pointSplitLine(s_nameWkt, s_namelinkWkt);
+                MultiLineString subline1 = gtg.createMLineByWKT(wktList.get(0));
+                MultiLineString subline2 = gtg.createMLineByWKT(wktList.get(1));
+                MultiLineString naviLine = gtg.createMLineByWKT(navigationMap.get(linkidArr[1]).wkt);
+                double dis1 = gtg.distanceGeo(subline1, naviLine);
+                double dis2 = gtg.distanceGeo(subline2, naviLine);
+                List<String> startString = null;
+                if(dis1>dis2){//取dis2 wktList(1)
+                    startString = getXYByWkt(wktList.get(1));
+                }else{//取dis1 wktList(2)
+                    startString = getXYByWkt(wktList.get(0));
+                }
+                String startStringwkt="(";
+                for(int k=0;k<startString.size();k++){
+                    if(k==startString.size()-1){
+                        startStringwkt +=startString.get(k)+"),";
+                    }else{
+                        startStringwkt +=startString.get(k)+",";
                     }
-                    multilineWkt +=middleLineWkt;
+                }
+                multilineWkt +=startStringwkt;
+                
+                if(linkidArr.length>2){
+                    for(int i=1;i<linkidArr.length-1;i++){
+                        String middleLineWkt="(";
+                        NavigationObject navigationWkt = navigationMap.get(linkidArr[i]);
+                        List<String> middStrList = getXYByWkt(navigationWkt.wkt);
+                        for(int u = 0;u<middStrList.size();u++){
+                            if(u==middStrList.size()-1){
+                                middleLineWkt += middStrList.get(u)+"),";
+                            }else{
+                                middleLineWkt += middStrList.get(u)+",";
+                            }
+                            
+                        }
+                        multilineWkt +=middleLineWkt;
+                    }
+                }
+                
+                List<String> wktList1 = pointSplitLine(e_nameWkt, e_namelinkWkt);
+                MultiLineString subline3 = gtg.createMLineByWKT(wktList1.get(0));
+                MultiLineString subline4 = gtg.createMLineByWKT(wktList1.get(1));
+                MultiLineString naviLine1 = gtg.createMLineByWKT(navigationMap.get(linkidArr[linkidArr.length-2]).wkt);
+                double dis3 = gtg.distanceGeo(subline3, naviLine1);
+                double dis4 = gtg.distanceGeo(subline4, naviLine1);
+                List<String> endString = null;
+                
+                if(dis3>dis4){//取dis2 wktList(1)
+                    endString = getXYByWkt(wktList1.get(1));
+                }else{//取dis1 wktList(2)
+                    endString = getXYByWkt(wktList1.get(0));
+                }
+                
+                String endStringwkt="(";
+                for(int h=0;h<endString.size();h++){
+                    if(h==endString.size()-1){
+                        endStringwkt +=endString.get(h)+")";
+                    }else{
+                        endStringwkt +=endString.get(h)+",";
+                    }
+                } 
+                multilineWkt +=endStringwkt;
+                multilineWkt +=")";
+                
+                psBusStation.setString(1, multilineWkt);
+                psBusStation.setString(2, id);
+                psBusStation.addBatch();
+                index++;
+                System.out.println("Index value ==== "+ index);
+                if(index%10000==0){
+                    psBusStation.executeBatch();
                 }
             }
             
-            List<String> wktList1 = pointSplitLine(e_nameWkt, e_namelinkWkt);
-            MultiLineString subline3 = gtg.createMLineByWKT(wktList1.get(0));
-            MultiLineString subline4 = gtg.createMLineByWKT(wktList1.get(1));
-            MultiLineString naviLine1 = gtg.createMLineByWKT(navigationMap.get(linkidArr[linkidArr.length-2]).wkt);
-            double dis3 = gtg.distanceGeo(subline3, naviLine1);
-            double dis4 = gtg.distanceGeo(subline4, naviLine1);
-            List<String> endString = null;
-            
-            if(dis3>dis4){//取dis2 wktList(1)
-                endString = getXYByWkt(wktList1.get(1));
-            }else{//取dis1 wktList(2)
-                endString = getXYByWkt(wktList1.get(0));
-            }
-            
-            String endStringwkt="(";
-            for(int h=0;h<endString.size();h++){
-                if(h==endString.size()-1){
-                    endStringwkt +=endString.get(h)+")";
-                }else{
-                    endStringwkt +=endString.get(h)+",";
-                }
-            } 
-            multilineWkt +=endStringwkt;
-            multilineWkt +=")";
-            
-            psBusStation.setString(1, multilineWkt);
-            psBusStation.setString(2, id);
-            psBusStation.addBatch();
-            index++;
-            System.out.println("Index value ==== "+ index);
-            if(index%10000==0){
-                psBusStation.executeBatch();
-            }
         }
         psBusStation.executeBatch();
         }catch(Exception e){
@@ -366,7 +384,7 @@ public class BaseDataTest {
         }
     }
     
-    
+    //220722198209035620 
     public List<String> pointSplitLine(String pointWkt,NavigationObject lineWkt){
         List<String> retList = new ArrayList<String>();
         List<String> pointList = getXYByWkt(pointWkt);
@@ -433,11 +451,16 @@ public class BaseDataTest {
     public List<String> getXYByWkt(String wkt){
         List<String> result = new ArrayList<String>();
         Pattern pattern = Pattern.compile("([-\\+]?\\d+(\\.\\d+)?) ([-\\+]?\\d+(\\.\\d+)?)");
-        Matcher matcher = pattern.matcher(wkt);
-        int i=0;
-        while(matcher.find()){
-            result.add(i, matcher.group());
-            i++;
+        try{
+            Matcher matcher = pattern.matcher(wkt);
+            int i=0;
+            while(matcher.find()){
+                result.add(i, matcher.group());
+                i++;
+            } 
+        }catch(Exception e){
+            e.printStackTrace();
+            System.out.println(wkt);
         }
         return result;
     }
@@ -471,9 +494,172 @@ public class BaseDataTest {
     
     @Test
     public void tesArea3tShapeToPostGis(){
-        String shapePath = "D:\\area3\\area4.shp";
+        String shapePath = "G:\\项目文档\\公交都市\\giss数据\\四维行政区划\\beijingqx_new.shp";
         DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "sw_navigation", "postgis", "postgis");
-        String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "area4", MultiPolygon.class, "EPSG:4326");
+        String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "beijingqx", MultiPolygon.class, "EPSG:4326");
         System.out.println(result);
     }
+    
+    @Test
+    public void tesZhanWeiShapeToPostGis(){
+        String urlttyj = "jdbc:postgresql://ttyjbj.ticp.net:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata!@#&*(";
+        String shapePath = "G:\\项目文档\\公交都市\\giss数据\\给交委数据\\北京_公交站位_font_point.shp";
+        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "ttyjbj.ticp.net", "5432", "basedata", "basedata", "basedata!@#&*(");
+        String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "busstation_platform", Point.class, "EPSG:4326");
+        System.out.println(result);
+    }
+    
+    @Test
+    public void mergeShapeFileGeometry() throws Exception{
+        String pgurl = "jdbc:postgresql://localhost:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata";
+        Connection connectionPG = DBConnection.GetPostGresConnection(pgurl, username, passwd);
+        String insertSQL = "insert into bus_channel_centerline (id,channelid,name,the_geom) values (?,?,?,st_geometryfromtext(?,4326))";
+        PreparedStatement ps = connectionPG.prepareStatement(insertSQL);
+        Map<String,String> map = new HashMap<String,String>();
+        map.put("all.shp","安立路");
+        map.put("byl_channel.shp","北苑路");
+        map.put("cnj_channel.shp","长安街");
+        map.put("cyl_channel.shp","朝阳路");
+        map.put("fcl_channel.shp","阜成路");
+        map.put("fsl_channel.shp","阜石路");
+        map.put("jcdegs_channel.shp","机场第二高速");
+        map.put("jcgs_channel.shp","京承高速");
+        map.put("jgags_channel.shp","京港澳高速");
+        map.put("jkgs_channel.shp","京开高速");
+        map.put("jml_channel.shp","京密路");
+        map.put("jtksl_channel.shp","京通快速路");
+        map.put("jzgs_channel.shp","京藏高速");
+        map.put("lgl_channel.shp","两广路");
+        map.put("lsl_channel.shp","莲石路");
+        map.put("nzzl_channel.shp","南中轴路");
+        map.put("padj_channel.shp","平安大街");
+        map.put("wqhl_channel.shp","万泉河路");
+        map.put("xdwl_channel.shp","西大望路");
+        map.put("zgcdj_channel.shp","中关村大街");
+        map.put("zzyl_channel.shp","紫竹院路");
+        String filePath = "G:\\项目文档\\公交都市\\giss数据\\合并通道中心线\\";
+        File fileDic = new File(filePath);
+        File[] fileArr = fileDic.listFiles();
+        for(File file : fileArr){
+            if(file.getName().endsWith(".shp")){
+                System.out.println(file.getName());
+                SimpleFeatureCollection sfc = GeoShapeUtil.ReadShapeFileFeatures(filePath+file.getName(), "GBK");
+                SimpleFeatureIterator sfi = sfc.features();
+                String channelid = StringUtil.GetUUIDString();
+                while(sfi.hasNext()){
+                    SimpleFeature sf = sfi.next();
+                    Geometry geom = (Geometry)sf.getDefaultGeometry();
+                    String id = StringUtil.GetUUIDString();
+                    ps.setString(1, id);
+                    ps.setString(2, channelid);
+                    if(file.getName().equals("bus_channel_centerline.shp")){
+                        ps.setString(2, StringUtil.GetUUIDString());
+                        if(null==sf.getAttribute("name")){
+                            ps.setString(3, file.getName());
+                        }else{
+                            ps.setString(3, sf.getAttribute("name").toString());
+                        }
+                    }else{
+                        ps.setString(3, map.get(file.getName()));
+                    }
+                    ps.setString(4, geom.toText());
+                    ps.addBatch();
+                    
+                }
+            }
+        }
+        ps.executeBatch();
+    }
+    
+    @Test
+    public void testMergeBuslinechannelcenterline() throws Exception{
+        String sql = "select name,st_astext(the_geom) from bus_channel_centerline";
+        String pgurl = "jdbc:postgresql://localhost:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata";
+        Connection connectionPG = DBConnection.GetPostGresConnection(pgurl, username, passwd);
+        ResultSet rs = connectionPG.createStatement().executeQuery(sql);
+        Map<String,List<String>> map= new HashMap<String,List<String>>();
+        while(rs.next()){
+            String nameStr = rs.getString(1);
+            String wktStr = rs.getString(2);
+            if(null==map.get(nameStr)){
+                List<String> list = new ArrayList<String>();
+                list.add(wktStr);
+                map.put(nameStr, list);
+            }else{
+                map.get(nameStr).add(wktStr);
+            }
+        }
+        rs.close();
+        String inserSQL = "insert into bus_channel_centerline_merge (name,the_geom) values (?,st_geometryfromtext(?,4326))";
+        PreparedStatement ps = connectionPG.prepareStatement(inserSQL);
+        for (Map.Entry<String, List<String>> entry : map.entrySet()) {
+            List<String> wkts = entry.getValue();
+            List<Geometry> listGeo = new ArrayList<Geometry>();
+            for(String wltStr : wkts){
+                listGeo.add(GeoToolsGeometry.createGeometrtyByWKT(wltStr));
+            }
+            Geometry unionGeo = null;
+            if(null!=listGeo.get(0)){
+              unionGeo = listGeo.get(0);
+              for(int i=1;i<listGeo.size();i++){
+                unionGeo = unionGeo.union(listGeo.get(i));
+              }
+            }
+            ps.setString(1, entry.getKey());
+            ps.setString(2, unionGeo.toText());
+            ps.addBatch();
+        }
+        ps.executeBatch();
+        DBConnection.CloseConnection(connectionPG);
+    }
+    
+    /**
+     * 处理公交站点adcd为空的情况
+     */
+    @Test
+    public void handleBustationAdcd() throws Exception{
+        String sql = "select t1.code,st_astext(t2.the_geom) from beijingqx t1 left join beijingqx_new t2 on t1.name=t2.name";
+        String urlttyj = "jdbc:postgresql://ttyjbj.ticp.net:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata!@#&*(";
+        Connection connection = DBConnection.GetPostGresConnection(urlttyj, username, passwd);
+        ResultSet rs = connection.createStatement().executeQuery(sql);
+        Map<String, Geometry> map1 = new HashMap<String, Geometry>();
+        while(rs.next()){
+            String adcdCode = rs.getString(1);
+            String wkt = rs.getString(2);
+            System.out.println(adcdCode);
+            System.out.println(wkt);
+            map1.put(adcdCode, GeoToolsGeometry.createGeometrtyByWKT(wkt));
+        }
+        String updateSQL = "update busstation set adcdcode=? where id=?";
+        PreparedStatement ps = connection.prepareStatement(updateSQL);
+        String sql2 = "select  id,st_astext(the_geom) from busstation where adcdcode is null";
+        ResultSet rs2 = connection.createStatement().executeQuery(sql2);
+        while(rs2.next()){
+            String id = rs2.getString(1);
+            String wkt = rs2.getString(2);
+            Geometry point = GeoToolsGeometry.createGeometrtyByWKT(wkt);
+            for (Map.Entry<String, Geometry> entry : map1.entrySet()) {
+                String adcdTemp = entry.getKey();
+                
+                Geometry geom = entry.getValue();
+                if(geom.contains(point) ||geom.intersects(point)){
+                    ps.setString(1, adcdTemp);
+                    ps.setString(2, id);
+                    ps.addBatch();
+                    break;
+                }
+               
+            }
+        }
+        ps.executeBatch();
+    }
 }
+

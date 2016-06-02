@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -333,4 +334,34 @@ public class XiNingTraffic {
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK");
         System.out.println(result);
     }
+    
+    @Test
+    public void exportXNGPSShape() throws Exception{
+        //车辆类别（如某个公司代码），车牌号，GPS时间，经度，纬度，速度，方向角，车辆状态，转换后经度，转换后纬度。
+        List<String> list = PBFileUtil.ReadFileByLine("G:\\项目文档\\西宁交通\\文档\\201604081639");
+        List<XININGGPS> gpsList = new ArrayList<XININGGPS>();
+        Map<String,String> map = new HashMap<String, String>();
+        for(String record : list){
+            String[] arr = record.split(",");
+            String companyCode = arr[0];
+            String carCode = arr[1];
+            String time = arr[2];
+            double longtidude = Double.parseDouble(arr[3]);
+            double latidude = Double.parseDouble(arr[4]);
+            if(null==map.get(carCode)){
+                XININGGPS gpsmessage = new XININGGPS();
+                gpsmessage.setCarCode(carCode);
+                gpsmessage.setCompanyCode(companyCode);
+                gpsmessage.setTime(time);
+                gpsmessage.setLatidude(latidude);
+                gpsmessage.setLongtidude(longtidude);
+                String wkt = GeoToolsGeometry.createPoint(longtidude, latidude).toText();
+                System.out.println(wkt);
+                gpsmessage.setWkt(wkt);
+                gpsList.add(gpsmessage);
+            }
+        }
+        GeoShapeUtil.ListObjectToShapeFile(gpsList, "d:\\xngps_point.shp", "GBK", "1", "wkt", "EPSG:4326");
+    }
 }
+ 

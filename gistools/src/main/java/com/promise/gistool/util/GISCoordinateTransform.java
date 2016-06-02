@@ -20,6 +20,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 
 import com.tongtu.nomap.core.transform.BeijingToGis84;
+import com.tongtu.nomap.core.transform.CoordinateConvert;
 import com.tongtu.nomap.core.transform.Gis84ToCehui;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.ParseException;
@@ -48,6 +49,24 @@ public class GISCoordinateTransform {
         r[0] = lon;
         r[1] = lat; 
         return r;
+    }
+    /**
+     * 02坐标转换84坐标
+     * @param x x坐标
+     * @param y y坐标
+     * @return
+     */
+    public static double[] From02To84(double x,double y){
+        return CoordinateConvert.gcj2WGSExactly(x, y);
+    }
+    /**
+     * 84坐标转换02坐标
+     * @param x x坐标
+     * @param y y坐标
+     * @return
+     */
+    public static double[] From84To02(double x,double y){
+        return Gis84ToCehui.transform(x, y);
     }
     /**
      * 84坐标转换投影坐标
@@ -322,5 +341,34 @@ public class GISCoordinateTransform {
         inputSDS.dispose();
         outSDS.dispose();
         return result;
+    }
+    
+    /**
+     * 将wkt900913转换wkt84
+     * @param wkt900913
+     * @return
+     */
+    public static String From02To84(String wkt900913){
+        Pattern pattern = Pattern.compile("([-\\+]?\\d+(\\.\\d+)?) ([-\\+]?\\d+(\\.\\d+)?)");
+        String wktCopy= wkt900913;
+        Matcher matcher = pattern.matcher(wkt900913);
+        while(matcher.find()){
+            String temp = wkt900913.substring(matcher.start(),matcher.end());
+            String[] xyArrTemp = temp.split(" ");
+            double x_double = Double.parseDouble(xyArrTemp[0]);
+            double y_double = Double.parseDouble(xyArrTemp[1]);
+            double[] wgs84XYArr = From02To84(x_double, y_double);
+            wktCopy = wktCopy.replaceAll(temp, wgs84XYArr[0]+" "+wgs84XYArr[1]);
+        }
+        return wktCopy;
+    }
+    /**
+     * 84坐标转换成百度09坐标
+     * @param glat
+     * @param glon
+     * @return
+     */
+    public static double[] From84ToBD09(double glat,double glon){
+        return CoordinateConvert.gcj2BD09(glat, glon);
     }
 }

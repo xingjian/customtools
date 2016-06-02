@@ -19,6 +19,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.geotools.data.DataStore;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.junit.Test;
@@ -28,7 +29,9 @@ import com.promise.cn.util.DBConnection;
 import com.promise.cn.util.PBMathUtil;
 import com.promise.cn.util.POIExcelUtil;
 import com.promise.cn.util.StringUtil;
+import com.promise.gistool.util.ConversionUtil;
 import com.promise.gistool.util.GISCoordinateTransform;
+import com.promise.gistool.util.GISDBUtil;
 import com.promise.gistool.util.GeoShapeUtil;
 import com.promise.gistool.util.GeoToolsGeometry;
 import com.tongtu.nomap.core.transform.BeijingToGis84;
@@ -1947,5 +1950,13 @@ public class BusCityDataTest {
             }
         }
         ps.executeBatch();
+    }
+    
+    @Test
+    public void testShapeToPostGis(){
+        String shapePath = "d:\\tongdaofulu.shp";
+        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "basedata", "basedata", "basedata");
+        String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "tongdaofulu", MultiLineString.class, "EPSG:4326");
+        System.out.println(result);
     }
 }

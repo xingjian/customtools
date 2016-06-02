@@ -18,6 +18,8 @@ import org.opengis.feature.simple.SimpleFeature;
 
 import com.promise.cn.util.DBConnection;
 import com.promise.cn.util.PBFileUtil;
+import com.promise.cn.util.PBPSQLUtil;
+import com.promise.cn.util.PBSortUtil;
 import com.promise.cn.util.PrintUtil;
 import com.promise.cn.util.StringUtil;
 import com.promise.gistool.util.ConversionUtil;
@@ -310,6 +312,137 @@ public class PollutionReductionTest {
        }
     }
     
+    /**
+     * 生成路链和行政区划的关系表，并且计算出长度比例系数
+     * 会删除关系表数据
+     */
+    @Test
+    public void testInsertBeijingqx_Navigation_ref(){
+        try{
+        String url = "jdbc:postgresql://ttyjbj.ticp.net:5432/emission";
+        String username = "emission";
+        String passwd = "emission";
+        String tableName = "beijingqx_navigation_ref";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        Statement statement = connection.createStatement();
+        statement.addBatch("delete from "+ tableName);
+        statement.addBatch("insert into "+ tableName +" (beijingqxid,navigationid,the_geom) select t1.gid,t2.\"LINKID\",t2.the_geom from beijingqx t1, navigation_link t2 where  ST_Intersects(t1.geom, t2.the_geom)");
+        statement.executeBatch();
+        //将queryTouch放到内存中
+        String queryBeijingqx = "select gid, st_astext(geom) wkt from beijingqx";
+        Statement statement1 = connection.createStatement();
+        ResultSet rsBeijingqx = statement1.executeQuery(queryBeijingqx);
+        Map<String,Geometry> map1 = new HashMap<String, Geometry>();
+        while(rsBeijingqx.next()){
+            String uuid = rsBeijingqx.getString(1);
+            Geometry geom1 = GeoToolsGeometry.createGeometrtyByWKT(rsBeijingqx.getString(2));
+            map1.put(uuid, geom1);
+        }
+        String querySQL2 = "select beijingqxid, navigationid, st_astext(the_geom) wkt from public.beijingqx_navigation_ref";
+        Statement statement2 = connection.createStatement();
+        ResultSet rs2 = statement2.executeQuery(querySQL2);
+        String update = "update "+tableName+" set subwkt=? where beijingqxid=? and navigationid=?";
+        PreparedStatement ps = connection.prepareStatement(update);
+        //factor, linklength, sublinklength, subwkt
+        int count = 0;
+        while(rs2.next()){
+            String beijingqxid = rs2.getString(1);
+            String navigationid = rs2.getString(2);
+            String wktStr = rs2.getString(3);
+            Geometry intersection = GeoToolsGeometry.intersection(map1.get(beijingqxid),GeoToolsGeometry.createGeometrtyByWKT(wktStr));
+            String subwkt = intersection.toText();
+            ps.setString(1, subwkt);
+            ps.setString(2, beijingqxid);
+            ps.setString(3, navigationid);
+            ps.addBatch();
+            count++;
+            if(count%10000==0){
+                ps.executeBatch();
+                System.out.println("count current value :"+ count);
+            }
+        }
+        ps.executeBatch();
+        System.out.println("count current value :"+ count);
+        System.out.println("start calulate other clolum...........");
+        Statement statement3 = connection.createStatement();
+        statement3.addBatch("update "+ tableName+" set linklength=ST_Length(ST_Transform(the_geom,900913))");
+        statement3.addBatch("update "+ tableName+" set sublinklength=ST_Length(ST_Transform(ST_GeomFromText(subwkt,4326),900913))");
+        statement3.addBatch("update "+ tableName+" set factor=sublinklength/linklength");
+        statement3.executeBatch();
+        System.out.println("end calulate other clolum!");
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+    
+    
+    /**
+     * 生成路链和环线区划的关系表，并且计算出长度比例系数
+     * 会删除关系表数据
+     */
+    @Test
+    public void testInsertRingArea_Navigation_ref(){
+        try{
+        String url = "jdbc:postgresql://ttyjbj.ticp.net:5432/emission";
+        String username = "emission";
+        String passwd = "emission";
+        String tableName = "ringarea_navigation_ref";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        Statement statement = connection.createStatement();
+        //statement.addBatch("delete from "+ tableName);
+        //statement.addBatch("insert into "+ tableName +" (ringareaid,navigationid,the_geom) select t1.id,t2.\"LINKID\",t2.the_geom from ring_area t1, navigation_link t2 where  ST_Intersects(t1.the_geom, t2.the_geom)");
+        //statement.executeBatch();
+        //将queryTouch放到内存中
+        String queryBeijingqx = "select id, st_astext(the_geom) wkt from ring_area";
+        Statement statement1 = connection.createStatement();
+        ResultSet rsBeijingqx = statement1.executeQuery(queryBeijingqx);
+        Map<String,Geometry> map1 = new HashMap<String, Geometry>();
+        while(rsBeijingqx.next()){
+            String uuid = rsBeijingqx.getString(1);
+            Geometry geom1 = GeoToolsGeometry.createGeometrtyByWKT(rsBeijingqx.getString(2));
+            System.out.println(uuid+"-----"+geom1.isValid());
+            map1.put(uuid, geom1);
+        }
+        String querySQL2 = "select ringareaid, navigationid, st_astext(the_geom) wkt from ringarea_navigation_ref where ringareaid!='6'";
+        Statement statement2 = connection.createStatement();
+        ResultSet rs2 = statement2.executeQuery(querySQL2);
+        String update = "update "+tableName+" set subwkt=? where ringareaid=? and navigationid=?";
+        PreparedStatement ps = connection.prepareStatement(update);
+        //factor, linklength, sublinklength, subwkt
+        int count = 0;
+        while(rs2.next()){
+            String beijingqxid = rs2.getString(1);
+            String navigationid = rs2.getString(2);
+            String wktStr = rs2.getString(3);
+            System.out.println("count current value :"+ count);
+            if(count==0){
+                System.out.println("1111111");
+            }
+            Geometry intersection = GeoToolsGeometry.intersection(map1.get(beijingqxid),GeoToolsGeometry.createGeometrtyByWKT(wktStr));
+            String subwkt = intersection.toText();
+            ps.setString(1, subwkt);
+            ps.setString(2, beijingqxid);
+            ps.setString(3, navigationid);
+            ps.addBatch();
+            count++;
+            if(count%10000==0){
+                ps.executeBatch();
+                System.out.println("count current value :"+ count);
+            }
+        }
+        ps.executeBatch();
+        System.out.println("count current value :"+ count);
+        System.out.println("start calulate other clolum...........");
+        Statement statement3 = connection.createStatement();
+        statement3.addBatch("update "+ tableName+" set linklength=ST_Length(ST_Transform(the_geom,900913))");
+        statement3.addBatch("update "+ tableName+" set sublinklength=ST_Length(ST_Transform(ST_GeomFromText(subwkt,4326),900913))");
+        statement3.addBatch("update "+ tableName+" set factor=sublinklength/linklength");
+        statement3.executeBatch();
+        System.out.println("end calulate other clolum!");
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
     
     @Test
     public void testFourPoint(){

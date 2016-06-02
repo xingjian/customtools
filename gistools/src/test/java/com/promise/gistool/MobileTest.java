@@ -4,9 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
 
 import org.junit.Test;
 
@@ -14,8 +14,6 @@ import com.promise.cn.util.DBConnection;
 import com.promise.cn.util.PBFileUtil;
 import com.promise.cn.util.PrintUtil;
 import com.promise.gistool.util.ConversionUtil;
-import com.tongtu.nomap.core.transform.BeijingToGis84;
-import com.tongtu.nomap.core.transform.Gis84ToCehui;
 
 /**  
  * 功能描述:
@@ -90,5 +88,12 @@ public class MobileTest {
             }
         }
         psInsert.executeBatch();
+    }
+    
+    @Test
+    public void testDateStr(){
+        Calendar cal = Calendar.getInstance(); 
+        int hour = cal.get(Calendar.HOUR_OF_DAY);
+        System.out.println(hour);
     }
 }

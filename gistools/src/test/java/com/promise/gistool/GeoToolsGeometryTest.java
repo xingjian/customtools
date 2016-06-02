@@ -17,6 +17,7 @@ import com.promise.gistool.util.GeoShapeUtil;
 import com.promise.gistool.util.GeoToolsGeometry;
 import com.promise.gistool.util.GeoToolsUtil;
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.gml2.GMLWriter;
@@ -98,5 +99,24 @@ public class GeoToolsGeometryTest {
             ps.addBatch();
         }
         ps.executeBatch();
+    }
+    
+    @Test
+    public void testArcgisJSONToGeometry(){
+        String rings = "{\"rings\":[[[116.65818839723528,39.90653535748063],[116.66024833375874,39.9066341174587],[116.66024833375874,39.9066341174587],[116.66026979143085,39.9040827723586],[116.65829568559589,39.90434614141166],[116.65801673585834,39.90646951741615],[116.65818839723528,39.90653535748063]],[[116.65818839723528,39.90653535748063],[116.66024833375874,39.9066341174587],[116.66024833375874,39.9066341174587],[116.66026979143085,39.9040827723586],[116.65829568559589,39.90434614141166],[116.65801673585834,39.90646951741615],[116.65818839723528,39.90653535748063]]],\"spatialReference\":{\"wkid\":4326}}";
+        String paths = "{\"spatialReference\":{\"wkid\":4326},\"paths\":[[[116.1787812467387,39.93600744406167],[116.18062660654094,39.9361801995568],[116.1806051488688,39.936163746671305],[116.1787812467387,39.935999217598635]]]}";
+        Geometry geom1 = GeoToolsGeometry.ArcgisJSONToGeometry(rings);
+        //SimpleFeature sf = new SimpleFeatureImpl(values, featureType, id)
+        Geometry geom2 =GeoToolsGeometry.ArcgisJSONToGeometry(paths);
+        System.out.println(geom1.toText());
+        System.out.println(geom2.toText());
+    }
+    
+    @Test
+    public void createLineTest(){
+        String url = "jdbc:postgresql://localhost:5432/test_gis";
+        String username = "postgis";
+        String passwd = "postgis";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
     }
 }

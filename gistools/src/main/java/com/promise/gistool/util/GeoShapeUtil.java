@@ -5,6 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -52,6 +54,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.xml.sax.SAXException;
 
 import com.promise.cn.util.PBFileUtil;
+import com.promise.cn.util.POIExcelUtil;
 import com.promise.cn.util.StringUtil;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
@@ -427,6 +430,88 @@ public class GeoShapeUtil {
     }
     
     /**
+     * 将对象集合转换到shape
+     * @param listObject
+     * @param shapeFilePath shape文件路径
+     * @param encoding shape文件编码
+     * @param geometryType 几何字段类型 1点2多点3线 4多线5面 6多面
+     * @param crs 坐标信息
+     * @param geomName 几何字段信息
+     * @return
+     */
+    public static <T> String ListObjectToShapeFile(List<T> listObject,String shapeFilePath,String encoding,String geometryType,String geomName,String crs){
+        String result = "success";
+        try{
+            //创建shape文件对象
+            File file = new File(shapeFilePath);  
+            Map<String, Serializable> params = new HashMap<String, Serializable>();  
+            params.put( ShapefileDataStoreFactory.URLP.key, file.toURI().toURL() );
+            params.put( ShapefileDataStoreFactory.CREATE_SPATIAL_INDEX.key, (Serializable)Boolean.TRUE );
+            ShapefileDataStore ds = (ShapefileDataStore) new ShapefileDataStoreFactory().createNewDataStore(params); 
+            SimpleFeatureTypeBuilder tb = new SimpleFeatureTypeBuilder();
+            CoordinateReferenceSystem sourceCRS = CRS.decode(crs);
+            tb.setCRS(sourceCRS);
+            tb.setName("shapefile");
+            Field[] fds = null;
+            Class clazz = null;
+            Map<String,String> map = new HashMap<String, String>();
+            for (Object object : listObject){
+                //获取集合中的对象类型
+                if (null == clazz) {
+                    clazz = object.getClass();
+                    //获取他的字段数组
+                    fds = clazz.getDeclaredFields();
+                    for(int i=0;i<fds.length;i++){  
+                        if(!fds[i].getName().toString().toLowerCase().trim().equals(geomName.toLowerCase().trim())){
+                            String columnLabel = fds[i].getName().toString();
+                            if(columnLabel.length()>10){
+                              if(i>9){
+                                  columnLabel = columnLabel.substring(0, 8)+i;
+                              }else{
+                                  columnLabel = columnLabel.substring(0, 9)+i;
+                              }
+                            }
+                            tb.add(columnLabel, String.class);
+                            map.put(columnLabel, "get"+POIExcelUtil.ChangeFirstUpper(fds[i].getName()));
+                        }else{
+                            if(geometryType.equals("1")){tb.add("the_geom", Point.class);}
+                            if(geometryType.equals("2")){tb.add("the_geom", MultiPoint.class);}
+                            if(geometryType.equals("3")){tb.add("the_geom", LineString.class);}
+                            if(geometryType.equals("4")){tb.add("the_geom", MultiLineString.class);}
+                            if(geometryType.equals("5")){tb.add("the_geom", Polygon.class);}
+                            if(geometryType.equals("6")){tb.add("the_geom", MultiPolygon.class);}
+                            map.put("the_geom","get"+POIExcelUtil.ChangeFirstUpper(geomName));
+                        }
+                    }
+                    ds.createSchema(tb.buildFeatureType());  
+                    ds.setCharset(Charset.forName(encoding));
+                }
+            }
+            //设置Writer  
+            FeatureWriter<SimpleFeatureType, SimpleFeature> writer = ds.getFeatureWriter(ds.getTypeNames()[0], Transaction.AUTO_COMMIT);
+            for (Object object : listObject) {
+                SimpleFeature feature = writer.next();
+                for(Map.Entry<String, String> entry : map.entrySet()){
+                    Method metd = clazz.getMethod(entry.getValue(), null);
+                    if(entry.getKey().trim().equals("the_geom")){
+                        feature.setAttribute(entry.getKey(),GeoToolsGeometry.createGeometrtyByWKT(metd.invoke(object, null).toString()));
+                    }else{
+                        feature.setAttribute(entry.getKey(),metd.invoke(object, null));
+                    }
+                }
+            }
+            writer.write();  
+            writer.close();  
+            ds.dispose();
+        }catch(Exception e){
+            e.printStackTrace();
+            result = "failture";
+        }
+        return result;
+    }
+    
+    
+    /**
      * shape数据格式转换成excel
      * 空间字段转换成wkt
      * @param shapeFilePath
@@ -494,6 +579,7 @@ public class GeoShapeUtil {
                 workbook.write(fOut);
                 fOut.flush();
                 fOut.close();
+                workbook.close();
             } 
             return true;
         }catch(Exception e){
