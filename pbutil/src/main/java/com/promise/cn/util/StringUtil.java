@@ -1,6 +1,7 @@
 package com.promise.cn.util;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Random;
 import java.util.UUID;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
@@ -17,6 +18,8 @@ import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombi
  */
 public class StringUtil {
 
+    public static String SITETYPE_LEFT = "append_left";
+    public static String SITETYPE_RIGHT = "append_right";
     /**
      * 汉字转换位汉语拼音首字母，英文字符不变
      * @param chinese 汉字
@@ -152,5 +155,43 @@ public class StringUtil {
     public static boolean IsChineseChar(char c){
        return String.valueOf(c).matches("[\\u4E00-\\u9FA5]+");
     }
+    
+    /**
+     * 随机产生字符串
+     */
+    public static String GetRandomString(int length){
+        String str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";  
+        Random random = new Random();  
+        StringBuffer sb = new StringBuffer();  
+        for(int i = 0 ; i < length; ++i){  
+            int number = random.nextInt(62);  
+            sb.append(str.charAt(number));  
+        }  
+        return sb.toString();  
+    }
+
+    /**
+     * 随机产生字符串
+     */
+    public static String GetRandomString(String baseStr,int length,String position){
+        String str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";  
+        Random random = new Random();  
+        StringBuffer sb = new StringBuffer();
+        if(position.equals(SITETYPE_LEFT)){
+            sb.append(baseStr);
+            for(int i = baseStr.length() ; i < length; ++i){  
+                int number = random.nextInt(62);  
+                sb.append(str.charAt(number));  
+            } 
+        }else if(position.equals(SITETYPE_RIGHT)){
+            for(int i = 0 ; i < length - baseStr.length(); ++i){  
+                int number = random.nextInt(62);  
+                sb.append(str.charAt(number));  
+            }
+            sb.append(baseStr);
+        }
+        return sb.toString();  
+    }
+    
     
 }

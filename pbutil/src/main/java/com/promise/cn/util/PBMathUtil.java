@@ -2,6 +2,9 @@
 
 package com.promise.cn.util;
 
+import java.text.DecimalFormat;
+import java.util.Random;
+
 
 /**   
  * 类名: PBMathUtil.java 
@@ -185,4 +188,49 @@ public class PBMathUtil {
         }
         return (sum1 / (num - 1));
     }
+    
+    /**
+     * 产生随机数区间范围minInt---maxInt
+     * @param minInt
+     * @param maxInt
+     * @return
+     */
+    public static int GetRandomInt(int minInt, int maxInt) {
+        Random random = new Random();
+        int retInt = 0;
+        if(maxInt>minInt){
+            retInt = random.nextInt(maxInt-minInt)+minInt;
+        }
+        return retInt;
+    }
+    
+    /**
+     * 产生随机数区间范围mindouble---maxdouble
+     * @param minInt
+     * @param maxInt
+     * @return
+     */
+    public static double GetRandomDouble(double mindouble, double maxdouble,int count) {
+        Random random = new Random();
+        double retdouble = 0.0;
+        if(maxdouble>mindouble){
+            retdouble = random.nextDouble()*(maxdouble-mindouble)+mindouble;
+            DecimalFormat dcmFmt = new DecimalFormat(GetDecimalPointFormat(count));
+            retdouble = Double.parseDouble(dcmFmt.format(retdouble));
+        }
+        return retdouble;
+    }
+
+    /**
+     * 返回小数点格式,count最小值为1
+     * @return
+     */
+    public static String GetDecimalPointFormat(int count){
+        String retStr = "0.";
+        for(int i=0;i<count;i++){
+            retStr = retStr+"0";
+        }
+        return retStr;
+    }
+    
 }

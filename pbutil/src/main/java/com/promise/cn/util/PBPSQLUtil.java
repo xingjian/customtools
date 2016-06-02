@@ -39,6 +39,23 @@ public class PBPSQLUtil {
     }
     
     /**
+     * 通过sql语句对数据进行copy,前提是表必须存在
+     * @param source 数据源链接
+     * @param dbType 源数据源类型，为了分页语句使用
+     * @param sourceSQL 数据源的查询语句
+     * @param des 目标数据源连接
+     * @param desSQL 目标执行插入的语句
+     * @param pageNum 如果数据量过大的话，会自动分页 。默认5000
+     * @return 执行结果状态
+     */
+    public static String CopyTable(Connection source,DBType dbType,String sourceSQL,Connection des,String desSQL,int pageNum){
+        String sqlCount = "select";
+        //source.createStatement().execute(sql);
+        return "success";
+    }
+    
+    
+    /**
      * 
      * @param connection
      * @param tName
@@ -64,5 +81,26 @@ public class PBPSQLUtil {
             e.printStackTrace();
         } 
         return boo;
+    }
+    
+    /**
+     * 根据连接获取所有表名
+     * @param connection
+     * @return
+     */
+    public static List<String> getTables(Connection connection){
+        List<String> retList = new ArrayList<String>();
+        try{
+            DatabaseMetaData dmd = connection.getMetaData();
+            String[] types   =   {"TABLE"};
+            ResultSet rs = dmd.getTables(null, null, null, types);
+            while(rs.next()){
+                String tableName = rs.getObject("TABLE_NAME").toString();
+                retList.add(tableName);
+            }  
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return retList;
     }
 }

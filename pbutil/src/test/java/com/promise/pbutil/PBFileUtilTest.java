@@ -5,7 +5,9 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -160,5 +162,173 @@ public class PBFileUtilTest {
             }
         }
         ps.executeBatch();
+    }
+    
+    /**
+     * 提供王绪华给工大的数据
+     */
+    @Test
+    public void testData_wxh(){
+        String url = "jdbc:postgresql://ttyjbj.ticp.net:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata!@#&*(";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+       String excelPath = "d:\\subwaystation.xls";
+       String result = POIExcelUtil.ExportDataBySQL("select name,tjcc,index,linecode,st_x(the_geom) x,st_y(the_geom) y from subwaystation order by tjcc,index", connection, excelPath);
+    }
+    
+    @Test
+    public void testData_wxh1(){
+        String url = "jdbc:postgresql://ttyjbj.ticp.net:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata!@#&*(";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String excelPath = "d:\\busstation.xls";
+        String sql = "select * from (select t2.label,t2.linecode,t1.stationorder,t1.name,t1.index,t1.stationid,t1.x,t1.y from ("+
+                "select name,index,buslineid,stationorder,stationid,st_x(the_geom) x,st_y(the_geom) y from busstation where buslineid in (select id from busline where isvalid='1') "+
+                ") t1 left join busline t2 on t1.buslineid= t2.id ) t3 order by t3.label,t3.index";
+       String result = POIExcelUtil.ExportDataBySQL(sql, connection, excelPath);
+    }
+    
+    @Test
+    public void testData_wxh2(){
+        String url = "jdbc:postgresql://ttyjbj.ticp.net:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata!@#&*(";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String excelPath = "d:\\bikestation.xls";
+        String sql = "select netid,name,x,y from bikestation";
+       String result = POIExcelUtil.ExportDataBySQL(sql, connection, excelPath);
+    }
+    //
+    @Test
+    public void testData_wxh3(){
+        String url = "jdbc:postgresql://ttyjbj.ticp.net:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata!@#&*(";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String excelPath = "d:\\busline_-1.xls";
+        String sql = "select id,label,name  from busline where isvalid!='1' and state='-1'";
+       String result = POIExcelUtil.ExportDataBySQL(sql, connection, excelPath);
+    }
+    
+    @Test
+    public void testData_wxh4(){
+        String url = "jdbc:oracle:thin:@ttyjwh.wicp.net:1522:ttyj";
+        String username = "buscity";
+        String passwd = "admin123ttyj7890uiop";
+        Connection connection = DBConnection.GetOracleConnection(url, username, passwd);
+        String excelPath = "d:\\de_base_station_change.xls";
+        String sql = "select * from de_base_station_change";
+       String result = POIExcelUtil.ExportDataBySQL(sql, connection, excelPath);
+    }
+    
+    
+    @Test
+    public void testData_wxh6(){
+        String url = "jdbc:postgresql://ttyjbj.ticp.net:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata!@#&*(";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String excelPath = "d:\\busstation_adcd_no.xls";
+        String sql = "select tjcc as label, name,adcd_code adcdcode,stationid,adcd_name from busstation_not_adcd order by tjcc,stationid asc";
+       String result = POIExcelUtil.ExportDataBySQL(sql, connection, excelPath);
+    }
+    
+    
+    @Test
+    public void testPOIExcelUtilExportDataByList(){
+       List<Student> list = new ArrayList<Student>();
+       Student s1 = new Student();
+       s1.setAge(10);
+       s1.setName("xingjian");
+       s1.setSarry(100.0);
+       Student s2 = new Student();
+       s2.setAge(101);
+       s2.setName("pengbo");
+       s2.setSarry(1070.0);
+       list.add(s1);
+       list.add(s2);
+       String result = POIExcelUtil.ExportDataByList(list,"d:\\ExportDataByList.xls");
+    }
+    
+    @Test
+    public void testData_qhm() throws Exception{
+        String url = "jdbc:postgresql://ttyjbj.ticp.net:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata!@#&*(";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+       String excelPath = "d:\\adcd_wkt.xls";
+       String sql = "select name,st_astext(the_geom) wkt from beijingqx_new";
+       ResultSet rs = connection.createStatement().executeQuery(sql);
+       while(rs.next()){
+           String name = rs.getString(1);
+           String wkt = rs.getString(2);
+           PBFileUtil.WriteStringToTxt(name+"****"+wkt+"\n", "d:\\adcd_wkt.txt");
+       }
+       //String result = POIExcelUtil.ExportDataBySQL(sql, connection, excelPath);
+    }
+    
+    @Test
+    public void testExport111(){
+        String url = "jdbc:postgresql://10.212.140.212:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata";
+        String excelPath = "d:\\bd_channel_section_dm_ref.xls";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String sql = "select * from bd_channel_section_dm_ref";
+        String result = POIExcelUtil.ExportDataBySQL(sql, connection, excelPath);
+    }
+    
+    @Test
+    public void testExport222(){
+        String url = "jdbc:postgresql://10.212.140.212:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata";
+        String excelPath = "d:\\busline_history.xls";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String sql = "select id,label,name from (select * from busline_history where batchtime='201603' ) t1 where t1.name not in (select name from busline where isvalid='1') order by name";
+        String result = POIExcelUtil.ExportDataBySQL(sql, connection, excelPath);
+    }
+    //
+    @Test
+    public void testData_calcBuslinecount() throws Exception{
+        String url = "jdbc:postgresql://ttyjbj.ticp.net:5432/basedata";
+        String username = "basedata";
+        String passwd = "basedata!@#&*(";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        
+        String url1 = "jdbc:postgresql://localhost:5432/basedata";
+        String username1 = "basedata";
+        String passwd1 = "basedata";
+        Connection connection1 = DBConnection.GetPostGresConnection(url1, username1, passwd1);
+        
+        String sql = "select id from busline_channel_geometry";
+        String updateSQL = "update busline_channel_geometry set buslinecount=? where id=?";
+        PreparedStatement ps = connection1.prepareStatement(updateSQL);
+        ResultSet rs = connection1.createStatement().executeQuery(sql);
+        while(rs.next()){
+            String channelid = rs.getString(1);
+           String query = "select count(*) from busline where id in ( select buslineid from buslinelink where navigationid in ( "+
+                   " select navigationid from busline_channel_section_link where sectionid in (select id from busline_channel_section where channelid='"+channelid+"')"+
+                   " ) group by buslineid ) and isvalid='1'";
+           ResultSet rs1 = connection.createStatement().executeQuery(query);
+           rs1.next();
+           int count = rs1.getInt(1);
+           ps.setInt(1, count);
+           ps.setString(2, channelid);
+           ps.addBatch();
+       }
+        ps.executeBatch();
+    }
+    
+    @Test
+    public void testArea4Export11(){
+        String url = "jdbc:postgresql://localhost:5432/sw_navigation";
+        String username = "postgis";
+        String passwd = "postgis";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+       String excelPath = "d:\\result_wxh3.xls";
+       String result = POIExcelUtil.ExportDataBySQL("select * from result_wxh3", connection, excelPath);
     }
 }

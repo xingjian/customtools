@@ -4,6 +4,8 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -101,6 +103,83 @@ public class POIExcelUtil {
             e.printStackTrace();
         }
         return retList;
+    }
+    
+    /**
+     * 根据集合导出excel
+     * 标准的domain写法
+     * @param list
+     * @param excelPath
+     * @return 导出结果
+     */
+    public static <T> String ExportDataByList(List<T> list, String excelPath) {
+        String result = "success";
+        try {
+            Field[] fds = null;
+            Class clazz = null;
+            HSSFWorkbook workbook = new HSSFWorkbook();
+            HSSFSheet sheet = workbook.createSheet();
+            int iRow=1;
+            //遍历集合
+            for (Object object : list) {
+                //获取集合中的对象类型
+                if (null == clazz) {
+                    clazz = object.getClass();
+                    workbook.setSheetName(0,clazz.getName());
+                    //获取他的字段数组
+                    fds = clazz.getDeclaredFields();
+                    HSSFRow row= sheet.createRow(0); 
+                    HSSFCell cell;
+                    for(int i=0;i<fds.length;i++){  
+                        cell = row.createCell(i);
+                        cell.setCellType(HSSFCell.CELL_TYPE_STRING);  
+                        cell.setCellValue(fds[i].getName());  
+                    }
+                }
+               //遍历该数组
+               HSSFRow row = sheet.createRow(iRow);
+               for(int i=0;i<fds.length;i++){
+                   HSSFCell cell = row.createCell(i);
+                   cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+                   //得到字段名
+                   String fdname = fds[i].getName();
+                   //根据字段名找到对应的get方法，null表示无参数
+                   Method metd = clazz.getMethod("get"+ChangeFirstUpper(fdname), null);
+                   if (null != metd) {
+                       //调用该字段的get方法
+                       Object name = metd.invoke(object, null);
+                       cell.setCellValue(name.toString());
+                   }else{
+                       cell.setCellValue("no method");
+                   }
+               } 
+               iRow++;
+            }
+            FileOutputStream fOut = new FileOutputStream(excelPath);
+            workbook.write(fOut);
+            fOut.flush();
+            fOut.close();
+            workbook.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            result = "fail";
+        }
+        return result;
+    }
+    
+    /**
+     * @param src
+     * 源字符串
+     * @return 字符串，将src的第一个字母转换为大写，src为空时返回null
+     */
+    public static String ChangeFirstUpper(String src) {
+        if (src != null) {
+            StringBuffer sb = new StringBuffer(src);
+            sb.setCharAt(0, Character.toUpperCase(sb.charAt(0)));
+            return sb.toString();
+        } else {
+            return null;
+        }
     }
     
     /**
