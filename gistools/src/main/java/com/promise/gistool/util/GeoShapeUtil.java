@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -581,6 +582,73 @@ public class GeoShapeUtil {
                 fOut.close();
                 workbook.close();
             } 
+            return true;
+        }catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
+        
+        
+    }
+    
+    /**
+     * shape数据格式转换成txt
+     * 空间字段转换成wkt
+     * @param shapeFilePath
+     * @param txtPath
+     * @param sfEncoding shapefile编码
+     * @param includeGeom 是否包括空间字段wkt true 包括wkt false 不包括
+     * @param splitChar 分隔符
+     */
+    public static boolean ExportShapeToTxt(String shapeFilePath,String txtPath,String sfEncoding,boolean includeGeom,String splitChar){
+        try{
+            SimpleFeatureCollection sfc = ReadShapeFileFeatures(shapeFilePath,sfEncoding);
+            SimpleFeatureIterator sfi = sfc.features();
+            SimpleFeatureType ft= sfc.getSchema();
+            List<String> exportList = new ArrayList<String>();
+            String[] attArr = null;
+            if(!includeGeom){//不包括空间字段
+                attArr = new String[ft.getAttributeCount()-1];
+                int j = 0;
+                for (int i = 0; i < ft.getAttributeCount(); i++) {
+                    AttributeType at = ft.getType(i);
+                    String cLabel = at.getName().toString();
+                    if(!ConstantUtil.IsGeometryTypeKey(cLabel)){
+                        attArr[j] = cLabel;
+                        j++;
+                    }
+                }
+            }else{
+                attArr = new String[ft.getAttributeCount()];
+                for (int i = 0; i < ft.getAttributeCount(); i++) {
+                    AttributeType at = ft.getType(i);
+                    attArr[i] = at.getName().toString();
+                }
+            }
+            
+            String title="";
+            int nColumn = attArr.length;
+            for(int i=0;i<nColumn;i++){  
+                title = title+attArr[i]+splitChar;
+            }
+            while(sfi.hasNext()){
+                SimpleFeature feature = sfi.next();
+                String rowStr="";
+                for(int j=0;j<nColumn;j++){
+                    String attArrStr = attArr[j];
+                    if(ConstantUtil.IsGeometryTypeKey(attArrStr)){
+                        rowStr = rowStr+((Geometry)feature.getDefaultGeometry()).toText()+splitChar;
+                    }else{
+                        if(null==feature.getAttribute(attArr[j]).toString()||"".equals(feature.getAttribute(attArr[j]).toString())){
+                            rowStr = rowStr+"Null"+splitChar;
+                        }else{
+                            rowStr = rowStr+feature.getAttribute(attArr[j]).toString()+splitChar;
+                        }
+                    }
+                }
+                exportList.add(rowStr);
+            } 
+            PBFileUtil.WriteListToTxt(exportList, txtPath, true);
             return true;
         }catch(Exception e){
             e.printStackTrace();

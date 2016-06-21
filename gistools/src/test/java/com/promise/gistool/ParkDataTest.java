@@ -462,4 +462,58 @@ public class ParkDataTest {
         DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "park", "postgis", "postgis");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "building", MultiPolygon.class, "EPSG:4326");
     }
+    
+    
+    @Test
+    public void exportJTXQBH(){
+        String url = "jdbc:postgresql://localhost:5432/park";
+        String username = "postgis";
+        String passwd = "postgis";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String sql = "select \"NO\",\"CODE\" from traffic_area_small_84 where \"CODE\"!=''";
+        String excelPath = "D:\\traffic_area_small_zt.xls";
+        POIExcelUtil.ExportDataBySQL(sql, connection, excelPath);
+    }
+    
+    /**
+     * 根据交通小区编号来导出响应的图层数据信息
+     */
+    @Test
+    public void exportShapeByTrafficAraeCode(){
+        String[] trafficAreaCodeArr = new String[]{"80903","80104"};
+        String pgurl = "jdbc:postgresql://localhost:5432/park";
+        String pgusername = "postgis";
+        String pgpasswd = "postgis";
+        boolean isExportTraffic = true;
+        boolean isBuilding = true;
+        boolean isParkPlace = true;
+        Connection connectionPG = DBConnection.GetPostGresConnection(pgurl, pgusername, pgpasswd);
+        String sqlQuery1 = "select \"NO\",st_astext(the_geom) wkt from traffic_area_small_84 where \"NO\"=";
+        String sqlQuery2 = "select id,\"smallArea\",\"parkCode\",\"parkName\",\"park_type\",st_astext(the_geom) wkt from park_area_polygon_sjs where \"smallArea\"=";
+        String sqlQuery3 = "select b.fid, b.\"ID\",st_astext(b.the_geom) wkt from traffic_area_small_84 a,building b where ST_Contains(a.the_geom,b.the_geom) and a.\"NO\"=";
+        String shapeFilePath = "G:\\项目文档\\停车场\\速通石景山\\20160603\\";
+        
+        for(String codeTemp : trafficAreaCodeArr){
+            String codeTempStr = "0"+ codeTemp;
+            //exprot traffic_area_small
+            if(isExportTraffic){
+                String sqlQueryTemp = sqlQuery1+codeTemp;
+                String result = GeoShapeUtil.ExportTableToShape(connectionPG, sqlQueryTemp, shapeFilePath+"sjc_"+codeTempStr+".shp","GBK","6","EPSG:4326");
+                System.out.println("traffic_area_small:"+codeTemp+"exprot result is"+result);
+            }
+            //export park_area_polygon_sjs 
+            if(isParkPlace){
+                String sqlQueryTemp2 = sqlQuery2+"'"+codeTempStr+"'";
+                String result2 = GeoShapeUtil.ExportTableToShape(connectionPG, sqlQueryTemp2, shapeFilePath+"sjc_tcc_"+codeTempStr+".shp","GBK","6","EPSG:4326");
+                System.out.println("park_area_polygon_sjs:"+codeTemp+"exprot result is"+result2);
+            }
+            //export building
+            if(isBuilding){
+                String sqlQueryTemp3 = sqlQuery3+codeTemp;
+                String result3 = GeoShapeUtil.ExportTableToShape(connectionPG, sqlQueryTemp3, shapeFilePath+"sjc_building_"+codeTempStr+".shp","GBK","6","EPSG:4326");
+                System.out.println("building:"+codeTemp+"exprot result is"+result3);
+            }
+            
+        }
+    }
 }

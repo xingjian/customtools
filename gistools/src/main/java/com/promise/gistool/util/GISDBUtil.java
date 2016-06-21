@@ -269,7 +269,7 @@ public class GISDBUtil {
     }
     
     /**
-     * 获取指定空间数据范围
+     * 获取指定空间数据范围080903 080103o8o1o4
      * @param dataStore
      * @param tableName
      * @return ReferencedEnvelope对象
