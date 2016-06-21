@@ -1,6 +1,9 @@
 package com.promise.cn.util;
 
 import java.io.UnsupportedEncodingException;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
 
@@ -193,5 +196,37 @@ public class StringUtil {
         return sb.toString();  
     }
     
+    /**
+     * 获取时间字符串
+     * @param formatterStr 默认yyyy-MM-dd HH:mm:ss
+     * @param time 默认当前时间 可以传入Date 和 毫秒数
+     * @return 
+     */
+    public static String GetDateString(String formatterStr,Object time){
+        if(null==formatterStr){
+            formatterStr = "yyyy-MM-dd HH:mm:ss";
+        }
+        SimpleDateFormat formatter = new SimpleDateFormat(formatterStr);
+        Date date = null;
+        if(null==time){
+            date = new Date();
+            return formatter.format(date);
+        }else if(time instanceof Long){
+            date = new Date((Long)time);
+        }else if(time instanceof Date){
+            date = (Date)time;
+        }
+        return formatter.format(date);
+    }
     
+    /**
+     * 返回double字符串格式,建议如果double比较大的时候采用
+     * @param format '0.0000' '#.0000'
+     * @param d
+     * @return
+     */
+    public static String FormatDoubleStr(String format,double d){
+        DecimalFormat df = new DecimalFormat(format);
+        return df.format(d);
+    }
 }

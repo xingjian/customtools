@@ -328,7 +328,29 @@ public class PBFileUtilTest {
         String username = "postgis";
         String passwd = "postgis";
         Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
-       String excelPath = "d:\\result_wxh3.xls";
-       String result = POIExcelUtil.ExportDataBySQL("select * from result_wxh3", connection, excelPath);
+        String excelPath = "d:\\result_wxh3.xls";
+        String result = POIExcelUtil.ExportDataBySQL("select * from result_wxh3", connection, excelPath);
+    }
+    
+    @Test
+    public void testReadLZOFileToTxtFile(){
+        String lzoPath = "G:\\项目文档\\武汉tocc\\gisdata\\WHTaxiDataPart1\\WHTaxiDataPart1";
+        String txtPath = "G:\\项目文档\\武汉tocc\\gisdata\\WHTaxiDataPart1\\gpstxt\\";
+        List<String> result = PBFileUtil.FindFilesByEndName(lzoPath,".lzo");
+        for(String str:result){
+            int index = str.indexOf("d=");
+            String str2 = str.substring(index, str.length()-3).replaceAll("=", "").replaceAll("\\\\", "")+"txt";
+            String result1  = PBFileUtil.ReadLZOFileToTxtFile(str, txtPath+str2,null,true);
+            System.out.println(result1+":"+txtPath+str2);
+        }
+    }
+    
+    @Test
+    public void testFindFilesByEndName(){
+        String lzoPath = "G:\\项目文档\\武汉tocc\\gisdata\\WHTaxiDataPart1\\WHTaxiDataPart1";
+        List<String> result = PBFileUtil.FindFilesByEndName(lzoPath,".lzo");
+        for(String s:result){
+            System.out.println(s);
+        }
     }
 }
