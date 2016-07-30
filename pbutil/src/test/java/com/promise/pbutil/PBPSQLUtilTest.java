@@ -9,6 +9,7 @@ import java.util.Calendar;
 import org.junit.Test;
 
 import com.promise.cn.util.DBConnection;
+import com.promise.cn.util.DBType;
 import com.promise.cn.util.PBPSQLUtil;
 
 /**  
@@ -67,4 +68,86 @@ public class PBPSQLUtilTest {
         }
         System.out.println("count ==== "+count);
     }
+    
+    @Test
+    public void testGetTableStructure() throws Exception{
+        Connection connectionOracle = DBConnection.GetOracleConnection("jdbc:oracle:thin:@10.212.140.210:1521:parking", "new_park", "new_park");
+        Connection connectionPG = DBConnection.GetPostGresConnection("jdbc:postgresql://localhost:5432/basedata", "basedata", "basedata");
+        PBPSQLUtil.GetTableStructure(connectionOracle, "PARK_AREA");
+        
+    }
+    
+    @Test
+    public void testCopyTable() throws Exception{
+        String sql1 = "INSERT INTO test_linestring( id, name, typestr) VALUES (?, ?, ?)";
+        String sql2 = "select id,name,linenumber from busline";
+        Connection connectionPG = DBConnection.GetPostGresConnection("jdbc:postgresql://localhost:5432/test_gis", "postgres", "postgres");
+        Connection connectionPG1 = DBConnection.GetPostGresConnection("jdbc:postgresql://ttyjbj.ticp.net:5432/basedata", "basedata", "basedata");
+        String result = PBPSQLUtil.CopyTable(connectionPG1, DBType.PostgreSQL, sql2, connectionPG, sql1, 5000, new String[]{"String","String","String"});
+        System.out.println(result);
+    }
+    
+    @Test
+    public void testGetTableDDLCreate() throws Exception{
+       // Connection connection = DBConnection.GetPostGresConnection("jdbc:postgresql://localhost:5432/basedata", "basedata", "basedata");
+       //PBPSQLUtil.GetTableDDLCreate(connection, DBType.PostgreSQL, "busline", "pbbusline");
+        Connection connectionOracle = DBConnection.GetOracleConnection("jdbc:oracle:thin:@ttyjwh.wicp.net:1522:ttyj", "buscity", "admin123ttyj7890uiop");
+        PBPSQLUtil.GetTableDDLCreate(connectionOracle, DBType.PostgreSQL, "ACAA02_AFC_SYSTEM_BODY_HISTORY","BUSLINE_CHANNEL");
+    }
+    
+    @Test
+    public void testCopyTableParkInfo() throws Exception{
+        String sql1 = "INSERT INTO parkinfo( kind_type, type, code, name, area, area_code, trafficcode, addr,   charge, day_c, night_c, day_o, night_o, day, night, num) VALUES (?, ?, ?, ?, ?, ?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql2 = "SELECT kind_type, type, code, name, area, area_code, trafficcode, addr, charge, day_c, night_c, day_o, night_o, day, night, num FROM parkinfo";
+        String urlOracle = "jdbc:oracle:thin:@10.212.140.210:1521:parking";
+        String usernameOracle = "new_park";
+        String passwdOracle = "new_park";
+        Connection connectionOLE = DBConnection.GetOracleConnection(urlOracle, usernameOracle, passwdOracle);
+        String pgurl = "jdbc:postgresql://ttyjbj.ticp.net:5432/tocc_park";
+        String pgusername = "toccpark";
+        String pgpasswd = "toccpark";
+        Connection connectionPG = DBConnection.GetOracleConnection(pgurl, pgusername, pgpasswd);
+        String result = PBPSQLUtil.CopyTable(connectionOLE, DBType.Oracle, sql2, connectionPG, sql1, 5000, new String[]{"String","String","String","String","String","String","String","String","int","int","int","int","int","int","int","int"});
+        System.out.println(result);
+    }
+    
+    
+    @Test
+    public void testCopyTableParkPoint() throws Exception{
+        String sql1 = "INSERT INTO parkpoint( kind_type, trafficcode, code, name, area, addr, num, charge,  pointcode, direction, nature, x, y) VALUES (?, ?, ?, ?, ?, ?, ?, ?,  ?, ?, ?, ?, ?)";
+        String sql2 = "SELECT kind_type, trafficcode, code, name, area, addr, num, charge,  pointcode, direction, nature, x, y FROM parkpoint";
+        String urlOracle = "jdbc:oracle:thin:@10.212.140.210:1521:parking";
+        String usernameOracle = "new_park";
+        String passwdOracle = "new_park";
+        Connection connectionOLE = DBConnection.GetOracleConnection(urlOracle, usernameOracle, passwdOracle);
+        String pgurl = "jdbc:postgresql://ttyjbj.ticp.net:5432/tocc_park";
+        String pgusername = "toccpark";
+        String pgpasswd = "toccpark";
+        Connection connectionPG = DBConnection.GetOracleConnection(pgurl, pgusername, pgpasswd);
+        String result = PBPSQLUtil.CopyTable(connectionOLE, DBType.Oracle, sql2, connectionPG, sql1, 5000, new String[]{"String","String","String","String","String","String","int","int","String","String","String","double","double"});
+        System.out.println(result);
+    }
+    
+    
+    @Test
+    public void testCopyTabletb_integrate_park_info() throws Exception{
+        String sql1 = "INSERT INTO tb_integrate_park_info( area, memo_no, id, parking_name, paking_type, unit_name, code,   park_name, park_address, community_name, street_name, pc_type, "
+            +" land_type, whehereornot_opening, whehereornot_charge, existing_park_count," 
+            +" ex_type, gps_longitude, gps_latitude) VALUES (?, ?, ?, ?, ?, ?, ?,  ?, ?, ?, ?, ?,  ?, ?, ?, ?,  ?, ?, ?)";
+        String sql2 = "SELECT area, memo_no, id, parking_name, paking_type, unit_name, code, "+
+       "park_name, park_address, community_name, street_name, pc_type, "+
+       "land_type, whehereornot_opening, whehereornot_charge, existing_park_count, "+
+       "ex_type, gps_longitude, gps_latitude FROM tb_integrate_park_info";
+        String urlOracle = "jdbc:oracle:thin:@10.212.138.190:1521:toccdb2";
+        String usernameOracle = "tocc2";
+        String passwdOracle = "admin123";
+        Connection connectionOLE = DBConnection.GetOracleConnection(urlOracle, usernameOracle, passwdOracle);
+        String pgurl = "jdbc:postgresql://ttyjbj.ticp.net:5432/tocc_park";
+        String pgusername = "toccpark";
+        String pgpasswd = "toccpark";
+        Connection connectionPG = DBConnection.GetOracleConnection(pgurl, pgusername, pgpasswd);
+        String result = PBPSQLUtil.CopyTable(connectionOLE, DBType.Oracle, sql2, connectionPG, sql1, 5000, new String[]{"String","String","String","String","String","String","String","String","String","String","String","String","String","String","String","String","String","String","String"});
+        System.out.println(result);
+    }
+    
 }

@@ -32,4 +32,17 @@ public class PBCrawlerUtilTest {
             }
         }
     }
+    
+    @Test
+    public void testGetImageByURI(){
+        String filePath = "d:";
+        String fileName = "test.png";
+        String uri = "http://ttyjbj.ticp.net:8888/geoserver/buscity/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=true&STYLES&LAYERS=buscity%3Anavigationline&SRS=EPSG%3A4326&WIDTH=768&HEIGHT=538&BBOX=115.4146423339845%2C39.31309509277345%2C117.5240173339845%2C40.79075622558595";
+        try {
+            String result = PBCrawlerUtil.GetImageByURI(filePath, fileName, uri);
+            System.out.println(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

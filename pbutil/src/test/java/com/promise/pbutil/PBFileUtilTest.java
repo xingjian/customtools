@@ -353,4 +353,16 @@ public class PBFileUtilTest {
             System.out.println(s);
         }
     }
+    
+    
+    @Test
+    public void testExportBaseinfo(){
+        String url = "jdbc:postgresql://localhost:5432/park";
+        String username = "postgis";
+        String passwd = "postgis";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String sql = "select seq, area, oldstatcode, newstatcode, oldlinecode, newlinecode, linename, roadlevel, zhuanghao, zhuanghaovalue, newname, ongitude, latitude, supply, type, typenum, typelevel, keytype, electricity, sunupdate, batterychange, supplyid, cardno, builder, completedate, operationyear, operationun, operationlink, tel, checktype, startplace, startzhuanghao, endzhuanghao, checklong, roadnum, ground, etclevel, roadtype, roadwidth, baseroadwidth, speed, isstop, mx, my, st_astext(geom) as wkt FROM base_info";
+       String excelPath = "d:\\baseinfo_wkt.xls";
+       String result = POIExcelUtil.ExportDataBySQL(sql, connection, excelPath);
+    }
 }

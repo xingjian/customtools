@@ -1,6 +1,12 @@
 package com.promise.cn.util;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -45,5 +51,37 @@ public class PBCrawlerUtil {
             httpclient.close();
         }
         return returnStr;
+    }
+    
+    /**
+     * 通过url获取图片
+     * @param filePath 文件夹路径
+     * @param fileName 文件名称
+     * @param uri
+     * @return 结果状态
+     */
+    public static String GetImageByURI(String filePath,String fileName,String uri) throws Exception{
+        String result = "success";
+        File f = new File(filePath);
+        if(!f.exists()){
+            f.mkdirs();
+        }
+        File f1 = new File(filePath+"//"+fileName);
+        FileOutputStream fos = new FileOutputStream(f1);
+        BufferedOutputStream fbo = new BufferedOutputStream(fos);
+        URL url = new URL(uri);
+        URLConnection urlc = url.openConnection();
+        urlc.setConnectTimeout(3000);
+        urlc.setReadTimeout(10000);
+        byte[] data = new byte[1024];
+        BufferedInputStream input = new BufferedInputStream(urlc.getInputStream());
+        int c = -1;
+        while ((c=input.read(data))!=-1){
+            fbo.write(data,0,c);
+        }
+        fbo.flush();
+        fbo.close();
+        input.close();
+        return result;
     }
 }
