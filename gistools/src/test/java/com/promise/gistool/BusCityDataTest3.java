@@ -15,7 +15,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
-import org.opengis.geometry.coordinate.Cone;
 
 import com.promise.cn.util.DBConnection;
 import com.promise.cn.util.PBMathUtil;

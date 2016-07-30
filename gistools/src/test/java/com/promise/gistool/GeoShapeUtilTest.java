@@ -16,7 +16,6 @@ import com.promise.gistool.util.ConversionUtil;
 import com.promise.gistool.util.GISDBUtil;
 import com.promise.gistool.util.GeoShapeUtil;
 import com.promise.gistool.util.GeoToolsGeometry;
-import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.Point;
 
 /**  
@@ -130,7 +129,7 @@ public class GeoShapeUtilTest {
     @Test
     public void testShapeToPostGis(){
         String shapePath = "G:\\项目文档\\公交都市\\giss数据\\给交委数据\\北京_公交站位_font_point.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "pollutionreduction", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS( "localhost", "5432", "pollutionreduction", "postgis", "postgis","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "busstation_zhanwei", Point.class, "EPSG:4326");
         System.out.println(result);
     }

@@ -21,7 +21,6 @@ import com.promise.cn.util.POIExcelUtil;
 import com.promise.cn.util.PrintUtil;
 import com.promise.cn.util.StringUtil;
 import com.promise.gistool.util.ConversionUtil;
-import com.promise.gistool.util.GeoShapeUtil;
 import com.promise.gistool.util.GeoToolsGeometry;
 import com.tongtu.nomap.core.transform.Gis84ToCehui;
 import com.vividsolutions.jts.geom.Geometry;

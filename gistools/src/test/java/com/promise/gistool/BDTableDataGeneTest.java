@@ -750,18 +750,20 @@ public class BDTableDataGeneTest {
     
     /**
      * 合并公交线路几何字段到busline geom
+     * a260b15e34db4a5e807973948f7bd8c1
+     * 9d95172463df428eb212ca7510fdcc79 
      */
     @Test
     public void testMergeBuslineGeom() throws Exception{
         //String buslineid="9ae8ceb66fa246d891640c0418d67988";
-        String buslineid="";
+        String buslineid="9d95172463df428eb212ca7510fdcc79";
         String sql = "";
         if(buslineid.trim().equals("")){
             sql = "select id from busline";
         }else{
             sql = "select id from busline where id='"+buslineid+"'";
         }
-        String url = "jdbc:postgresql://ttyjbj.ticp.net:5432/basedata";
+        String url = "jdbc:postgresql://10.212.140.212:5432/basedata";
         String userName = "basedata";
         String passwd = "basedata";
         Connection connection = DBConnection.GetPostGresConnection(url, userName, passwd);

@@ -330,7 +330,7 @@ public class XiNingTraffic {
     @Test
     public void testImportXiNingNan2Shape(){
         String shapePath = "G:\\项目文档\\西宁交通\\西宁双向\\pingxing0114\\xiningnan2_all.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "ttyjbj.ticp.net", "5432", "xiningtraffic", "postgres", "fld789&*(");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("ttyjbj.ticp.net", "5432", "xiningtraffic", "postgres", "fld789&*(","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK");
         System.out.println(result);
     }

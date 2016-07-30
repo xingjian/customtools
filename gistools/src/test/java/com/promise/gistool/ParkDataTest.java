@@ -15,19 +15,21 @@ import org.json.simple.parser.JSONParser;
 import org.junit.Test;
 
 import com.promise.cn.util.DBConnection;
+import com.promise.cn.util.PBCrawlerUtil;
 import com.promise.cn.util.POIExcelUtil;
 import com.promise.gistool.util.ConversionUtil;
 import com.promise.gistool.util.GISCoordinateTransform;
 import com.promise.gistool.util.GISDBUtil;
 import com.promise.gistool.util.GeoShapeUtil;
 import com.promise.gistool.util.GeoToolsGeometry;
-import com.tongtu.nomap.core.transform.CoordinateConvert;
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 
 /**  
  * 功能描述:
@@ -40,7 +42,7 @@ public class ParkDataTest {
     @Test
     public void testInsertTrafficSmallToPostGIS(){
         String shapePath = "G:\\项目文档\\停车场\\交通小区151019\\traffic_area_small_84.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "park", "basedata", "basedata");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "park", "basedata", "basedata","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "traffic_area_small_84", MultiPolygon.class, "EPSG:4326");
         System.out.println(result);
     }
@@ -48,7 +50,7 @@ public class ParkDataTest {
     @Test
     public void testInsertBeijingqxToPostGIS(){
         String shapePath = "G:\\项目文档\\停车场\\行政区划\\beijingqx.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "park", "basedata", "basedata");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "park", "basedata", "basedata","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "beijingqx", MultiPolygon.class, "EPSG:4326");
         System.out.println(result);
     }
@@ -90,14 +92,14 @@ public class ParkDataTest {
     @Test
     public void testInsertTCWToPostGIS(){
         String shapePath = "G:\\项目文档\\停车场\\080305\\080305_hx_rj_02.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "park", "basedata", "basedata");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "park", "basedata", "basedata","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "080305_hx_rj_02", MultiPolygon.class, "EPSG:4326");
         System.out.println(result);
     }
     @Test
     public void testInsertBeijingqxPostGIS(){
         String shapePath = "G:\\项目文档\\停车场\\行政区划\\beijingqx.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "park", "basedata", "basedata");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "park", "basedata", "basedata","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "beijingqx_chouxi", MultiPolygon.class, "EPSG:4326");
         System.out.println(result);
     }
@@ -118,7 +120,7 @@ public class ParkDataTest {
     @Test
     public void testInsertEmission1(){
         String shapePath = "D:\\排放通道路链关系\\busline_channel_emission.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "ttyjbj.ticp.net", "5432", "emission", "emission", "emission");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("ttyjbj.ticp.net", "5432", "emission", "emission", "emission","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "busline_channel_link_ref", MultiLineString.class, "EPSG:4326");
         System.out.println(result);
     }
@@ -452,14 +454,14 @@ public class ParkDataTest {
     @Test
     public void importShapeToPostGis1(){
         String shapePath = "G:/项目文档/停车场/建筑物/building080205.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "park", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS( "localhost", "5432", "park", "postgis", "postgis","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "building080205", MultiPolygon.class, "EPSG:4326");
     }
     
     @Test
     public void importShapeToPostGisBuilding(){
         String shapePath = "G:\\项目文档\\停车场\\建筑物\\building.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "park", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "park", "postgis", "postgis","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "building", MultiPolygon.class, "EPSG:4326");
     }
     
@@ -516,4 +518,227 @@ public class ParkDataTest {
             
         }
     }
+    
+    /**
+     * 张海瑞
+     * @throws Exception
+     */
+    @Test
+    public void testGeneratorArcgisJSONToShape1() throws Exception{
+        String urlOracle = "jdbc:oracle:thin:@10.212.140.210:1521:parking";
+        String usernameOracle = "new_park";
+        String passwdOracle = "new_park";
+        Connection connectionOLE = DBConnection.GetOracleConnection(urlOracle, usernameOracle, passwdOracle);
+        String sql = "select id,smail_area_code,park_code,park_name,park_type,park_geom from park_area";
+        ResultSet rs = connectionOLE.createStatement().executeQuery(sql);
+        List<ParkArea> listPolygon = new ArrayList<ParkArea>();
+        List<ParkArea> listLine = new ArrayList<ParkArea>();
+        while(rs.next()){
+            if(null!=rs.getString(6)){
+                Geometry geom1 = GeoToolsGeometry.ArcgisJSONToGeometry(rs.getString(6));
+                ParkArea pa = new ParkArea();
+                pa.setId(rs.getString(1));
+                pa.setSmallArea(rs.getString(2));
+                pa.setParkCode(rs.getString(3));
+                pa.setParkName(rs.getString(4));
+                pa.setPark_type(rs.getString(5));
+                pa.setPark_geom(geom1.toText());
+                if(geom1 instanceof MultiPolygon){
+                    listPolygon.add(pa);
+                }else if(geom1 instanceof MultiLineString){ 
+                    listLine.add(pa);
+                }  
+            }
+            
+        }
+        System.out.println(listPolygon.size());
+        System.out.println(listLine.size());
+        GeoShapeUtil.ListObjectToShapeFile(listLine,"d:\\park_area_line.shp","GBK","4","park_geom","EPSG:4326");
+        GeoShapeUtil.ListObjectToShapeFile(listPolygon,"d:\\park_area_polygon.shp","GBK","6","park_geom","EPSG:4326");
+    }
+    
+    
+    /**
+     * 拷贝park_area 到postgis
+     * @throws Exception
+     */
+    @Test
+    public void testCopyPostgisToOracles() throws Exception{
+        String urlOracle = "jdbc:oracle:thin:@10.212.140.210:1521:parking";
+        String usernameOracle = "new_park";
+        String passwdOracle = "new_park";
+        Connection connectionOLE = DBConnection.GetOracleConnection(urlOracle, usernameOracle, passwdOracle);
+        String pgurl = "jdbc:postgresql://localhost:5432/park";
+        String pgusername = "postgis";
+        String pgpasswd = "postgis";
+        Connection connectionPG = DBConnection.GetOracleConnection(pgurl, pgusername, pgpasswd);
+        
+        String sql = "select id,smail_area_code,park_code,park_name,park_type,park_geom,state,user_code,kind_type from park_area";
+        ResultSet rs = connectionOLE.createStatement().executeQuery(sql);
+        String inserSQL = "INSERT INTO park_area_new( id, smail_area_code, park_code, park_name, park_type, park_geom, "+
+            "state, user_code, kind_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        PreparedStatement psInsert = connectionPG.prepareStatement(inserSQL);
+        int count = 0;
+        while(rs.next()){
+            String id = rs.getString(1);
+            String smail_area_code = rs.getString(2);
+            String park_code = rs.getString(3);
+            String park_name = rs.getString(4);
+            String park_type = rs.getString(5);
+            String park_geom = rs.getString(6);
+            int state = rs.getInt(7);
+            String user_code = rs.getString(8);
+            String kind_type = rs.getString(9);
+            psInsert.setString(1, id);
+            psInsert.setString(2, smail_area_code);
+            psInsert.setString(3, park_code);
+            psInsert.setString(4, park_name);
+            psInsert.setString(5, park_type);
+            psInsert.setString(6, park_geom);
+            psInsert.setInt(7, state);
+            psInsert.setString(8, user_code);
+            psInsert.setString(9, kind_type);
+            psInsert.addBatch();
+            count++;
+            if(count%5000==0){
+                psInsert.executeBatch();
+            }
+        }
+        psInsert.executeBatch();
+       
+    }
+    
+    
+    @Test
+    public void importShapeToPostParkArea(){
+        String shapePath = "d:\\park_area_line.shp";
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "park", "postgis", "postgis","public");
+        String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "park_area_line", MultiLineString.class, "EPSG:4326");
+    }
+    
+    
+    /**
+     * 张海瑞
+     * @throws Exception
+     */
+    @Test
+    public void testGeneratorArcgisJSONToShape2() throws Exception{
+        String pgurl = "jdbc:postgresql://localhost:5432/park";
+        String pgusername = "postgis";
+        String pgpasswd = "postgis";
+        Connection connectionPG = DBConnection.GetOracleConnection(pgurl, pgusername, pgpasswd);
+        String sql = "select id,smail_area_code,park_code,park_name,park_type,park_geom from park_area";
+        ResultSet rs = connectionPG.createStatement().executeQuery(sql);
+        List<ParkArea> listPolygon = new ArrayList<ParkArea>();
+        List<ParkArea> listLine = new ArrayList<ParkArea>();
+        while(rs.next()){
+            if(null!=rs.getString(6)){
+                Geometry geom1 = GeoToolsGeometry.ArcgisJSONToGeometry(rs.getString(6));
+                ParkArea pa = new ParkArea();
+                pa.setId(rs.getString(1));
+                pa.setSmallArea(rs.getString(2));
+                pa.setParkCode(rs.getString(3));
+                pa.setParkName(rs.getString(4));
+                pa.setPark_type(rs.getString(5));
+                pa.setPark_geom(geom1.toText());
+                if(geom1 instanceof MultiPolygon){
+                    listPolygon.add(pa);
+                }else if(geom1 instanceof MultiLineString){ 
+                    listLine.add(pa);
+                }  
+            }
+            
+        }
+        System.out.println(listPolygon.size());
+        System.out.println(listLine.size());
+        GeoShapeUtil.ListObjectToShapeFile(listLine,"d:\\parkimage\\park_area_line.shp","GBK","4","park_geom","EPSG:4326");
+        GeoShapeUtil.ListObjectToShapeFile(listPolygon,"d:\\parkimage\\park_area_polygon.shp","GBK","6","park_geom","EPSG:4326");
+    }
+    
+    @Test
+    public void testGeneratorImage() throws Exception{
+        String sql = "select fid, \"NO\" from traffic_area_small_84_new";
+        String pgurl = "jdbc:postgresql://localhost:5432/park";
+        String pgusername = "postgis";
+        String pgpasswd = "postgis";
+        Connection connectionPG = DBConnection.GetOracleConnection(pgurl, pgusername, pgpasswd);
+        String updateSQL = "update traffic_area_small_84_new set codestr=? where fid=?";
+        ResultSet rs = connectionPG.createStatement().executeQuery(sql);
+        PreparedStatement pre = connectionPG.prepareStatement(updateSQL);
+        while(rs.next()){
+            int id = rs.getInt(1);
+            String noStr = rs.getString(2);
+            if(noStr.length()<6){
+                noStr = "0"+noStr;
+            }
+            pre.setString(1, noStr);
+            pre.setInt(2, id);
+            pre.addBatch();
+        }
+        pre.executeBatch();
+    }
+    
+    @Test
+    public void testGeneratorImage11() throws Exception{
+        String uri = "http://localhost:8080/geoserver/wms?service=WMS&version=1.1.0&request=GetMap&layers=parkimage&styles=&bbox={bbox}&width=1920&height=1080&srs=EPSG:4326&format=image/png&VIEWPARAMS=smallcode:{smallcode}";
+        String sql = "select codestr,st_astext(ST_Envelope(the_geom)) from traffic_area_small_84_new";
+        String pgurl = "jdbc:postgresql://localhost:5432/park";
+        String pgusername = "postgis";
+        String pgpasswd = "postgis";
+        Connection connectionPG = DBConnection.GetOracleConnection(pgurl, pgusername, pgpasswd);
+        ResultSet rs = connectionPG.createStatement().executeQuery(sql);
+        while(rs.next()){
+            String codestr = rs.getString(1);
+            String wkt = rs.getString(2);
+            Polygon polygon= GeoToolsGeometry.createPolygonByWKT(wkt);
+            Envelope envelope = polygon.getEnvelope().getEnvelopeInternal();
+            String bbox = envelope.getMinX()+","+envelope.getMinY()+","+envelope.getMaxX()+","+envelope.getMaxY();
+            String layerUri = uri.replace("{bbox}", bbox).replace("{smallcode}", codestr);
+            System.out.println(layerUri);
+            PBCrawlerUtil.GetImageByURI("d:\\parkimage", codestr+".png", layerUri);
+        }
+        
+    }
+    
+    
+    @Test
+    public void testCopyData() throws Exception{
+        String urlOracle = "jdbc:oracle:thin:@10.212.140.210:1521:parking";
+        String usernameOracle = "new_park";
+        String passwdOracle = "new_park";
+        Connection connectionOLE = DBConnection.GetOracleConnection(urlOracle, usernameOracle, passwdOracle);
+        String pgurl = "jdbc:postgresql://localhost:5432/park";
+        String pgusername = "postgis";
+        String pgpasswd = "postgis";
+        Connection connectionPG = DBConnection.GetOracleConnection(pgurl, pgusername, pgpasswd);
+        String querySQL = "select codestr,adcdname,center_x,center_y,st_astext(ST_Envelope(the_geom))  from traffic_area_small_84_new1";
+        String insertSQL = "insert into TRAFFIC_AREA_SMALL_MIS (id,centerx,centery,xmin,ymin,xmax,ymax,adcdname) values (?,?,?,?,?,?,?,?)";
+        PreparedStatement ps = connectionOLE.prepareStatement(insertSQL);
+        ResultSet rs1 = connectionPG.createStatement().executeQuery(querySQL);
+        
+        while(rs1.next()){
+            String codestr = rs1.getString(1);
+            String adcdname = rs1.getString(2);
+            String center_x = rs1.getString(3);
+            String center_y = rs1.getString(4);
+            String wkt = rs1.getString(5);
+            Polygon polygon= GeoToolsGeometry.createPolygonByWKT(wkt);
+            Envelope envelope = polygon.getEnvelope().getEnvelopeInternal();
+            String xmin = envelope.getMinX()+"";
+            String ymin = envelope.getMinY()+"";
+            String xmax = envelope.getMaxX()+"";
+            String ymax = envelope.getMaxY()+"";
+            ps.setString(1, codestr);
+            ps.setString(2, center_x);
+            ps.setString(3, center_y);
+            ps.setString(4, xmin);
+            ps.setString(5, ymin);
+            ps.setString(6, xmax);
+            ps.setString(7, ymax);
+            ps.setString(8, adcdname);
+            ps.addBatch();
+        }
+        ps.executeBatch();
+    }
+    
 }

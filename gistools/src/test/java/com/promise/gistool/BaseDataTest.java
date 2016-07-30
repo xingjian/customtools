@@ -47,7 +47,7 @@ public class BaseDataTest {
     @Test
     public void testXNingqxShapeToPostGis(){
         String shapePath = "G:\\项目文档\\西宁交通\\gis\\xining\\xningqx.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "xiningtaffic", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "xiningtaffic", "postgis", "postgis","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "xningqx", MultiPolygon.class, "EPSG:4326");
         System.out.println(result);
     }
@@ -55,7 +55,7 @@ public class BaseDataTest {
     @Test
     public void testShapeToPostGis(){
         String shapePath = "G:\\项目文档\\公交都市\\giss数据\\地图\\2014地图\\14S-G_beijing\\beijingshape\\POIbeijing.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "sw_navigation", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "sw_navigation", "postgis", "postgis","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "poibeijing", Point.class, "EPSG:4326");
         System.out.println(result);
     }
@@ -63,7 +63,7 @@ public class BaseDataTest {
     @Test
     public void testShapeToPostGisNew(){
         String shapePath = "G:\\项目文档\\公交都市\\通道数据\\beijingqx_disolve.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "192.168.1.105", "5432", "basedata", "basedata", "basedata");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("192.168.1.105", "5432", "basedata", "basedata", "basedata","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "beijingborder", MultiPolygon.class, "EPSG:4326");
         System.out.println(result);
     }
@@ -71,7 +71,7 @@ public class BaseDataTest {
     @Test
     public void testDBFToPostGis(){
         String dbfPath = "G:\\项目文档\\公交都市\\giss数据\\地图\\2014地图\\14S-G_beijing\\beijingshape\\PNamebeijing.dbf";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "sw_navigation", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "sw_navigation", "postgis", "postgis","public");
         List<String> str = ConversionUtil.GetDBFAttributes(dbfPath, "GBK");
         ConversionUtil.DBFToPostGIS(dbfPath, "GBK", "pnamebeijing", dataStore);
         PrintUtil.PrintObject(str);
@@ -495,7 +495,7 @@ public class BaseDataTest {
     @Test
     public void tesArea3tShapeToPostGis(){
         String shapePath = "G:\\项目文档\\公交都市\\giss数据\\四维行政区划\\beijingqx_new.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "sw_navigation", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "sw_navigation", "postgis", "postgis","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "beijingqx", MultiPolygon.class, "EPSG:4326");
         System.out.println(result);
     }
@@ -506,7 +506,7 @@ public class BaseDataTest {
         String username = "basedata";
         String passwd = "basedata!@#&*(";
         String shapePath = "G:\\项目文档\\公交都市\\giss数据\\给交委数据\\北京_公交站位_font_point.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "ttyjbj.ticp.net", "5432", "basedata", "basedata", "basedata!@#&*(");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("ttyjbj.ticp.net", "5432", "basedata", "basedata", "basedata!@#&*(","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "busstation_platform", Point.class, "EPSG:4326");
         System.out.println(result);
     }

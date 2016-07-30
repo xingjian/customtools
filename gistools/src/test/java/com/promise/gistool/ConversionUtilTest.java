@@ -261,7 +261,7 @@ public class ConversionUtilTest {
     @Test
     public void testShapeToPostGIS2(){
         String shapePath = "G:\\项目文档\\公交都市\\giss数据\\cl\\环面.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "postgis", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS( "localhost", "5432", "postgis", "postgis", "postgis","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK","beijinghuanmian1",MultiPolygon.class,"");
         Assert.assertEquals("success", result);
     }
@@ -283,7 +283,7 @@ public class ConversionUtilTest {
     public void testCreateTableSchema2(){
         String tableName = "rbeijing_polylinetest11";
         String shapePath = "G:\\项目文档\\公交都市\\giss数据\\地图\\导航shape\\shp\\Rbeijing_polyline.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "postgis", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS( "localhost", "5432", "postgis", "postgis", "postgis","public");
         String result = GISDBUtil.CreateTableSchema(tableName,shapePath,dataStore,"GBK");
         String resultInsert = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK",tableName,MultiLineString.class,"");
         PrintUtil.PrintObject(result);
@@ -296,7 +296,7 @@ public class ConversionUtilTest {
     @Test
     public void testShapeToPostGIS3(){
         String shapePath = "G:\\项目文档\\公交都市\\giss数据\\cl\\busline.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "192.168.1.105", "5432", "busycity", "postgres", "admin123");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS( "192.168.1.105", "5432", "busycity", "postgres", "admin123","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK");
     }
     
@@ -305,7 +305,7 @@ public class ConversionUtilTest {
      */
     @Test
     public void testCreateTableSchema(){
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "127.0.0.1", "5432", "postgis", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS( "127.0.0.1", "5432", "postgis", "postgis", "postgis","public");
         //创建point类型
         Map<String,Class> columns = new HashMap<String, Class>();
         columns.put("c1", Integer.class);
@@ -369,7 +369,7 @@ public class ConversionUtilTest {
      */
     @Test
     public void testGetFeaturesByTableName(){
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "buscity", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS( "localhost", "5432", "buscity", "postgis", "postgis","public");
         List<SimpleFeature> list = GISDBUtil.GetFeaturesByTableName(dataStore, "buslinelink");
         System.out.println(list.size());
     }
@@ -379,7 +379,7 @@ public class ConversionUtilTest {
      */
     @Test
     public void testGetAttributeByTableName(){
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "buscity", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "buscity", "postgis", "postgis","public");
         List<String> list = GISDBUtil.GetAttributeByTableName(dataStore, "buslinelink");
         PrintUtil.PrintObject(list);
     }
@@ -395,7 +395,7 @@ public class ConversionUtilTest {
     @Test
     public void testShapeToPostGis(){
         String shapePath = "G:\\项目文档\\节能减排\\gis\\data\\wgs1984\\traffic3.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "pollutionreduction", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS( "localhost", "5432", "pollutionreduction", "postgis", "postgis","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "traffic3", MultiLineString.class, "EPSG:4326");
         System.out.println(result);
     }
@@ -403,7 +403,7 @@ public class ConversionUtilTest {
     @Test
     public void testDBFToPostGis(){
         String dbfPath = "G:\\项目文档\\公交都市\\giss数据\\地图\\2014地图\\14S-G_beijing\\beijingshape\\PNamebeijing.dbf";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "sw_navigation", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS( "localhost", "5432", "sw_navigation", "postgis", "postgis","public");
         List<String> str = ConversionUtil.GetDBFAttributes(dbfPath, "GBK");
         ConversionUtil.DBFToPostGIS(dbfPath, "GBK", "pnamebeijing", dataStore);
         PrintUtil.PrintObject(str);

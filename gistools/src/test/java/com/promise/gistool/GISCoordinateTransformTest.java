@@ -14,7 +14,6 @@ import com.promise.cn.util.DBConnection;
 import com.promise.gistool.util.GISCoordinateTransform;
 import com.promise.gistool.util.GeoToolsGeometry;
 import com.tongtu.nomap.core.transform.CoordinateConvert;
-import com.tongtu.nomap.core.transform.Gis84ToCehui;
 
 /**  
  * 功能描述: 坐标转换测试用例

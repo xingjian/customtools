@@ -1955,7 +1955,7 @@ public class BusCityDataTest {
     @Test
     public void testShapeToPostGis(){
         String shapePath = "d:\\tongdaofulu.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "basedata", "basedata", "basedata");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "basedata", "basedata", "basedata","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "tongdaofulu", MultiLineString.class, "EPSG:4326");
         System.out.println(result);
     }

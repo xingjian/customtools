@@ -52,7 +52,7 @@ public class HubeiDataTest {
     @Test
     public void importRhubeiShaple(){
         String shapePath = "G:\\项目文档\\武汉tocc\\gisdata\\hubeishape\\Rhubei.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "hubei", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "hubei", "postgis", "postgis","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "Rhubei", MultiLineString.class, "EPSG:4326");
         System.out.println(result);
     }
@@ -89,7 +89,7 @@ public class HubeiDataTest {
     @Test
     public void importBPhubeiShaple(){
         String shapePath = "G:\\项目文档\\武汉tocc\\gisdata\\hubeishape\\BPhubei.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "hubei", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS( "localhost", "5432", "hubei", "postgis", "postgis","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "BPhubei", MultiPolygon.class, "EPSG:4326");
         System.out.println(result);
     }
@@ -97,7 +97,7 @@ public class HubeiDataTest {
     @Test
     public void importBNhubeiShaple(){
         String shapePath = "G:\\项目文档\\武汉tocc\\gisdata\\hubeishape\\BNhubei.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "hubei", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "hubei", "postgis", "postgis","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "BNhubei", Point.class, "EPSG:4326");
         System.out.println(result);
     }
@@ -105,7 +105,7 @@ public class HubeiDataTest {
     @Test
     public void importDhubeiShaple(){
         String shapePath = "G:\\项目文档\\武汉tocc\\gisdata\\hubeishape\\Dhubei.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "hubei", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "hubei", "postgis", "postgis","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "Dhubei", MultiPolygon.class, "EPSG:4326");
         System.out.println(result);
     }
@@ -113,7 +113,7 @@ public class HubeiDataTest {
     @Test
     public void importBLhubeiShaple(){
         String shapePath = "G:\\项目文档\\武汉tocc\\gisdata\\hubeishape\\BLhubei.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "hubei", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "hubei", "postgis", "postgis","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "BLhubei", MultiLineString.class, "EPSG:4326");
         System.out.println(result);
     }
@@ -121,7 +121,7 @@ public class HubeiDataTest {
     @Test
     public void importBPLhubeiDBF(){
         String shapePath = "G:\\项目文档\\武汉tocc\\gisdata\\hubeishape\\BPLhubei.dbf";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "hubei", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "hubei", "postgis", "postgis","public");
         String result = ConversionUtil.DBFToPostGIS(shapePath, "GBK","BPLhubei",dataStore);
         System.out.println(result);
     }
@@ -129,7 +129,7 @@ public class HubeiDataTest {
     @Test
     public void importBUPhubeiDBF(){
         String shapePath = "G:\\项目文档\\武汉tocc\\gisdata\\hubeishape\\BUPhubei.dbf";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "hubei", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "hubei", "postgis", "postgis","public");
         String result = ConversionUtil.DBFToPostGIS(shapePath, "GBK","BUPhubei",dataStore);
         System.out.println(result);
     }
@@ -137,7 +137,7 @@ public class HubeiDataTest {
     @Test
     public void importR_NamehubeiDBF(){
         String shapePath = "G:\\项目文档\\武汉tocc\\gisdata\\hubeishape\\R_Namehubei.dbf";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "hubei", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "hubei", "postgis", "postgis","public");
         String result = ConversionUtil.DBFToPostGIS(shapePath, "GBK","R_Namehubei",dataStore);
         System.out.println(result);
     }
@@ -145,7 +145,7 @@ public class HubeiDataTest {
     @Test
     public void importR_LNamehubeiDBF(){
         String shapePath = "G:\\项目文档\\武汉tocc\\gisdata\\hubeishape\\R_LNamehubei.dbf";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "hubei", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "hubei", "postgis", "postgis","public");
         String result = ConversionUtil.DBFToPostGIS(shapePath, "GBK","R_LNamehubei",dataStore);
         System.out.println(result);
     }
@@ -153,7 +153,7 @@ public class HubeiDataTest {
     @Test
     public void importFNamehubeiDBF(){
         String shapePath = "G:\\项目文档\\武汉tocc\\gisdata\\hubeishape\\FNamehubei.dbf";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "hubei", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "hubei", "postgis", "postgis","public");
         String result = ConversionUtil.DBFToPostGIS(shapePath, "GBK","FNamehubei",dataStore);
         System.out.println(result);
     }

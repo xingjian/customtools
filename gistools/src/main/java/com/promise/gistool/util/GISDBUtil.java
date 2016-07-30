@@ -1,14 +1,19 @@
 package com.promise.gistool.util;
 
 import java.io.IOException;
+import java.io.Serializable;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.geotools.arcsde.ArcSDEDataStoreFactory;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
+import org.geotools.data.mysql.MySQLDataStoreFactory;
+import org.geotools.data.oracle.OracleNGDataStoreFactory;
 import org.geotools.data.postgis.PostgisNGDataStoreFactory;
 import org.geotools.data.shapefile.dbf.DbaseFileHeader;
 import org.geotools.data.shapefile.dbf.DbaseFileReader;
@@ -19,6 +24,7 @@ import org.geotools.data.shapefile.shp.ShapefileReader;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
+import org.geotools.data.wfs.WFSDataStoreFactory;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
@@ -28,7 +34,6 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeType;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.promise.cn.util.DBType;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -48,22 +53,22 @@ import com.vividsolutions.jts.geom.Polygon;
 public class GISDBUtil {
 
     /**
-     * ConnPostGis("postgis", "localhost", 5432, "postgis", "postgres", "root");
-     * @param dbtype
+     * GetDataStoreFromPostGIS("localhost", 5432, "postgis", "postgres", "root","public");
      * @param host
      * @param port
      * @param database
      * @param userName
      * @param password
+     * @param schema
      */
-    public static DataStore ConnPostGis(String dbtype, String host, String port,String database, String userName, String password) {
+    public static DataStore GetDataStoreFromPostGIS(String host, String port,String database, String userName, String password,String schema) {
         DataStore pgDatastore = null;
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put(PostgisNGDataStoreFactory.DBTYPE.key, dbtype);
+        params.put(PostgisNGDataStoreFactory.DBTYPE.key, "postgis");
         params.put(PostgisNGDataStoreFactory.HOST.key, host);
         params.put(PostgisNGDataStoreFactory.PORT.key, new Integer(port));
         params.put(PostgisNGDataStoreFactory.DATABASE.key, database);
-        params.put(PostgisNGDataStoreFactory.SCHEMA.key, "public");
+        params.put(PostgisNGDataStoreFactory.SCHEMA.key, schema);
         params.put(PostgisNGDataStoreFactory.USER.key, userName);
         params.put(PostgisNGDataStoreFactory.PASSWD.key, password);
         try {
@@ -73,6 +78,61 @@ public class GISDBUtil {
         }
         return pgDatastore;
     }
+    
+    public static DataStore GetDataStoreFromWFS(String url) throws Exception {
+        String getCapabilities = url;
+        if (url.contains("?")) {
+            getCapabilities += "&request=GetCapabilities";
+        } else {
+            getCapabilities += "?request=GetCapabilities";
+        }
+        URL endPoint = new URL(getCapabilities);
+        HashMap<String, Serializable> params = new HashMap<String, Serializable>();
+        params.put(WFSDataStoreFactory.URL.key, endPoint);
+        WFSDataStoreFactory dsFactory = new WFSDataStoreFactory();
+        DataStore ds = dsFactory.createDataStore(params);
+        return ds;
+    }
+    
+    public static DataStore GetDataStoreFromMySQL(String host, int port, String user, String passwd, String database) throws Exception {
+        HashMap<String, Serializable> params = new HashMap<String, Serializable>();
+        params.put(MySQLDataStoreFactory.DBTYPE.key, "mysql");
+        params.put(MySQLDataStoreFactory.HOST.key, host);
+        params.put(MySQLDataStoreFactory.PORT.key, port);
+        params.put(MySQLDataStoreFactory.USER.key, user);
+        params.put(MySQLDataStoreFactory.PASSWD.key, passwd);
+        params.put(MySQLDataStoreFactory.DATABASE.key, database);
+        MySQLDataStoreFactory dsFactory = new MySQLDataStoreFactory();
+        DataStore ds = dsFactory.createDataStore(params);
+        return ds;
+    }
+
+    public static DataStore GetDataStoreFromArcSDE(String server, int port, String instance, String user, String passwd) throws Exception {
+        HashMap<String, Serializable> params = new HashMap<String, Serializable>();
+        params.put(ArcSDEDataStoreFactory.DBTYPE_PARAM.key, "arcsde");
+        params.put(ArcSDEDataStoreFactory.SERVER_PARAM.key, server);
+        params.put(ArcSDEDataStoreFactory.PORT_PARAM.key, port);
+        params.put(ArcSDEDataStoreFactory.INSTANCE_PARAM.key, instance);
+        params.put(ArcSDEDataStoreFactory.USER_PARAM.key, user);
+        params.put(ArcSDEDataStoreFactory.PASSWORD_PARAM.key, passwd);
+        ArcSDEDataStoreFactory dsFactory = new ArcSDEDataStoreFactory();
+        DataStore ds = dsFactory.createDataStore(params);
+        return ds;
+    }
+
+    public static DataStore GetDataStoreFromOracle(String host, int port, String user, String passwd, String instance) throws Exception {
+        HashMap<String, Serializable> params = new HashMap<String, Serializable>();
+        params.put("dbtype", "oracle");
+        params.put("host", host);
+        params.put("port", port);
+        params.put("user", user);
+        params.put("passwd", passwd);
+        params.put("instance", instance);
+        OracleNGDataStoreFactory dsFactory = new OracleNGDataStoreFactory();
+        DataStore ds = dsFactory.createDataStore(params);
+        return ds;
+    }
+    
     
     /**
      * 获取DataStore中所有的空间表

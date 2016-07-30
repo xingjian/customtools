@@ -18,8 +18,6 @@ import org.opengis.feature.simple.SimpleFeature;
 
 import com.promise.cn.util.DBConnection;
 import com.promise.cn.util.PBFileUtil;
-import com.promise.cn.util.PBPSQLUtil;
-import com.promise.cn.util.PBSortUtil;
 import com.promise.cn.util.PrintUtil;
 import com.promise.cn.util.StringUtil;
 import com.promise.gistool.util.ConversionUtil;
@@ -47,7 +45,7 @@ public class PollutionReductionTest {
     @Test
     public void testSixPolygon() throws Exception{
         //获取范围
-        DataStore ds = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "pollutionreduction", "postgis", "postgis");
+        DataStore ds = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "pollutionreduction", "postgis", "postgis","public");
         ReferencedEnvelope re = GISDBUtil.GetBoundsByTableName(ds,"beijingqx");
         double minx = re.getMinX();
         double miny = re.getMinY();
@@ -83,9 +81,9 @@ public class PollutionReductionTest {
         String url = "jdbc:postgresql://localhost:5432/pollutionreduction";
         String username = "postgis";
         String passwd = "postgis";
-        DataStore ds = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "pollutionreduction", "postgis", "postgis");
+        DataStore ds = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "pollutionreduction", "postgis", "postgis","public");
         Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
-        DataStore ds1 = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "pollutionreduction", "postgis", "postgis");
+        DataStore ds1 = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "pollutionreduction", "postgis", "postgis","public");
         List<SimpleFeature> list1 = GISDBUtil.GetFeaturesByTableName(ds,"beijingqx");
         List<SimpleFeature> list2 = GISDBUtil.GetFeaturesByTableName(ds1,"hexagon_beijingqx_all");
         List<SimpleFeature> result = GeoToolsUtil.ClipGeometry(list2, list1);
@@ -164,7 +162,7 @@ public class PollutionReductionTest {
     @Test
     public void testShapeToPostGis1(){
         String shapePath = "G:\\项目文档\\节能减排\\北京地图20150429\\link_84_english_1.shp";
-        DataStore dataStore = GISDBUtil.ConnPostGis("postgis", "localhost", "5432", "pollutionreduction", "postgis", "postgis");
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "pollutionreduction", "postgis", "postgis","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "navigation_link", MultiLineString.class, "EPSG:4326");
         System.out.println(result);
     }
@@ -287,7 +285,7 @@ public class PollutionReductionTest {
     @Test
     public void testFourPolygon(){
         //获取范围
-        DataStore ds = GISDBUtil.ConnPostGis("postgis", "192.168.1.105", "5432", "basedata", "basedata", "basedata");
+        DataStore ds = GISDBUtil.GetDataStoreFromPostGIS("192.168.1.105", "5432", "basedata", "basedata", "basedata","public");
         List<SimpleFeature> listFeature = GISDBUtil.GetFeaturesByTableName(ds, "traffic_area_middle");
         String url = "jdbc:postgresql://192.168.1.105:5432/basedata";
         String username = "basedata";
@@ -447,7 +445,7 @@ public class PollutionReductionTest {
     @Test
     public void testFourPoint(){
         //获取范围
-        DataStore ds = GISDBUtil.ConnPostGis("postgis", "192.168.1.105", "5432", "basedata", "basedata", "basedata");
+        DataStore ds = GISDBUtil.GetDataStoreFromPostGIS("192.168.1.105", "5432", "basedata", "basedata", "basedata","public");
         List<SimpleFeature> listFeature = GISDBUtil.GetFeaturesByTableName(ds, "traffic_area_middle");
         String url = "jdbc:postgresql://192.168.1.105:5432/basedata";
         String username = "basedata";
