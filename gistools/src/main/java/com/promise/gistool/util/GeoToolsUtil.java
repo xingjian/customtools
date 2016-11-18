@@ -237,4 +237,62 @@ public class GeoToolsUtil {
         return new Coordinate(result[0],result[1]);
     }
     
+    /**
+     * 计算两点之前距离 wgs1984坐标系
+     * @param x1
+     * @param y1
+     * @param x2
+     * @param y2
+     * @return
+     */
+    public static double GetDistance84(double x1,double y1,double x2,double y2){
+        double lon1 = x1;
+        double lat1 = y1;
+        double lon2 = x2;
+        double lat2 = y2;
+        double a = 6378137;
+        double b = 6356752.3142;
+        double f = 1 / 298.257223563;
+        double L = Math.toRadians(lon2 - lon1);
+        double U1 = Math.atan((1 - f) * Math.tan(Math.toRadians(lat1)));
+        double U2 = Math.atan((1 - f) * Math.tan(Math.toRadians(lat2)));
+        double sinU1 = Math.sin(U1), cosU1 = Math.cos(U1);
+        double sinU2 = Math.sin(U2), cosU2 = Math.cos(U2);
+        double lambda = L;
+        double lambdaP = 0.0;
+        double iterLimit = 100;
+        double cosSqAlpha = 0.0;
+        double cos2SigmaM = 0.0;
+        double sinSigma = 0.0;
+        double sinLambda = 0.0;
+        double cosLambda = 0.0;
+        double cosSigma = 0.0;
+        double sigma = 0.0;
+        do {
+            sinLambda = Math.sin(lambda);
+            cosLambda = Math.cos(lambda);
+            sinSigma = Math.sqrt((cosU2 * sinLambda) * (cosU2 * sinLambda) + (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) * (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda));
+            if(sinSigma == 0)
+                return 0;
+            cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * cosLambda;
+            sigma = Math.atan2(sinSigma, cosSigma);
+            double sinAlpha = cosU1 * cosU2 * sinLambda / sinSigma;
+            cosSqAlpha = 1 - sinAlpha * sinAlpha;
+            cos2SigmaM = cosSigma - 2 * sinU1 * sinU2 / cosSqAlpha;
+            double C = f / 16 * cosSqAlpha * (4 + f * (4 - 3 * cosSqAlpha));
+            lambdaP = lambda;
+            lambda = L + (1 - C) * f * sinAlpha * (sigma + C * sinSigma * (cos2SigmaM + C * cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM)));
+        }while (Math.abs(lambda-lambdaP) > (1e-12) && --iterLimit>0);
+        if(iterLimit == 0) {
+            return -1.0;
+        }
+        double uSq = cosSqAlpha * (a * a - b * b) / (b * b);
+        double  A = 1 + uSq / 16384 * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)));
+        double  B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)));
+        double  deltaSigma = B * sinSigma * (cos2SigmaM + B / 4 * (cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM) - B / 6 * cos2SigmaM * (-3 + 4 * sinSigma * sinSigma) * (-3 + 4 * cos2SigmaM * cos2SigmaM)));
+        double  s = b * A * (sigma - deltaSigma);
+        double  fwdAz = Math.atan2(cosU2 * sinLambda, cosU1 * sinU2 - sinU1 * cosU2 * cosLambda);
+        double  revAz = Math.atan2(cosU1 * sinLambda, -sinU1 * cosU2 + cosU1 * sinU2 * cosLambda);
+        return s;        
+    }
 }
