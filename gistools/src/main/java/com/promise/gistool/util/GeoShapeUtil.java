@@ -236,11 +236,13 @@ public class GeoShapeUtil {
     
     /**
      * 根据文本文件生成shape wkt json 文件
-     * @param path txt 路径
-     * @param splitChar 文件每行分隔
+     * @param path txt 路径  'F:\\xy.txt'
+     * @param splitChar 文件每行分隔 除了点要素分隔符可以使用逗号，其它类型要更换分隔符号
      * @param crs 坐标系
      * @param encoding 文件编码
      * @param attriDesc 属性描述 空间字段名称必须为the_geom 类型geometry-wkt geometry-json
+     * String[] attriDesc = new String[]{"gid:int","type:String","lockid:double","street:String","the_geom:geometry-wkt"};
+     * @param topath  'F:\\export.shp'
      * @param geometry type 1(point) 2(multipoint) 3(line) 4(multiline) 5(polygon) 6(multipolygon)
      * @return 结果状态
      */
@@ -432,12 +434,12 @@ public class GeoShapeUtil {
     
     /**
      * 将对象集合转换到shape
-     * @param listObject
+     * @param listObject 通过类的反射
      * @param shapeFilePath shape文件路径
      * @param encoding shape文件编码
      * @param geometryType 几何字段类型 1点2多点3线 4多线5面 6多面
-     * @param crs 坐标信息
-     * @param geomName 几何字段信息
+     * @param crs 坐标信息  EPSG:4326
+     * @param geomName 几何字段信息 一般设置成wkt
      * @return
      */
     public static <T> String ListObjectToShapeFile(List<T> listObject,String shapeFilePath,String encoding,String geometryType,String geomName,String crs){
@@ -654,7 +656,85 @@ public class GeoShapeUtil {
             e.printStackTrace();
             return false;
         }
-        
-        
     }
+    
+    
+//    public static boolean CreatePointByTxt(String txtpath,String splitChar,String crs,String encoding,String[] attriDesc,String topath){
+//        boolean ret = false;
+//        try {
+//            //创建shape文件对象
+//            File file = new File(topath);
+//            Map<String, Serializable> params = new HashMap<String, Serializable>();  
+//            params.put( ShapefileDataStoreFactory.URLP.key, file.toURI().toURL() );
+//            params.put( ShapefileDataStoreFactory.CREATE_SPATIAL_INDEX.key, (Serializable)Boolean.TRUE );
+//            ShapefileDataStore ds = (ShapefileDataStore) new ShapefileDataStoreFactory().createNewDataStore(params); 
+//            //定义图形信息和属性信息  
+//            SimpleFeatureTypeBuilder tb = new SimpleFeatureTypeBuilder(); 
+//            CoordinateReferenceSystem sourceCRS = CRS.decode(crs);
+//            tb.setName("shapefile");
+//            tb.setCRS(sourceCRS);
+//            Map<Integer,String> map = new HashMap<Integer,String>();
+//            Map<String,String> mapTemp = new HashMap<String,String>();
+//            for(int i=0;i<attriDesc.length;i++){
+//                String[] arrTemp = attriDesc[i].split(":");
+//                String columnLabel = arrTemp[0];
+//                String columnType = arrTemp[1];
+//                if(columnLabel.length()>10){
+//                    if(i>9){
+//                        columnLabel = columnLabel.substring(0, 8)+i;
+//                    }else{
+//                        columnLabel = columnLabel.substring(0, 9)+i;
+//                    }
+//                }
+//                if(!columnLabel.trim().toLowerCase().equals("the_geom")){
+//                    if(columnType.toLowerCase().equals("double")){
+//                        tb.add(columnLabel, Double.class);
+//                    }else if(columnType.toLowerCase().equals("int")){
+//                        tb.add(columnLabel, Integer.class);
+//                    }else if(columnType.toLowerCase().equals("float")){
+//                        tb.add(columnLabel, Float.class);
+//                    }else{
+//                        tb.add(columnLabel, String.class);
+//                    }
+//                }
+//                map.put(i, columnLabel);
+//                mapTemp.put(columnLabel, columnType);
+//            }
+//            tb.add("the_geom", Point.class);
+//            
+//            ds.createSchema(tb.buildFeatureType());  
+//            ds.setCharset(Charset.forName(encoding));
+//            List<String> listTxtLine = PBFileUtil.ReadFileByLine(txtpath);
+//            //设置Writer  
+//            FeatureWriter<SimpleFeatureType, SimpleFeature> writer = ds.getFeatureWriter(ds.getTypeNames()[0], Transaction.AUTO_COMMIT);
+//            for(String str:listTxtLine){
+//                String[] strArr = str.split(splitChar);
+//                SimpleFeature feature = writer.next();
+//                for(int i=0;i<strArr.length;i++){
+//                    String labelName = map.get(i);
+//                    String labelType = mapTemp.get(labelName);
+//                    String dataStr = strArr[i];
+//                    if(labelType.toLowerCase().equals("double")){
+//                        feature.setAttribute(labelName,Double.parseDouble(dataStr));
+//                    }else if(labelType.toLowerCase().equals("int")){
+//                        feature.setAttribute(labelName,Integer.parseInt(dataStr));
+//                    }else if(labelType.toLowerCase().equals("float")){
+//                        feature.setAttribute(labelName,Float.parseFloat(dataStr));
+//                    }else if(labelType.toLowerCase().equals("string")){
+//                        feature.setAttribute(labelName,dataStr);
+//                    }else if(labelType.toLowerCase().equals("geometry-wkt")){
+//                        feature.setAttribute(labelName,GeoToolsGeometry.createGeometrtyByWKT(dataStr));
+//                    }else if(labelType.toLowerCase().equals("geometry-json")){
+//                        feature.setAttribute(labelName,GeoToolsGeometry.CreateGeometrtyByJSON(dataStr));
+//                    }
+//                }
+//            }
+//            writer.write();  
+//            writer.close();  
+//            ds.dispose();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return ret;
+//    }
 }
