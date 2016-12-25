@@ -1,11 +1,14 @@
 package com.promise.pbutil;
 
+import java.util.List;
+
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.junit.Test;
 
 import com.promise.cn.util.PBCrawlerUtil;
+import com.promise.cn.util.PBFileUtil;
 
 /**  
  * 功能描述:
@@ -41,6 +44,21 @@ public class PBCrawlerUtilTest {
         try {
             String result = PBCrawlerUtil.GetImageByURI(filePath, fileName, uri);
             System.out.println(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void testGetImageByURIBusCity(){
+        String filePath = "D:\\buscitytxb";
+        List<String> list = PBFileUtil.ReadFileByLine("d:\\buscitytxb.txt");
+        String uri = "http://www.bjbus.com/ext/saleimg/";
+        try {
+            for(String imageName:list){
+                String result = PBCrawlerUtil.GetImageByURI(filePath, imageName, uri+imageName);
+                System.out.println(imageName+":"+result);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

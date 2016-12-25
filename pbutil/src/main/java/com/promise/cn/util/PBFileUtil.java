@@ -13,6 +13,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -21,6 +25,10 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import com.hadoop.compression.lzo.LzopCodec;
 
@@ -324,6 +332,53 @@ public class PBFileUtil {
        }
        return result;
     } 
+    
+    /**
+     * 通过sql导出数据到txt
+     * @param sql
+     * @param conect
+     * @param splitStr
+     * @param appendEnter
+     * @return
+     */
+    public static String ExportDataBySQL(String sql,Connection connect,String txtPath,String splitStr,boolean appendEnter){
+        String result = "success";
+        try{
+            Statement statement = connect.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql);
+            ResultSetMetaData rsmd = resultSet.getMetaData();
+            int nColumn = rsmd.getColumnCount();
+            FileWriter writer;
+            try {
+                writer = new FileWriter(txtPath, true);
+                while(resultSet.next()){
+                    String content = "";
+                    for(int i=1;i<=nColumn;i++){
+                        if(i==nColumn){
+                            content = content + resultSet.getString(i);
+                        }else{
+                            content = content + resultSet.getString(i)+splitStr;
+                        }
+                    }
+                    if(appendEnter){
+                        writer.write(content+"\r\n");
+                    }else{
+                        writer.write(content);
+                    }
+                }
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }  
+          resultSet.close();
+          statement.close();
+        }catch(Exception e){
+            result = "error";
+            e.printStackTrace();
+        }
+        return result;
+    }
+    
     
     /**
      * 关闭流

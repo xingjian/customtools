@@ -324,12 +324,12 @@ public class PBFileUtilTest {
     
     @Test
     public void testArea4Export11(){
-        String url = "jdbc:postgresql://localhost:5432/sw_navigation";
+        String url = "jdbc:postgresql://localhost:5432/basedata";
         String username = "postgis";
         String passwd = "postgis";
         Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
-        String excelPath = "d:\\result_wxh3.xls";
-        String result = POIExcelUtil.ExportDataBySQL("select * from result_wxh3", connection, excelPath);
+        String excelPath = "d:\\busstation.xls";
+        String result = POIExcelUtil.ExportDataBySQL("select id,label,name,tjcc,index,company,st_x(the_geom),st_y(the_geom) from busstation where buslineid in (select id from busline where isvalid='1') order by label,index", connection, excelPath);
     }
     
     @Test
@@ -364,5 +364,63 @@ public class PBFileUtilTest {
         String sql = "select seq, area, oldstatcode, newstatcode, oldlinecode, newlinecode, linename, roadlevel, zhuanghao, zhuanghaovalue, newname, ongitude, latitude, supply, type, typenum, typelevel, keytype, electricity, sunupdate, batterychange, supplyid, cardno, builder, completedate, operationyear, operationun, operationlink, tel, checktype, startplace, startzhuanghao, endzhuanghao, checklong, roadnum, ground, etclevel, roadtype, roadwidth, baseroadwidth, speed, isstop, mx, my, st_astext(geom) as wkt FROM base_info";
        String excelPath = "d:\\baseinfo_wkt.xls";
        String result = POIExcelUtil.ExportDataBySQL(sql, connection, excelPath);
+    }
+    
+    
+    @Test
+    public void testExportBaseinfo11(){
+        String url = "jdbc:postgresql://localhost:5432/xiningtaffic";
+        String username = "postgis";
+        String passwd = "postgis";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        String sql = "SELECT id, crossingid, latitude, longitude, crossingname, adcdname FROM xiningkakou";
+       String excelPath = "d:\\xiningkakou.xlsx";
+       String result = POIExcelUtil.ExportDataBySQLNew(sql, connection, excelPath);
+    }
+    /**
+     * 西宁卡口数据
+     * SELECT id, crossingid, latitude, longitude, crossingname, adcdname FROM xiningkakou;
+     * @throws Exception
+     */
+    @Test
+    public void testReadCSVFileXining() throws Exception{
+        String filePath = "d:\\西宁卡口经纬度.csv";
+        String url = "jdbc:postgresql://localhost:5432/xiningtaffic";
+        String username = "postgis";
+        String passwd = "postgis";
+        String insertSQL = "INSERT INTO xiningkakou(id, crossingid, latitude, longitude, crossingname) VALUES (?, ?, ?, ?, ?)";
+        Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
+        PreparedStatement ps = connection.prepareStatement(insertSQL);
+        try {
+            FileInputStream fis = new FileInputStream(filePath);
+            InputStreamReader isr = new InputStreamReader(fis,"GBK");
+            BufferedReader br = new BufferedReader(isr);
+            String s = null;
+            while((s = br.readLine())!=null){
+                if(s.trim()!=""){
+                    s = s.replace("\"", "");
+                    String[] rowData = s.split(",");
+                    if(rowData.length<5){
+                        continue;
+                    }
+                    if(null!=rowData[2]&&!rowData[2].trim().equals("")&&null!=rowData[3]&&!rowData[3].trim().equals("")){
+                        ps.setDouble(3, Double.parseDouble(rowData[2]));
+                        ps.setDouble(4, Double.parseDouble(rowData[3]));
+                    }else{
+                        continue;
+                    }
+                    ps.setInt(1,Integer.parseInt(rowData[0]));
+                    ps.setString(2,rowData[1]);
+                    ps.setString(5,rowData[4]);
+                    ps.addBatch();
+                }
+            }
+            br.close();
+            isr.close();
+            fis.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        ps.executeBatch();
     }
 }

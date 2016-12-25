@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -19,7 +20,12 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.NumberToTextConverter;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFCell;
 
 /**  
  * 功能描述: poiexcel帮助类
@@ -67,6 +73,7 @@ public class POIExcelUtil {
                    retList.add(rowStr);
                 }
             }
+            wb.close();
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -91,6 +98,7 @@ public class POIExcelUtil {
             HSSFSheet st = wb.getSheetAt(sheetIndex);
             HSSFRow row = st.getRow(rowIndex);
             if (row == null) {
+                wb.close();
                 return retList;
             }
             Iterator<Cell> iter = row.cellIterator();
@@ -99,6 +107,7 @@ public class POIExcelUtil {
                 String cellValue = GetCellValue(cell);
                 retList.add(StringUtil.ConverterToSpell(cellValue));
             }
+            wb.close();
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -182,16 +191,76 @@ public class POIExcelUtil {
         }
     }
     
+    
     /**
-     * 通过sql导出数据到excel
+     * 通过sql导出数据到excel 2007版本
+     * 根据之前的方法现在支持2007的版本
      * @param sql
      * @param conect
      * @return
      */
+    public static String ExportDataBySQLNew(String sql,Connection connect,String excelPath){
+        String result = "success";
+        try{
+            Statement statement = connect.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql);
+            ResultSetMetaData rsmd = resultSet.getMetaData();
+            int nColumn = rsmd.getColumnCount();
+            //解决数据量大访问慢的问题
+            Workbook workBook = new SXSSFWorkbook();  
+            Sheet sheet = workBook.createSheet();  
+            workBook.setSheetName(0,"export1");  
+            Row row= sheet.createRow(0); 
+            Cell cell;
+            for(int i=1;i<=nColumn;i++){  
+                cell = row.createCell(i-1);
+                cell.setCellType(XSSFCell.CELL_TYPE_STRING);  
+                cell.setCellValue(rsmd.getColumnLabel(i));  
+           }
+          int iRow=1;
+          //写入各条记录，每条记录对应Excel中的一行
+          while(resultSet.next()){
+              row= sheet.createRow(iRow);
+              for(int j=1;j<=nColumn;j++){
+                  cell = row.createCell(j-1);
+                  cell.setCellType(XSSFCell.CELL_TYPE_STRING);
+                  if(null==resultSet.getObject(j)){
+                      cell.setCellValue("");
+                  }else{
+                      cell.setCellValue(resultSet.getObject(j).toString());
+                  }
+              }
+              iRow++;
+          }
+          FileOutputStream fOut = new FileOutputStream(excelPath);
+          workBook.write(fOut);
+          fOut.flush();
+          fOut.close();
+          resultSet.close();
+          statement.close();
+          workBook.close();
+        }catch(Exception e){
+            result = "error";
+            e.printStackTrace();
+        }
+        return result;
+    }
+    
+    
+    
+    /**
+     * 通过sql导出数据到excel
+     * 已经过时,请使用ExportDataBySQLNew方法进行。
+     * @param sql
+     * @param conect
+     * @return
+     */
+    @Deprecated
     public static String ExportDataBySQL(String sql,Connection connect,String excelPath){
         String result = "success";
         try{
-            ResultSet resultSet = connect.createStatement().executeQuery(sql);
+            Statement statement = connect.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql);
             ResultSetMetaData rsmd = resultSet.getMetaData();
             int nColumn = rsmd.getColumnCount();
             HSSFWorkbook workbook = new HSSFWorkbook();  
@@ -223,12 +292,17 @@ public class POIExcelUtil {
           workbook.write(fOut);
           fOut.flush();
           fOut.close();
+          resultSet.close();
+          statement.close();
+          workbook.close();
         }catch(Exception e){
             result = "error";
             e.printStackTrace();
         }
         return result;
     }
+    
+    
     
     /**
      * 读取Cell内容

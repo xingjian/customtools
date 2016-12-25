@@ -42,7 +42,7 @@ public class ReadFileTest {
         List<String> result=new ArrayList<String>();    
         while((line=reader.readLine())!=null){
             System.out.println(line);
-          result.add(line);    
+            result.add(line);    
         }    
     }
 }

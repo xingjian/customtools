@@ -220,6 +220,19 @@ public class StringUtil {
     }
     
     /**
+     * 获取当前时间字符串
+     * @param formatterStr 默认yyyy-MM-dd HH:mm:ss
+     * @param time 默认当前时间 可以传入Date 和 毫秒数
+     * @return 
+     */
+    public static String GetCurrentDateString(){
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = new Date();;
+        return formatter.format(date);
+    }
+    
+    
+    /**
      * 返回double字符串格式,建议如果double比较大的时候采用
      * @param format '0.0000' '#.0000'
      * @param d
