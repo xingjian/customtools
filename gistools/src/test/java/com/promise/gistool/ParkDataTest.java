@@ -741,4 +741,15 @@ public class ParkDataTest {
         ps.executeBatch();
     }
     
+    @Test
+    public void importXWJYXTCC(){
+        String pgurl = "jdbc:postgresql://localhost:5432/park";
+        String pgusername = "postgis";
+        String pgpasswd = "postgis";
+        Connection connectionPG = DBConnection.GetOracleConnection(pgurl, pgusername, pgpasswd);
+        
+        String shapePath = "G:\\项目文档\\停车场\\西城区经营性停车场出入口\\02\\02\\停车场出入口_point.shp";
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "park", "postgis", "postgis","public");
+        String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "park_crk_crk", Point.class, "EPSG:4326");
+    }
 }

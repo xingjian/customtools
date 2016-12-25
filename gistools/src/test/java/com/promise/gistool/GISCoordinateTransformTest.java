@@ -98,15 +98,15 @@ public class GISCoordinateTransformTest {
         String username = "postgis";
         String passwd = "postgis";
         Connection connection = DBConnection.GetPostGresConnection(url, username, passwd);
-        String tableName = "xning_transform";
-        String sql_update = "update "+tableName+" set geom=st_geometryfromtext(?,4326) where id=?";
-        String sql_query = "select id, st_astext(geom) from "+tableName;
+        String tableName = "xiningnew2";
+        String sql_update = "update "+tableName+" set the_geom=st_geometryfromtext(?,4326) where gid=?";
+        String sql_query = "select gid, st_astext(geom) from "+tableName;
         Statement statement = connection.createStatement();
         PreparedStatement ps = connection.prepareStatement(sql_update);
         ResultSet rs = statement.executeQuery(sql_query);
         int i=1;
         while(rs.next()){
-            String id = rs.getString(1);
+            int id = rs.getInt(1);
             String wkt = rs.getString(2);
             System.out.println(id +"-----"+i);
             String wktCopy= wkt;
@@ -122,7 +122,7 @@ public class GISCoordinateTransformTest {
                 wktCopy = wktCopy.replaceAll(temp, cehuiDouble[1]+" "+cehuiDouble[0]);
             }
             ps.setString(1, wktCopy);
-            ps.setString(2, id);
+            ps.setInt(2, id);
            ps.addBatch();
             i++;
        }
@@ -132,5 +132,17 @@ public class GISCoordinateTransformTest {
     
     public void test84to02Point(){
         double[] xy = new double[]{116.300928,39.883084};
+    }
+    
+    @Test
+    public void test02to900913Point(){
+//        double[] ret = GISCoordinateTransform.From84To900913(113.70041,31.36125);
+//        double[] ret1 = GISCoordinateTransform.From84To900913(115.08081,29.96664);
+        double[] ret = GISCoordinateTransform.From84To900913(114.13163479739977,30.700547250000003);
+        double[] ret1 = GISCoordinateTransform.From84To900913(114.67519520260022,30.37306275);
+        BigDecimal bd = new BigDecimal(ret[0]);
+        BigDecimal bd1 = new BigDecimal(ret1[0]);
+        System.out.println(bd+"  "+ret[1]);
+        System.out.println(bd1+"  "+ret1[1]);
     }
 }

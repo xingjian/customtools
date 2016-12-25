@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.opengis.feature.simple.SimpleFeature;
 
 import com.promise.cn.util.DBConnection;
+import com.promise.cn.util.PBFileUtil;
 import com.promise.cn.util.POIExcelUtil;
 import com.promise.gistool.util.ConversionUtil;
 import com.promise.gistool.util.GISDBUtil;
@@ -247,4 +248,29 @@ public class GeoShapeUtilTest {
         System.out.println(result);
     }
     
+    
+    @Test
+    public void testCreateETCPShapeByTxt(){
+        String txtpath = "d:\\etcp.txt";
+        List<String> list = PBFileUtil.ReadFileByLine(txtpath);
+        List<ETCPPark> listETCP = new ArrayList<ETCPPark>();
+        for(String s:list){
+            String[] arr = s.split(",");
+            double x = Double.parseDouble(arr[0].trim());
+            double y = Double.parseDouble(arr[1].trim());
+            ETCPPark etcp = new ETCPPark();
+            etcp.setWkt(GeoToolsGeometry.createPoint(x, y).toText());
+            etcp.setX(arr[0]);
+            etcp.setY(arr[1]);
+            listETCP.add(etcp);
+        }
+        String splitChar = ";";
+        String crs = "EPSG:4326";
+        String encoding = "GBK";
+        //geometry type 1(point) 2(multipoint) 3(line) 4(multiline) 5(polygon) 6(multipolygon)
+        String geometryType = "1";
+        String topath = "F:\\export.shp";
+        String[] attriDesc = new String[]{"x:double","y:double", "the_geom:geometry-wkt"};
+        GeoShapeUtil.ListObjectToShapeFile(listETCP, "D:\\ETCP.shp", encoding, geometryType, "wkt", crs);
+    }
 }

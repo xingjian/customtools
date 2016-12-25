@@ -443,4 +443,24 @@ public class ConversionUtilTest {
         //update busstation_history set batchtime='201509',systime='2015-12-30 19:12:00' where batchtime is null
         //update busline_history set batchtime='201509',systime='2015-12-30 19:12:00' where batchtime is null
     }
+    
+    
+    @Test
+    public void testDBFToPostGisXinng(){
+        String dbfPath = "G:\\项目文档\\西宁交通\\gis\\xining\\xning_r_lname.dbf";
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS( "localhost", "5432", "xiningtaffic", "postgis", "postgis","public");
+        List<String> str = ConversionUtil.GetDBFAttributes(dbfPath, "GBK");
+        ConversionUtil.DBFToPostGIS(dbfPath, "GBK", "xning_r_lname", dataStore);
+        PrintUtil.PrintObject(str);
+    }
+    
+    @Test
+    public void testGDShapeToPostGis(){
+        String shapePath = "G:\\项目文档\\TOCC\\gis\\110000chooseroad\\gd_beijing.shp";
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS( "localhost", "5432", "sw_navigation", "postgis", "postgis","public");
+        String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "gd_beijing", MultiLineString.class, "EPSG:4326");
+        System.out.println(result);
+    }
+    
+    
 }

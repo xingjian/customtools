@@ -1,10 +1,16 @@
 package com.promise.gistool;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.geotools.data.DataStore;
 import org.junit.Test;
 
+import com.promise.cn.util.PBFileUtil;
 import com.promise.gistool.util.ConversionUtil;
+import com.promise.gistool.util.GISCoordinateTransform;
 import com.promise.gistool.util.GISDBUtil;
+import com.tongtu.nomap.core.transform.BeijingToGis84;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 
@@ -63,5 +69,20 @@ public class GSGXDataTest {
     @Test
     public void generatorRef(){
         
+    }
+    
+    @Test
+    public void testCl(){
+        List<String> list = PBFileUtil.ReadFileByLine("d:\\1111.txt");
+        List<String> result = new ArrayList<String>();
+        for(String s:list){
+            String[] arr = s.split(",");
+            double x = Double.parseDouble(arr[2]);
+            double y = Double.parseDouble(arr[3]);
+            double[] wgs84XYArr = BeijingToGis84.transSingle(x, y);
+            double[] sss = GISCoordinateTransform.From84To02(wgs84XYArr[0], wgs84XYArr[1]);
+            result.add(arr[0]+","+arr[1]+","+sss[0]+","+sss[1]);
+        }
+        PBFileUtil.WriteListToTxt(result, "d:\\2222.txt", true);
     }
 }

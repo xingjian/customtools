@@ -19,6 +19,7 @@ import com.promise.cn.util.DBConnection;
 import com.promise.cn.util.PBFileUtil;
 import com.promise.cn.util.PrintUtil;
 import com.promise.gistool.util.ConversionUtil;
+import com.promise.gistool.util.GISCoordinateTransform;
 import com.promise.gistool.util.GISDBUtil;
 import com.promise.gistool.util.GeoShapeUtil;
 import com.promise.gistool.util.GeoToolsGeometry;
@@ -326,6 +327,14 @@ public class XiNingTraffic {
         Assert.assertEquals("success", result);
     }
     
+    @Test
+    public void testImportxining_section_20160929(){
+        String shapePath = "d:\\xining_section_20160929\\xining_section_20160929.shp";
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "xiningtaffic", "postgis", "postgis","public");
+        String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK");
+        System.out.println(result);
+    }
+    
     
     @Test
     public void testImportXiNingNan2Shape(){
@@ -362,6 +371,19 @@ public class XiNingTraffic {
             }
         }
         GeoShapeUtil.ListObjectToShapeFile(gpsList, "d:\\xngps_point.shp", "GBK", "1", "wkt", "EPSG:4326");
+    }
+    
+    
+    @Test
+    public void testFrom54To02ShapeFile(){
+        String inputShapeFile = "d:\\xining_section_20160929\\xining_section_20160929.shp";
+        String outputShapleFile = "d:\\xining_section_20160929\\xining_section_20160929_new.shp";
+        try {
+           String result = GISCoordinateTransform.From84To02(inputShapeFile, outputShapleFile, "GBK");
+           System.out.println(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
  

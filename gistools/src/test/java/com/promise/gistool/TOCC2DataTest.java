@@ -4,13 +4,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.geotools.data.DataStore;
 import org.junit.Test;
 
 import com.promise.cn.util.DBConnection;
+import com.promise.cn.util.PBFileUtil;
 import com.promise.gistool.util.ConversionUtil;
+import com.promise.gistool.util.GISCoordinateTransform;
 import com.promise.gistool.util.GISDBUtil;
 import com.promise.gistool.util.GeoToolsGeometry;
 import com.vividsolutions.jts.geom.Point;
@@ -114,7 +117,7 @@ public class TOCC2DataTest {
     }
     
     /**
-     * 导入佳琪提供西城区的路侧停车场（说是非常准备的数据，有毛博士提供的）
+     * 导入佳琪提供西城区的路侧停车场（说是非常准确的数据，有毛博士提供的）
      */
     @Test
     public void importParkPoint(){
@@ -122,6 +125,46 @@ public class TOCC2DataTest {
         DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("ttyjbj.ticp.net", "5432", "tocc_park", "toccpark", "toccpark","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "park_point", Point.class, "EPSG:4326");
         System.out.println(result);
+    }
+    
+    /**
+     * 将京通检测器数据和机场高速的检测器29个生成数据到指定表中
+     */
+    @Test
+    public void importJCQData() throws Exception{
+        String issertSQL = "INSERT INTO roadsection_cl_point(uuid, unirowid, sname, ename, streetname, intime, geom) VALUES (?, ?, ?, ?, ?, ?, ST_GeomFromText(?,4326))";
+        String pgurl = "jdbc:postgresql://localhost:5432/tocc2";
+        String pgusername = "postgres";
+        String pgpasswd = "postgres";
+        //ID,AREANAME,SCODE,STYPE,PILENO,PILENUM,LINENAME,LINECODE,POSITION,LONGITUDE,LATITUDE,DESCREPTION,REMARK,ROADTYPE,LONGX,LATIY,SXX
+        //402881f7456efc0f01456efc46ea0009,,623110009,交通流量采集设备,K10+880,10880,机场高速,S12,VD9,12973718.37,4869640.512,,,1,12973712.81,4869653.688,all
+        Connection connectionPG = DBConnection.GetOracleConnection(pgurl, pgusername, pgpasswd);
+        PreparedStatement ps = connectionPG.prepareStatement(issertSQL);
+        List<String> list = PBFileUtil.ReadCSVFile("D:\\sensor.csv", "GBK");
+        for(String str:list){
+            String[] arr = str.split(",");
+            String id = arr[0];
+            String scode = arr[2];
+            String sname = arr[4];
+            String ename = "";
+            String streetName = arr[6];
+            String intime = "2016-11-29";
+            String x1 = arr[9];
+            String y1 = arr[10];
+            String x2 = arr[14];
+            String y2 = arr[15];
+            double[] arrXY = GISCoordinateTransform.From900913To84(Double.parseDouble(x1), Double.parseDouble(y1));
+            Point point = GeoToolsGeometry.createPoint(arrXY[0], arrXY[1]);
+            ps.setString(1, id);
+            ps.setString(2, scode);
+            ps.setString(3, sname);
+            ps.setString(4, ename);
+            ps.setString(5, streetName);
+            ps.setString(6, intime);
+            ps.setString(7, point.toText());
+            ps.addBatch();
+        }
+        ps.executeBatch();
     }
     
 }

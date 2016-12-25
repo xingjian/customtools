@@ -661,5 +661,13 @@ public class BaseDataTest {
         }
         ps.executeBatch();
     }
+    
+    @Test
+    public void testInsertNavigation2016(){
+        String shapePath = "G:\\项目文档\\公交都市\\2016年导航\\road.shp";
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("192.168.1.105", "5432", "basedata", "basedata", "basedata","public");
+        String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "navigation_2016", MultiLineString.class, "EPSG:4326");
+        System.out.println(result);
+    }
 }
 

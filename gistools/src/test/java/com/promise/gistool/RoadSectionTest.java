@@ -125,6 +125,14 @@ public class RoadSectionTest {
         }
     }
     
-    
+    @Test
+    public void testExportRoadsection() throws Exception{
+        String url = "jdbc:postgresql://localhost:5432/roadsection";
+        String username = "postgis";
+        String passwd = "postgis";
+        String sql = "select uuid,unirowid,sname,ename,streetname ,ST_AsText(ST_Centroid(st_astext(the_geom))) point_wkt,ST_AsText(the_geom) line_wkt from roadsection_cl_point_bnk20161019";
+        Connection connectPostgres = DBConnection.GetPostGresConnection(url, username, passwd);
+        POIExcelUtil.ExportDataBySQL(sql, connectPostgres, "d:\\zh.xls");
+    }
     
 }
