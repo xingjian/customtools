@@ -40,6 +40,7 @@ import org.opengis.feature.Property;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 
+import com.promise.cn.util.PBFileUtil;
 import com.promise.cn.util.StringUtil;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
@@ -391,15 +392,20 @@ public class ConversionUtil {
     
     /**
      * shape文件转换成geojson
-     * @param geoJSONFilePath
+     * @param geoJSONFilePath eg:'d://test//1.geojson'
      * @param shapeFile
      * @param sfEncoding
      * @return
      */
     public static String ShapeToGeoJSON(String geoJSONFilePath,String shapeFile,String sfEncoding){
-        File file = new File(geoJSONFilePath);
         SimpleFeatureCollection features = GeoShapeUtil.ReadShapeFileFeatures(shapeFile, sfEncoding);
-        String result = ConversionUtil.WriteGeoJSONFile(features, file);
-        return result;
+        String jsonStr = null;
+        try {
+            jsonStr = GeoToolsGeometry.FeatureToJSON(features);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        PBFileUtil.WriteStringToTxt(jsonStr, geoJSONFilePath);
+        return "success";
     }
 }

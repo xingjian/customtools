@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -329,6 +330,45 @@ public class GeoShapeUtil {
         return ret;
     }
     
+    /**
+     * 将空间对象导出到shape,并增加字段fid
+     * @param listGeom
+     * @param shapeFilePath
+     * @param encoding
+     * @param geometryType
+     * @param crs
+     * @return
+     * @throws Exception
+     */
+    public static String GeometrysToShape(List<Geometry> listGeom,String shapeFilePath,String encoding,String crs,Class geoTypeClass) throws Exception {
+        //创建shape文件对象
+        File file = new File(shapeFilePath);  
+        Map<String, Serializable> params = new HashMap<String, Serializable>();  
+        params.put( ShapefileDataStoreFactory.URLP.key, file.toURI().toURL() );
+        params.put( ShapefileDataStoreFactory.CREATE_SPATIAL_INDEX.key, (Serializable)Boolean.TRUE );
+        ShapefileDataStore ds = (ShapefileDataStore) new ShapefileDataStoreFactory().createNewDataStore(params); 
+        //定义图形信息和属性信息  
+        SimpleFeatureTypeBuilder tb = new SimpleFeatureTypeBuilder(); 
+        CoordinateReferenceSystem sourceCRS = CRS.decode(crs);
+        tb.setCRS(sourceCRS);
+        tb.setName("shapefile");
+        tb.add("fid", Integer.class);
+        tb.add("the_geom", geoTypeClass);
+        ds.createSchema(tb.buildFeatureType());  
+        ds.setCharset(Charset.forName(encoding));
+        
+      //设置Writer  
+        FeatureWriter<SimpleFeatureType, SimpleFeature> writer = ds.getFeatureWriter(ds.getTypeNames()[0], Transaction.AUTO_COMMIT);
+        for(int i=0;i<listGeom.size();i++){
+            SimpleFeature feature = writer.next();
+            feature.setAttribute("fid",i+1);
+            feature.setAttribute("the_geom",listGeom.get(i));
+        }
+        writer.write();  
+        writer.close();  
+        ds.dispose();
+        return "success";
+    }
     
     /**
      * 将空间表数据导出shape 只支持WGS84 字符串字段不能超过253，列名不能超过10(非中文)
@@ -342,7 +382,7 @@ public class GeoShapeUtil {
         try {
             //创建shape文件对象
             File file = new File(shapeFilePath);  
-            Map<String, Serializable> params = new HashMap<String, Serializable>();  
+            Map<String, Serializable> params = new HashMap<String, Serializable>();
             params.put( ShapefileDataStoreFactory.URLP.key, file.toURI().toURL() );
             params.put( ShapefileDataStoreFactory.CREATE_SPATIAL_INDEX.key, (Serializable)Boolean.TRUE );
             ShapefileDataStore ds = (ShapefileDataStore) new ShapefileDataStoreFactory().createNewDataStore(params); 

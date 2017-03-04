@@ -1,22 +1,24 @@
 package com.promise.gistool.util;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.geojson.feature.FeatureJSON;
 import org.geotools.geojson.geom.GeometryJSON;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.graph.util.geom.GeometryUtil;
+import org.geotools.referencing.CRS;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -200,6 +202,27 @@ public class GeoToolsGeometry {
         }
         return null;
     }
+    
+    /**
+     * 绘制矩形
+     * @param xmin
+     * @param ymin
+     * @param xmax
+     * @param ymax
+     * @return
+     */
+    public static Polygon createSquare(double xmin,double ymin,double xmax,double ymax){
+        Coordinate coords[] = new Coordinate[5];
+        coords[0] = new Coordinate(xmin,ymax);
+        coords[1] = new Coordinate(xmax,ymax);
+        coords[2] = new Coordinate(xmax,ymin);
+        coords[3] = new Coordinate(xmin,ymin);
+        coords[4] = coords[0];
+        LinearRing ring = gf.createLinearRing( coords );
+        Polygon polygon = gf.createPolygon( ring, null );
+        return polygon;
+    }
+    
     
     /**
      * 创建一个园
@@ -689,9 +712,20 @@ public class GeoToolsGeometry {
      */
     public static String FeatureToJSON(SimpleFeature feature) throws IOException{
         FeatureJSON fjson = new FeatureJSON();
-        StringWriter writer = new StringWriter();
-        fjson.writeFeature(feature, writer);
-        String json = writer.toString();
+        String json = fjson.toString(feature);
+        return json;
+    }
+    
+    
+    /**
+     * Features对象转换成GeoJSON 也可使用ConversionUtil WriteGeoJSONFile
+     * @param feature
+     * @return
+     * @throws IOException
+     */
+    public static String FeatureToJSON(FeatureCollection features) throws Exception{
+        FeatureJSON fjson = new FeatureJSON();
+        String json = fjson.toString(features);
         return json;
     }
     

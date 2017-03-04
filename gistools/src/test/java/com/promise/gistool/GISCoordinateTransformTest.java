@@ -13,6 +13,7 @@ import org.junit.Test;
 import com.promise.cn.util.DBConnection;
 import com.promise.gistool.util.GISCoordinateTransform;
 import com.promise.gistool.util.GeoToolsGeometry;
+import com.tongtu.nomap.core.transform.BeijingToGis84;
 import com.tongtu.nomap.core.transform.CoordinateConvert;
 
 /**  
@@ -138,11 +139,49 @@ public class GISCoordinateTransformTest {
     public void test02to900913Point(){
 //        double[] ret = GISCoordinateTransform.From84To900913(113.70041,31.36125);
 //        double[] ret1 = GISCoordinateTransform.From84To900913(115.08081,29.96664);
-        double[] ret = GISCoordinateTransform.From84To900913(114.13163479739977,30.700547250000003);
-        double[] ret1 = GISCoordinateTransform.From84To900913(114.67519520260022,30.37306275);
-        BigDecimal bd = new BigDecimal(ret[0]);
-        BigDecimal bd1 = new BigDecimal(ret1[0]);
-        System.out.println(bd+"  "+ret[1]);
-        System.out.println(bd1+"  "+ret1[1]);
+//        double[] ret = GISCoordinateTransform.From84To900913(114.13163479739977,30.700547250000003);
+//        double[] ret1 = GISCoordinateTransform.From84To900913(114.67519520260022,30.37306275);
+//        BigDecimal bd = new BigDecimal(ret[0]);
+//        BigDecimal bd1 = new BigDecimal(ret1[0]);
+//        System.out.println(bd+"  "+ret[1]);
+//        System.out.println(bd1+"  "+ret1[1]);
+        double[] wgs84XYArr = BeijingToGis84.transSingle(534845, 398628);
+        System.out.println(wgs84XYArr[0]+"----"+wgs84XYArr[1]);
+        System.out.println(wgs84XYArr);
     }
+    
+    
+    @Test
+    public void testFrom84To02ShapeFile1(){
+        String inputShapeFile = "D:\\2017_01_12_武汉公交基础数据_new\\2017_01_12_武汉公交基础数据\\wh_busline_4326_new.shp";
+        String outputShapleFile = "G:\\公交线路_02.shp";
+        try {
+           String result = GISCoordinateTransform.From84To02(inputShapeFile, outputShapleFile, "GBK");
+           System.out.println(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * 程磊坐标转换测试
+     * @throws Exception
+     */
+    @Test
+    public void test11111() throws Exception{
+        String pgurl = "jdbc:postgresql://localhost:5432/sw_navigation";
+        String pgusername = "postgis";
+        String pgpasswd = "postgis";
+        Connection connectionPG = DBConnection.GetPostGresConnection(pgurl, pgusername, pgpasswd);
+        String sql1 = "select fid,\"GPSLongtit\",\"GPSLatitud\" from busstation_clwh";
+        String upsql = "update busstation_clwh set x02=?,y02=? where fid=?";
+        ResultSet rs = connectionPG.createStatement().executeQuery(sql1);
+        while(rs.next()){
+            int fid = rs.getInt(1);
+            String x02 = rs.getString(2);
+            String y02 = rs.getString(3);
+            double[] dd = GISCoordinateTransform.From84To02(Double.parseDouble(x02), Double.parseDouble(y02));
+        }
+    }
+    
 }

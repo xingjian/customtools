@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.geotools.data.wfs.v1_1_0.GeoServerStrategy;
-
 import com.promise.cn.util.PBCrawlerUtil;
 import com.promise.cn.util.StringUtil;
 
@@ -53,9 +51,10 @@ public class MapServerUtil {
      * @parem filePath d://mapservercache
      * @param zLevel 0 - 19
      * @param format 图片格式默认png
+     * @param filter 哪些zyx的不用去请求,格式z-y-x
      * @return 生成url
      */
-    public static List<String> CreateMercator3857Cache(String wmsurl,int threadNum,double minX,double minY,double maxX,double maxY,String filePath,int zLevel,String format){
+    public static List<String> CreateMercator3857Cache(String wmsurl,int threadNum,double minX,double minY,double maxX,double maxY,String filePath,int zLevel,String format,Map<String,String> filter){
         List<String> mapURLList = new ArrayList<String>();
         int[] startIndexArr = GetMercatorImageXYBy3857(minX,maxY,zLevel);
         int[] endIndexArr = GetMercatorImageXYBy3857(maxX,minY,zLevel);
@@ -73,11 +72,18 @@ public class MapServerUtil {
                 String bboxStr = StringUtil.FormatDoubleStr("#.00000000", minxDouble)+","+StringUtil.FormatDoubleStr("#.00000000", minyDouble)+
                         ","+StringUtil.FormatDoubleStr("#.00000000", maxxDouble)+","+StringUtil.FormatDoubleStr("#.00000000", maxyDouble);
                 try {
-                    PBCrawlerUtil.GetImageByURI(filePath+File.separator+zLevel+File.separator+y, x+"."+format, wmsurl+"&BBOX="+bboxStr);
+                    boolean flag = true;
+                    if(null!=filter){
+                        if(null!=filter.get(zLevel+"-"+y+"-"+x)){
+                            flag = false;
+                        }
+                    }
+                    if(flag){
+                        PBCrawlerUtil.GetImageByURI(filePath+File.separator+zLevel+File.separator+y, x+"."+format, wmsurl+"&BBOX="+bboxStr);
+                        mapURLList.add(zLevel+"-"+y+"-"+x+":"+wmsurl+"&BBOX="+bboxStr);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
-                } finally{
-                    mapURLList.add(zLevel+"-"+y+"-"+x+":"+wmsurl+"&BBOX="+bboxStr);
                 }
             }
         }

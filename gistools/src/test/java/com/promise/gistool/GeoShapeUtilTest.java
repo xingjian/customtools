@@ -273,4 +273,14 @@ public class GeoShapeUtilTest {
         String[] attriDesc = new String[]{"x:double","y:double", "the_geom:geometry-wkt"};
         GeoShapeUtil.ListObjectToShapeFile(listETCP, "D:\\ETCP.shp", encoding, geometryType, "wkt", crs);
     }
+    
+    
+    @Test
+    public void testShapeToPostGis1(){
+        String shapePath = "C:\\Users\\xingjian\\Desktop\\2017_01_11_武汉公交基础数据\\2017_01_11_武汉公交基础数据\\公交站点.shp";
+        DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS( "localhost", "5432", "sw_navigation", "postgis", "postgis","public");
+        String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "busstation_clwh", Point.class, "EPSG:900914");
+        System.out.println(result);
+    }
+    
 }

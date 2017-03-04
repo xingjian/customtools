@@ -49,6 +49,36 @@ public class GeoToolsUtil {
         return retList;
     }
     
+    
+    /**
+     * 根据空间初始化的范围，切割成许多正方形格子,从左上角开始
+     * @param xmin
+     * @param ymin
+     * @param xmax
+     * @param ymax
+     * @param radius 边长
+     * @return
+     */
+    public static List<Polygon> CreateSquareByExtents(double xmin,double ymin,double xmax,double ymax,double radius){
+        int index = 0;
+        List<Polygon> retList = new ArrayList<Polygon>();
+        double xTemp = 0;
+        double yTemp = 0;
+        int yInt = (int)((ymax-ymin)/(radius))+1;
+        int xInt = (int)((xmax-xmin)/(radius))+1;
+        for(int i=0;i<xInt;i++){
+            xTemp = xmin + (i)*radius;
+            for(int j=0;j<yInt;j++){
+                yTemp = ymax - (j)*radius;
+                Polygon polygon = GeoToolsGeometry.createSquare(xTemp,yTemp-radius,xTemp+radius,yTemp);
+                retList.add(index, polygon);
+                index++;
+            }
+        }
+        return retList;
+    }
+    
+    
     /**
      * 根据中心点绘制正方形
      * @param x

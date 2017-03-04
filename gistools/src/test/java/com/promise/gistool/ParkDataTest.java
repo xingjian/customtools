@@ -16,6 +16,7 @@ import org.junit.Test;
 
 import com.promise.cn.util.DBConnection;
 import com.promise.cn.util.PBCrawlerUtil;
+import com.promise.cn.util.PBFileUtil;
 import com.promise.cn.util.POIExcelUtil;
 import com.promise.gistool.util.ConversionUtil;
 import com.promise.gistool.util.GISCoordinateTransform;
@@ -341,8 +342,28 @@ public class ParkDataTest {
         String pgusername = "postgres";
         String pgpasswd = "postgres";
         Connection connectionOLE = DBConnection.GetPostGresConnection(pgurl, pgusername, pgpasswd);
-//        String sql = "select id,smail_area_code,park_code,park_name,park_type,park_geom from park_area where park_code like '13%'";
-        String sql = "select id,smail_area_code,park_code,park_name,park_type,park_geom from park_area";
+        /**
+            01  西城区 xcq
+            04  西城区 xcq
+            02  东城区 dcq
+            03  东城区 dcq
+            05  海淀区 hdq
+            06  朝阳区 cyq
+            07  丰台区 ftq
+            08  石景山区 sjsq
+            09  昌平区 cpq
+            10  顺义区 syq
+            11  通州区 tzq
+            12  大兴区 dxq
+            13  房山区 fsq
+            14  门头沟区 mtgq
+            15  延庆县 yqx
+            16  怀柔区 hrq
+            17  密云县 myx
+            18  平谷区 pgq
+         */
+        String sql = "select id,smail_area_code,park_code,park_name,park_type,park_geom from park_area where park_code like '18%'";
+        //String sql = "select id,smail_area_code,park_code,park_name,park_type,park_geom from park_area";
         ResultSet rs = connectionOLE.createStatement().executeQuery(sql);
         List<ParkArea> listPolygon = new ArrayList<ParkArea>();
         List<ParkArea> listLine = new ArrayList<ParkArea>();
@@ -366,8 +387,8 @@ public class ParkDataTest {
         }
         System.out.println(listPolygon.size());
         System.out.println(listLine.size());
-        GeoShapeUtil.ListObjectToShapeFile(listLine,"d:\\park_area_line_fsq.shp","GBK","4","park_geom","EPSG:4326");
-        GeoShapeUtil.ListObjectToShapeFile(listPolygon,"d:\\park_area_polygon_fsq.shp","GBK","6","park_geom","EPSG:4326");
+        GeoShapeUtil.ListObjectToShapeFile(listLine,"d:\\parkimage\\pgq_park_area_line.shp","GBK","4","park_geom","EPSG:4326");
+        GeoShapeUtil.ListObjectToShapeFile(listPolygon,"d:\\parkimage\\pgq_park_area_polygon.shp","GBK","6","park_geom","EPSG:4326");
     }
     
     @Test
@@ -609,6 +630,56 @@ public class ParkDataTest {
     }
     
     
+    /**
+     * 拷贝park_area 到postgis csv
+     * @throws Exception
+     */
+    @Test
+    public void testCopyPostgisToOraclesCSV() throws Exception{
+        List<String> list = PBFileUtil.ReadCSVFile("d:\\park_area.csv", "GBK");
+        
+        String pgurl = "jdbc:postgresql://localhost:5432/park";
+        String pgusername = "postgis";
+        String pgpasswd = "postgis";
+        Connection connectionPG = DBConnection.GetOracleConnection(pgurl, pgusername, pgpasswd);
+        
+        String inserSQL = "INSERT INTO park_area_new0111( id, smail_area_code, park_code, park_name, park_type, park_geom, "+
+            "state, user_code, kind_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        PreparedStatement psInsert = connectionPG.prepareStatement(inserSQL);
+        int count = 0;
+        for(String str:list){
+            String[] arr = str.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
+            String id = arr[0];
+          String smail_area_code = arr[1];
+          String park_code = arr[2];
+          String park_name = arr[3];
+          String park_type = arr[4];
+          String park_geom = arr[5];
+          int state = Integer.parseInt(arr[6]);
+          String user_code = arr[7];
+          String kind_type = arr[8];
+          psInsert.setString(1, id);
+          psInsert.setString(2, smail_area_code);
+          psInsert.setString(3, park_code);
+          psInsert.setString(4, park_name);
+          psInsert.setString(5, park_type);
+          psInsert.setString(6, park_geom);
+          psInsert.setInt(7, state);
+          psInsert.setString(8, user_code);
+          psInsert.setString(9, kind_type);
+          psInsert.addBatch();
+          count++;
+          if(count%5000==0){
+              psInsert.executeBatch();
+              System.out.println(count);
+          }
+        }
+
+        psInsert.executeBatch();
+       
+    }
+    
+    
     @Test
     public void importShapeToPostParkArea(){
         String shapePath = "d:\\park_area_line.shp";
@@ -627,12 +698,13 @@ public class ParkDataTest {
         String pgusername = "postgis";
         String pgpasswd = "postgis";
         Connection connectionPG = DBConnection.GetOracleConnection(pgurl, pgusername, pgpasswd);
-        String sql = "select id,smail_area_code,park_code,park_name,park_type,park_geom from park_area";
+        String sql = "select id,smail_area_code,park_code,park_name,park_type,park_geom from park_area_new011101";
         ResultSet rs = connectionPG.createStatement().executeQuery(sql);
         List<ParkArea> listPolygon = new ArrayList<ParkArea>();
         List<ParkArea> listLine = new ArrayList<ParkArea>();
         while(rs.next()){
             if(null!=rs.getString(6)){
+                System.out.println(rs.getString(6));
                 Geometry geom1 = GeoToolsGeometry.ArcgisJSONToGeometry(rs.getString(6));
                 ParkArea pa = new ParkArea();
                 pa.setId(rs.getString(1));
@@ -752,4 +824,24 @@ public class ParkDataTest {
         DataStore dataStore = GISDBUtil.GetDataStoreFromPostGIS("localhost", "5432", "park", "postgis", "postgis","public");
         String result = ConversionUtil.ShapeToPostGIS(shapePath, dataStore, "GBK", "park_crk_crk", Point.class, "EPSG:4326");
     }
+    
+    
+    @Test
+    @SuppressWarnings("all")
+    public void testCopyReadCSV() throws Exception{
+        List<String> list = PBFileUtil.ReadCSVFile("d:\\park_area.csv", "GBK");
+        for(String str:list){
+            String[] arr = str.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
+            String id = arr[0];
+            String smail_area_code = arr[1];
+            String park_code = arr[2];
+            String park_name = arr[3];
+            String park_type = arr[4];
+            String park_geom = arr[5];
+            int state = Integer.parseInt(arr[6]);
+            String user_code = arr[7];
+            String kind_type = arr[8];
+        }
+    }
+    
 }

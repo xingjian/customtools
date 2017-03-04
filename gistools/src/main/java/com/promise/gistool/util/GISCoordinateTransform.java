@@ -340,6 +340,11 @@ public class GISCoordinateTransform {
         writer.close();
         inputSDS.dispose();
         outSDS.dispose();
+        String outputShapleFileStr = outputShapleFile.substring(0,outputShapleFile.lastIndexOf(".shp"))+".prj";
+        File f = new File(outputShapleFileStr);
+        FileWriter fw =  new FileWriter(f);
+        fw.write("GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137,298.257223563]],PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.017453292519943295]]");
+        fw.close();
         return result;
     }
     
