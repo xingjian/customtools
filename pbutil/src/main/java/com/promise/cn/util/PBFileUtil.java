@@ -17,18 +17,20 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import net.sf.json.JSONObject;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.junit.Test;
 
 import com.hadoop.compression.lzo.LzopCodec;
 
@@ -394,5 +396,269 @@ public class PBFileUtil {
                 }
             }
         }
+    }
+    
+    /**
+     * 解压zip文件到指定的目录
+     * 默认和当前zip同级
+     * @param zipFilePath
+     * @param exportPath
+     * @return
+     */
+    public static String ExtractZipFiles(String zipFilePath,String exportPath) {
+        String ret = "success";
+        try {
+            if(null==exportPath||exportPath.trim().equals("")){
+                exportPath = zipFilePath.substring(0, zipFilePath.lastIndexOf(".zip"))+File.separator;
+            }else{
+                if(!exportPath.endsWith(File.separator) ){
+                    exportPath+=File.separator;
+                }
+                exportPath += zipFilePath.substring(zipFilePath.lastIndexOf(File.separator), zipFilePath.lastIndexOf(".zip"));
+                exportPath+=File.separator;
+            }
+            
+            int size = 2048;
+            byte[] buf = new byte[size];
+            ZipInputStream zipinputstream = null;
+            ZipEntry zipentry;
+            zipinputstream = new ZipInputStream(new FileInputStream(zipFilePath));
+            zipentry = zipinputstream.getNextEntry();
+            while (zipentry != null) {
+                String entryName = zipentry.getName();
+                int n;
+                FileOutputStream fileoutputstream;
+                File newFile = new File(entryName);
+                String directory = newFile.getParent();
+                if (directory == null) {
+                    if (newFile.isDirectory()) {
+                        break;
+                    }
+                }else{
+                    new File(exportPath+directory).mkdirs();
+                }
+                if (!zipentry.isDirectory()) {
+                    fileoutputstream = new FileOutputStream(exportPath+entryName);
+                    while ((n = zipinputstream.read(buf, 0, size)) > -1) {
+                        fileoutputstream.write(buf, 0, n);
+                    }
+                    fileoutputstream.close();
+                }
+ 
+                zipinputstream.closeEntry();
+                zipentry = zipinputstream.getNextEntry();
+            }
+            zipinputstream.close();
+        } catch (Exception e) {
+            ret = "error";
+            e.printStackTrace();
+        }
+        return ret;
+        
+    }
+    
+    /**
+     * 获取指定目录下面所有的文件
+     * @param filePath
+     * @return
+     */
+    @Test
+    public static void GetFilesByPath(String filePath,List<File> result){
+        File root = new File(filePath);
+        File[] files = root.listFiles();
+        if(null==result){
+            result  = new ArrayList<File>();
+        }
+        for(File file:files){     
+            if(file.isDirectory()){
+                GetFilesByPath(file.getAbsolutePath(),result);
+            }else{
+                result.add(file);
+            }     
+        }
+    }
+    
+    /**
+     * 获取系统的默认编码
+     * @return
+     */
+    public static String GetLocalEncoding() {  
+        String encoding = System.getProperty("file.encoding");  
+        return encoding;  
+    }
+    
+    /**
+     * 在某个路径下创建一个文件
+     * @param filePath
+     */
+    public static void CreateFile(String filePath){  
+        File f = new File(filePath);  
+        try{  
+            if (!f.exists()){
+                f.createNewFile();  
+            }  
+        }catch (IOException e) {  
+            e.printStackTrace();  
+        }  
+    }  
+    
+    /**
+     * 创建一个文件夹
+     * @param filePath
+     */
+    public static void CreateDir(String filePath){  
+        File f = new File(filePath);  
+        try {  
+            if (!f.exists()) {  
+                f.mkdirs();  
+            }  
+        } catch (Exception e) {  
+            e.printStackTrace();  
+        }  
+    } 
+    
+    /**
+     * 拷贝文件
+     * @param srcFile
+     * @param desFile
+     * @return
+     */
+    public static boolean copyToFile(String srcFile, String desFile)  {  
+        File scrfile = new File(srcFile);  
+        if (scrfile.isFile() == true)  {  
+            int length;  
+            FileInputStream fis = null;  
+            try {  
+                fis = new FileInputStream(scrfile);  
+            }catch (FileNotFoundException ex)  {  
+                ex.printStackTrace();  
+            }  
+            File desfile = new File(desFile);  
+            FileOutputStream fos = null;  
+            try{  
+                fos = new FileOutputStream(desfile, false);  
+            } catch (FileNotFoundException ex){  
+                ex.printStackTrace();  
+            }  
+            desfile = null;  
+            length = (int)scrfile.length();  
+            byte[] b = new byte[length];  
+            try{  
+                fis.read(b);  
+                fis.close();  
+                fos.write(b);  
+                fos.close();  
+            }catch (IOException e){  
+                e.printStackTrace();  
+            }  
+        }else{  
+            scrfile = null;  
+            return false;  
+        }  
+        scrfile = null;  
+        return true;  
+    }  
+    
+    /**
+     * 拷贝文件夹
+     * @param sourceDir
+     * @param destDir
+     * @return
+     */
+    public static boolean copyDir(String sourceDir, String destDir){  
+        File sourceFile = new File(sourceDir);  
+        String tempSource;  
+        String tempDest;  
+        String fileName;  
+        File[] files = sourceFile.listFiles();  
+        for (int i = 0; i < files.length; i++)  {  
+            fileName = files[i].getName();  
+            tempSource = sourceDir + File.separator + fileName;  
+            tempDest = destDir + File.separator + fileName;  
+            if (files[i].isFile()){  
+                copyToFile(tempSource, tempDest);  
+            }else{  
+                copyDir(tempSource, tempDest);  
+            }  
+        }  
+        sourceFile = null;  
+        return true;  
+    }  
+    
+    
+    /**
+     * 读取json格式文件，返回json对象
+     * @param filePath 文件路径
+     * @return
+     */
+    public static JSONObject ReadJSONFile(String filePath){
+        List<String> list = ReadFileByLine(filePath);
+        String json = "";
+        for(String strTemp : list){
+            json += strTemp;
+        }
+        JSONObject dataJson = JSONObject.fromObject(json);
+        return dataJson;
+    }
+    
+    
+    /**
+     * 格式话文件大小字符串
+     * @param fileS
+     * @return
+     */
+    public static String FormatFileSize(long fileS) {
+        DecimalFormat df = new DecimalFormat("#.00");
+        String fileSizeString = "";
+        if (fileS < 1024) {
+            fileSizeString = df.format((double) fileS) + "B";
+        } else if (fileS < 1048576) {
+            fileSizeString = df.format((double) fileS / 1024) + "K";
+        } else if (fileS < 1073741824) {
+            fileSizeString = df.format((double) fileS / 1048576) + "M";
+        } else {
+            fileSizeString = df.format((double) fileS / 1073741824) + "G";
+        }
+        return fileSizeString;
+    }
+    
+    /**
+     * 某个路径下如果存在文件，则删除
+     * @param filePath
+     */
+    public static void deleteFile(String filePath){  
+        File f = new File(filePath);  
+        try {  
+            if (f.exists()) {  
+                f.delete();  
+            }  
+        }catch (Exception e){  
+            e.printStackTrace();  
+        }  
+    }
+    
+    /**
+     * 
+     * 删除文件夹
+     * @param strDir
+     * @return 成功true;否则false
+     */
+    public static boolean removeDir(String strDir){  
+        File rmDir = new File(strDir);  
+        if (rmDir.isDirectory() && rmDir.exists()){  
+            String[] fileList = rmDir.list();  
+            for (int i = 0; i < fileList.length; i++){  
+                String subFile = strDir + File.separator + fileList[i];  
+                File tmp = new File(subFile);  
+                if (tmp.isFile())  
+                    tmp.delete();  
+                else if (tmp.isDirectory())  
+                    removeDir(subFile);  
+            }  
+            rmDir.delete();  
+        }else{  
+            return false;  
+        }  
+        return true;  
     }
 }

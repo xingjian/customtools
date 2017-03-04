@@ -57,4 +57,11 @@ public class StringUtilTest {
         wktCopy = wktCopy.replaceFirst("484842.9970703125 306711.8045043945300", "fffff");
         System.out.println(wktCopy);
     }
+    
+    @Test
+    public void testGetFileName(){
+        String filePath = "F:\\gitworkspace\\javastudy\\SpringQuartzFrameWork\\target\\classes\\tasks\\student_count_monitor.xml";
+        String fileName = StringUtil.GetFileName(filePath);
+        System.out.println(fileName);
+    }
 }

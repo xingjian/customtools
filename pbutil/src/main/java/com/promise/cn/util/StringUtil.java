@@ -1,5 +1,6 @@
 package com.promise.cn.util;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -242,4 +243,34 @@ public class StringUtil {
         DecimalFormat df = new DecimalFormat(format);
         return df.format(d);
     }
+    
+    /**
+     * 将遍历得到的文件夹及子文件夹中的全部目录去除前面全部,仅保留文件名
+     * @param pathandname
+     * @return
+     */
+    public static String GetFileName(String pathandname) {  
+        /** 
+        * 仅保留文件名不保留后缀 
+        */  
+        int start = pathandname.lastIndexOf(File.separator);  
+        int end = pathandname.lastIndexOf(".");  
+        if (start != -1 && end != -1) {  
+            return pathandname.substring(start + 1, end);  
+        } else {  
+            return null;  
+        }         
+    }
+    
+    /** 
+     * 将遍历得到的文件夹及子文件夹中的全部目录去除前面全部,保留文件名及后缀 
+     */  
+    public static String GetFileNameWithSuffix(String pathandname) {
+        int start = pathandname.lastIndexOf("/");  
+        if (start != -1 ) {  
+            return pathandname.substring(start + 1);  
+        } else {  
+            return null;  
+        }         
+    }     
 }

@@ -1,13 +1,13 @@
 package com.promise.pbutil;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -15,8 +15,10 @@ import org.junit.Test;
 
 import com.promise.cn.util.DBConnection;
 import com.promise.cn.util.PBFileUtil;
+import com.promise.cn.util.PBSortUtil;
 import com.promise.cn.util.POIExcelUtil;
 import com.promise.cn.util.PrintUtil;
+import com.promise.cn.util.StringUtil;
 
 /**  
  * 功能描述:PBFileUtil测试用例
@@ -422,5 +424,44 @@ public class PBFileUtilTest {
             e.printStackTrace();
         }
         ps.executeBatch();
+    }
+    
+    @Test
+    public void testExtractZipFiles(){
+        String dir = "H:\\高德数据";
+        String des = "H:\\高德数据\\gd1101-1221";
+        File path = new File(dir);
+        int index = 0;
+        for(File f:path.listFiles()){
+            String stime = StringUtil.GetCurrentDateString();
+            String name = f.getName();
+            PBFileUtil.ExtractZipFiles(dir+File.separator+name, des);
+            String etime = StringUtil.GetCurrentDateString();
+            System.out.println(++index+":"+stime+"---"+etime+"----"+name);
+        }
+    }
+    
+    @Test
+    public void testGetFilesByPath(){
+        String filePath = "F:\\gitworkspace\\opengis\\mapofflinestudy\\src\\main\\webapp\\tiles\\cus_beijing_baidu_blue";
+        List<File> result  = new ArrayList<File>();
+        List<String> subresult  = new ArrayList<String>();
+        PBFileUtil.GetFilesByPath(filePath,result);
+        for(File f : result){
+            if(PBFileUtil.FormatFileSize(f.length()).equals("1.74K")){
+                File yFile = f.getParentFile();
+                String zStr = yFile.getParentFile().getName();
+                System.out.println();
+                subresult.add(zStr+"-"+yFile.getName()+"-"+f.getName());
+            }
+        }
+        System.out.println(subresult.size());
+        PBFileUtil.WriteListToTxt(subresult, "d:\\beijingtile.txt", true);
+    }
+    
+    @Test
+    public void testSplitString(){
+        String path = "F:\\gitworkspace\\opengis\\mapofflinestudy\\src\\main\\webapp\\tiles\\cus_beijing_baidu_blue\\8\\95\211.png";
+        //path.split(regex)
     }
 }

@@ -1,23 +1,20 @@
 package com.promise.pbutil;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.anarres.lzo.LzoAlgorithm;
-import org.anarres.lzo.LzoDecompressor;
-import org.anarres.lzo.LzoInputStream;
-import org.anarres.lzo.LzoLibrary;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
 
 import com.hadoop.compression.lzo.LzopCodec;
+import com.promise.cn.util.PBFileUtil;
 
 /**  
  * 功能描述:
@@ -44,5 +41,17 @@ public class ReadFileTest {
             System.out.println(line);
             result.add(line);    
         }    
+    }
+    
+    @Test
+    public void testReadJSONFile(){
+        String filePath = "F:\\gitworkspace\\customtools\\pbutil\\src\\test\\resources\\testjson.json";
+        JSONObject jsonObject = PBFileUtil.ReadJSONFile(filePath);
+        JSONArray array = jsonObject.getJSONArray("features");
+        for(int i=0;i<array.size();i++){
+            JSONObject j1 = array.getJSONObject(i);
+            System.out.println(j1.get("type"));
+            System.out.println(j1.get("properties"));
+        }
     }
 }
